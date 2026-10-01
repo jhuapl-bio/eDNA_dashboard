@@ -1,0 +1,74 @@
+/* ════════════════════════════════════════════════════════════════════════
+   MBON Dashboard — table search/pagination + pinned-legend chart layout
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── universal table control bar (table-tools.js) ───────────────────────── */
+.tt-controls {
+  position: sticky; left: 0;
+  display: flex; align-items: center; gap: .5rem;
+  flex-wrap: wrap;
+  margin: 0 0 .6rem; padding: .35rem .1rem;
+  font-size: .78rem; color: var(--muted);
+}
+.tt-controls .tt-search {
+  flex: 1 1 200px; min-width: 160px; max-width: 320px;
+  padding: .35rem .55rem;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  font-size: .8rem; background: #fff;
+}
+.tt-controls .tt-search:focus { outline: none; border-color: var(--ocean); }
+.tt-controls .tt-count { white-space: nowrap; }
+.tt-controls .tt-spacer { flex: 1 1 auto; }
+.tt-controls .tt-size-lbl { display: flex; align-items: center; gap: .3rem; white-space: nowrap; }
+.tt-controls .tt-size {
+  padding: .25rem .4rem; border: 1px solid var(--border);
+  border-radius: var(--radius); background: #fff; font-size: .78rem;
+}
+.tt-controls .tt-pager { display: flex; align-items: center; gap: .3rem; }
+.tt-controls .tt-pager button {
+  border: 1px solid var(--border); background: #fff; color: var(--text);
+  border-radius: var(--radius); cursor: pointer;
+  width: 26px; height: 26px; line-height: 1; font-size: .95rem;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.tt-controls .tt-pager button:hover:not(:disabled) { background: var(--foam); border-color: var(--ocean); }
+.tt-controls .tt-pager button:disabled { opacity: .4; cursor: default; }
+.tt-controls .tt-page { min-width: 3.2rem; text-align: center; }
+/* When there's only one page, keep the search + count but hide the pager. */
+.tt-controls.tt-onepage .tt-pager,
+.tt-controls.tt-onepage .tt-size-lbl { display: none; }
+
+.tt-hidden { display: none !important; }
+
+/* ── pinned-legend chart layout (bar plots) ─────────────────────────────── */
+/* The chart area scrolls; the legend stays anchored so it's always visible. */
+.chart-scrollbox {
+  max-height: 440px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-radius: var(--radius);
+}
+.chart-scrollbox::-webkit-scrollbar { width: 9px; }
+.chart-scrollbox::-webkit-scrollbar-thumb { background: #cfd8dc; border-radius: 6px; }
+
+.chart-legend-pinned {
+  position: sticky; bottom: 0; z-index: 2;
+  display: flex; flex-wrap: wrap; gap: .35rem .8rem;
+  margin-top: .5rem; padding: .5rem .15rem .1rem;
+  background: linear-gradient(#fff, #fff);
+  border-top: 1px solid var(--border);
+  font-size: .74rem; color: var(--muted);
+}
+
+/* Top-N + pager control that sits in a chart header */
+.chart-pager { display: inline-flex; align-items: center; gap: .3rem; font-size: .74rem; color: var(--muted); }
+.chart-pager button {
+  border: 1px solid var(--border); background: #fff; color: var(--text);
+  border-radius: var(--radius); cursor: pointer;
+  width: 24px; height: 24px; line-height: 1; font-size: .9rem;
+  display: inline-flex; align-items: center; justify-content: center;
+}
+.chart-pager button:hover:not(:disabled) { background: var(--foam); border-color: var(--ocean); }
+.chart-pager button:disabled { opacity: .4; cursor: default; }
+.chart-pager .chart-pg-info { min-width: 6.5rem; text-align: center; white-space: nowrap; }
+.chart-topn { width: 60px; padding: .2rem .35rem; border: 1px solid var(--border); border-radius: var(--radius); font-size: .78rem; }

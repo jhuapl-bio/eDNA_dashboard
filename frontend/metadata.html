@@ -1,0 +1,2988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MBON Comparison Dashboard</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.prod.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --ocean: #0077b6; --ocean-dk: #023e8a; --ocean-lt: #90e0ef;
+      --foam: #e0f7fa; --sand: #f4f8fb; --text: #1b2631; --muted: #6c757d;
+      --border: #dee2e6; --radius: 8px; --surface: #fff;
+      --teal: #00b4d8; --green: #2a9d8f; --amber: #e9c46a; --coral: #e76f51;
+    }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--sand); color: var(--text); }
+    #app { display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg, var(--ocean-dk), var(--ocean));
+      color: #fff; padding: 0 1.5rem;
+      display: flex; align-items: center; gap: 1rem;
+      height: 58px; position: sticky; top: 0; z-index: 200;
+      box-shadow: 0 2px 10px rgba(0,0,0,.3);
+    }
+    header .brand h1 { font-size: 1.05rem; font-weight: 800; letter-spacing: -.3px; }
+    header .brand .sub { font-size: .7rem; opacity: .75; }
+    header nav { margin-left: auto; display: flex; gap: .2rem; }
+    header nav button {
+      background: transparent; border: 1px solid rgba(255,255,255,.3);
+      color: #fff; padding: .35rem .85rem; border-radius: var(--radius);
+      cursor: pointer; font-size: .8rem; font-weight: 600; transition: all .15s;
+    }
+    header nav button:hover { background: rgba(255,255,255,.15); border-color: rgba(255,255,255,.6); }
+    header nav button.active { background: rgba(255,255,255,.22); border-color: #fff; }
+    .upload-btn {
+      display: flex; align-items: center; gap: .4rem;
+      background: rgba(255,255,255,.15); border: 1.5px dashed rgba(255,255,255,.6);
+      color: #fff; padding: .3rem .85rem; border-radius: var(--radius);
+      cursor: pointer; font-size: .78rem; font-weight: 600; transition: all .15s;
+      margin-left: .5rem;
+    }
+    .upload-btn:hover { background: rgba(255,255,255,.28); border-color: #fff; }
+    .upload-btn .icon { font-size: 1rem; }
+
+    /* ── Drop overlay ── */
+    .drop-overlay {
+      position: fixed; inset: 0; z-index: 999;
+      background: rgba(0,119,182,.88); display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: .75rem;
+      color: #fff; font-size: 1.4rem; font-weight: 700; pointer-events: none;
+    }
+    .drop-overlay .sub { font-size: .9rem; font-weight: 400; opacity: .85; }
+
+    /* ── Layout ── */
+    main { flex: 1; padding: 1.5rem; max-width: 1440px; margin: 0 auto; width: 100%; }
+
+    /* ── Cards ── */
+    .card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 1.25rem; box-shadow: 0 1px 5px rgba(0,0,0,.06); margin-bottom: 1rem; }
+    .card-title { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin-bottom: .4rem; }
+    .card-value { font-size: 2.1rem; font-weight: 800; color: var(--ocean); }
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(145px,1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+
+    /* ── Section headers ── */
+    .section-header { display: flex; align-items: center; gap: .75rem; margin-bottom: 1rem; }
+    .section-header h2 { font-size: 1.1rem; font-weight: 800; }
+    .badge { background: var(--foam); color: var(--ocean); font-size: .7rem; font-weight: 700; padding: .2rem .65rem; border-radius: 99px; }
+
+    /* ── Two-col layout ── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+    @media (max-width: 1100px) { .two-col, .three-col { grid-template-columns: 1fr; } }
+
+    /* ── Filter bar ── */
+    .filter-bar { display: flex; flex-wrap: wrap; gap: .6rem; margin-bottom: 1rem; align-items: center; }
+    .filter-bar input, .filter-bar select {
+      border: 1px solid var(--border); border-radius: var(--radius);
+      padding: .4rem .75rem; font-size: .85rem; outline: none; background: var(--surface);
+    }
+    .filter-bar input:focus, .filter-bar select:focus { border-color: var(--ocean); }
+
+    /* ── Buttons ── */
+    .btn { padding: .4rem .9rem; border-radius: var(--radius); border: none; cursor: pointer; font-size: .85rem; font-weight: 600; transition: all .15s; }
+    .btn:hover { opacity: .85; }
+    .btn-primary { background: var(--ocean); color: #fff; }
+    .btn-sm { padding: .25rem .6rem; font-size: .75rem; }
+    .btn-outline { background: transparent; border: 1px solid var(--ocean); color: var(--ocean); }
+    .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+
+    /* ── Tables ── */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: .84rem; }
+    thead th {
+      background: var(--foam); color: var(--ocean-dk); text-align: left;
+      padding: .6rem .85rem; font-weight: 700; font-size: .73rem;
+      text-transform: uppercase; letter-spacing: .4px; border-bottom: 2px solid var(--border);
+      white-space: nowrap; cursor: pointer; user-select: none;
+    }
+    thead th:hover { background: #c8eef5; }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+    tbody tr:hover { background: var(--foam); }
+    tbody td { padding: .5rem .85rem; vertical-align: middle; }
+    .no-data { text-align: center; padding: 2.5rem; color: var(--muted); font-style: italic; }
+
+    /* ── Pills ── */
+    .pill { display: inline-block; padding: .15rem .55rem; border-radius: 99px; font-size: .7rem; font-weight: 700; }
+    .pill-blue { background: #d1ecf1; color: #0c5460; }
+    .pill-green { background: #d4edda; color: #155724; }
+    .pill-red { background: #f8d7da; color: #721c24; }
+    .pill-grey { background: #e2e3e5; color: #383d41; }
+    .pill-amber { background: #fff3cd; color: #856404; }
+
+    /* ── Tab bars ── */
+    .tab-bar { display: flex; gap: .2rem; border-bottom: 2px solid var(--border); margin-bottom: 1rem; }
+    .tab-btn {
+      background: none; border: none; padding: .55rem 1.1rem;
+      cursor: pointer; font-size: .85rem; font-weight: 600;
+      color: var(--muted); border-bottom: 2.5px solid transparent; margin-bottom: -2px;
+    }
+    .tab-btn.active { color: var(--ocean); border-bottom-color: var(--ocean); }
+
+    /* ── Detail panel ── */
+    .detail-panel {
+      position: fixed; top: 58px; right: 0; bottom: 0; width: 420px;
+      background: var(--surface); border-left: 1px solid var(--border);
+      box-shadow: -4px 0 20px rgba(0,0,0,.1); z-index: 50;
+      display: flex; flex-direction: column;
+    }
+    .detail-panel-hdr {
+      padding: 1rem 1.25rem; background: var(--foam); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: .75rem;
+    }
+    .detail-panel-hdr h3 { font-size: .95rem; font-weight: 700; flex: 1; }
+    .detail-panel-body { flex: 1; overflow-y: auto; padding: 1.25rem; }
+    .kv-grid { display: grid; grid-template-columns: max-content 1fr; gap: .35rem .75rem; font-size: .82rem; }
+    .kv-key { color: var(--muted); font-weight: 600; white-space: nowrap; }
+    .kv-val { word-break: break-word; }
+
+    /* ── D3 / Charts ── */
+    .chart-wrap { position: relative; width: 100%; }
+    .chart-wrap svg { display: block; width: 100%; }
+    .chart-hdr { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; margin-bottom: .75rem; }
+    .chart-hdr h3 { font-size: .9rem; font-weight: 700; margin-right: auto; }
+    .d3-tip {
+      position: fixed; background: rgba(2,62,138,.93); color: #fff;
+      padding: .6rem .9rem; border-radius: var(--radius);
+      font-size: .78rem; pointer-events: none; z-index: 9999;
+      max-width: 260px; box-shadow: 0 4px 16px rgba(0,0,0,.3);
+      line-height: 1.6; opacity: 0; transition: opacity .12s;
+    }
+    .d3-tip strong { display: block; margin-bottom: .2rem; font-size: .85rem; }
+
+    /* ── Legend ── */
+    .legend { display: flex; flex-wrap: wrap; gap: .35rem .75rem; margin-top: .75rem; }
+    .legend-item { display: flex; align-items: center; gap: .35rem; font-size: .73rem; color: var(--muted); cursor: pointer; }
+    .legend-swatch { width: 11px; height: 11px; border-radius: 3px; flex-shrink: 0; }
+
+    /* ── Sunburst ── */
+    .sunburst-layout { display: flex; gap: 1.5rem; flex-wrap: wrap; align-items: flex-start; }
+    .sb-list { flex: 1; min-width: 220px; max-height: 480px; overflow-y: auto; }
+    .sb-list-item { display: flex; align-items: center; gap: .5rem; padding: .3rem .4rem; border-radius: 5px; cursor: pointer; font-size: .8rem; }
+    .sb-list-item:hover { background: var(--foam); }
+    .sb-list-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .sb-list-name { flex: 1; }
+    .sb-list-val { font-weight: 700; color: var(--muted); font-size: .75rem; }
+
+    /* ── Misc ── */
+    .text-muted { color: var(--muted); font-size: .8rem; }
+    .mt1 { margin-top: 1rem; }
+    .inline-bar-bg { width: 70px; background: var(--border); border-radius: 3px; height: 5px; display: inline-block; vertical-align: middle; margin-right: .4rem; }
+    .inline-bar-fill { height: 5px; background: var(--ocean); border-radius: 3px; }
+    .file-source { font-size:.72rem; color:var(--muted); margin-left:.5rem; font-style:italic; }
+
+    /* ── Map tab ── */
+    .map-outer { display:flex; flex-direction:column; gap:1rem; }
+    .map-hint { font-size:.78rem; color:var(--muted); padding:.3rem .6rem; background:var(--foam); border-radius:var(--radius); display:inline-flex; align-items:center; gap:.4rem; }
+    #mbon-map { width:100%; height:560px; border-radius:var(--radius); border:1px solid var(--border); box-shadow:0 1px 5px rgba(0,0,0,.07); z-index:1; }
+    .map-station-label { background:rgba(255,255,255,.92); border:1px solid rgba(44,62,80,.2); border-radius:4px; padding:1px 5px; font-size:10px; font-weight:700; color:#1b2631; white-space:nowrap; box-shadow:0 1px 4px rgba(0,0,0,.15); }
+
+    /* Comparison panel */
+    .cmp-panel {
+      background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+      box-shadow:0 4px 24px rgba(0,0,0,.14); overflow:hidden;
+    }
+    .cmp-panel-hdr {
+      padding:.75rem 1.1rem; background:linear-gradient(135deg,var(--ocean-dk),var(--ocean));
+      color:#fff; display:flex; align-items:center; gap:.75rem;
+    }
+    .cmp-panel-hdr h3 { font-size:.9rem; font-weight:700; flex:1; }
+    .cmp-chips { display:flex; flex-wrap:wrap; gap:.3rem; }
+    .cmp-chip {
+      display:inline-flex; align-items:center; gap:.25rem;
+      padding:.15rem .55rem; border-radius:99px; font-size:.72rem; font-weight:700;
+      color:#fff; cursor:pointer; user-select:none;
+    }
+    .cmp-chip .rm { opacity:.7; }
+    .cmp-chip .rm:hover { opacity:1; }
+    .cmp-body { padding:1rem; }
+    .cmp-tab-bar { display:flex; gap:.2rem; border-bottom:2px solid var(--border); margin-bottom:1rem; }
+    .cmp-tab-btn {
+      background:none; border:none; padding:.45rem .9rem;
+      cursor:pointer; font-size:.8rem; font-weight:600;
+      color:var(--muted); border-bottom:2.5px solid transparent; margin-bottom:-2px;
+    }
+    .cmp-tab-btn.active { color:var(--ocean); border-bottom-color:var(--ocean); }
+    .cmp-charts-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    @media(max-width:900px){ .cmp-charts-grid{ grid-template-columns:1fr; } }
+    .cmp-chart-card { background:var(--sand); border:1px solid var(--border); border-radius:var(--radius); padding:.75rem; }
+    .cmp-chart-card h4 { font-size:.78rem; font-weight:700; color:var(--muted); margin-bottom:.5rem; text-transform:uppercase; letter-spacing:.4px; }
+    .cmp-chart-card svg { display:block; }
+
+    /* Single-station popup inside Leaflet */
+    .st-popup { min-width:340px; font-family:system-ui,sans-serif; font-size:12px; }
+    .st-popup h4 { font-size:.85rem; font-weight:800; margin-bottom:.4rem; color:var(--ocean-dk); }
+    .st-popup .kv { display:grid; grid-template-columns:max-content 1fr; gap:.2rem .6rem; margin-bottom:.5rem; }
+    .st-popup .kv span:nth-child(odd){ color:#6c757d; font-weight:600; }
+    .st-popup .sparkbar { display:flex; align-items:center; gap:4px; margin-top:.35rem; }
+    .st-popup .sparkbar-label { width:80px; text-align:right; color:#6c757d; font-size:10px; flex-shrink:0; }
+    .st-popup .sparkbar-bg { flex:1; background:#e9ecef; border-radius:3px; height:7px; }
+    .st-popup .sparkbar-fill { height:7px; border-radius:3px; }
+    .st-popup .sparkbar-val { width:38px; font-size:10px; color:#1b2631; font-weight:600; }
+    .st-popup-tabs { display:flex; gap:0; border-bottom:1.5px solid #dee2e6; margin-bottom:6px; }
+    .st-popup-tab { padding:4px 12px; font-size:10px; font-weight:600; background:none; border:none; border-bottom:2px solid transparent; margin-bottom:-1.5px; cursor:pointer; color:#6c757d; }
+    .st-popup-tab.active { color:#0077b6; border-bottom-color:#0077b6; }
+    .st-popup-pane { display:none; } .st-popup-pane.active { display:block; }
+
+/* ===== MBON Import Panel styles (inlined) ===== */
+/* ============================================================
+   MBON Import Panel — floating, resizable side panel + popup
+   Framework-agnostic. Loaded by both metadata.html (inlined)
+   and frontend/index.html (linked).
+   ============================================================ */
+
+.mip-root { --mip-bg:#fff; --mip-fg:#1b2631; --mip-muted:#6c757d; --mip-border:#dee2e6;
+  --mip-accent:#0077b6; --mip-accent-dk:#023e8a; --mip-ok:#2a9d8f; --mip-warn:#e9a23b;
+  --mip-bad:#e76f51; --mip-radius:8px; --mip-surface:#f4f8fb;
+  font-family: system-ui, -apple-system, sans-serif; box-sizing:border-box; }
+.mip-root *, .mip-root *::before, .mip-root *::after { box-sizing:border-box; }
+
+/* ---- Launcher tab (shown when panel closed) ---- */
+.mip-launcher { position:fixed; top:120px; right:0; z-index:9000;
+  background:linear-gradient(135deg,var(--mip-accent-dk),var(--mip-accent)); color:#fff;
+  border:none; border-radius:8px 0 0 8px; padding:10px 8px; cursor:pointer;
+  writing-mode:vertical-rl; text-orientation:mixed; font-size:.8rem; font-weight:600;
+  letter-spacing:.5px; box-shadow:-2px 2px 10px rgba(0,0,0,.18); }
+.mip-launcher:hover { filter:brightness(1.08); }
+.mip-launcher .mip-badge { writing-mode:horizontal-tb; display:inline-block;
+  background:#fff; color:var(--mip-accent-dk); border-radius:10px; font-size:.66rem;
+  padding:0 5px; margin-top:6px; font-weight:700; }
+
+/* ---- Panel shell ---- */
+.mip-panel { position:fixed; top:0; right:0; height:100vh; width:380px;
+  min-width:280px; max-width:90vw; background:var(--mip-bg); color:var(--mip-fg);
+  z-index:9001; display:flex; flex-direction:column;
+  box-shadow:-4px 0 24px rgba(0,0,0,.18); border-left:1px solid var(--mip-border); }
+.mip-panel.mip-hidden { display:none; }
+
+/* left-border drag handle for resizing */
+.mip-resizer { position:absolute; left:-3px; top:0; width:8px; height:100%;
+  cursor:ew-resize; z-index:5; }
+.mip-resizer::after { content:""; position:absolute; left:2px; top:50%; transform:translateY(-50%);
+  width:3px; height:46px; border-radius:3px; background:var(--mip-border); }
+.mip-resizer:hover::after, .mip-resizing .mip-resizer::after { background:var(--mip-accent); }
+body.mip-resizing { cursor:ew-resize; user-select:none; }
+
+.mip-head { display:flex; align-items:center; gap:8px; padding:10px 12px;
+  background:linear-gradient(135deg,var(--mip-accent-dk),var(--mip-accent)); color:#fff; }
+.mip-head h3 { margin:0; font-size:.95rem; font-weight:700; flex:1; }
+.mip-head button { background:rgba(255,255,255,.18); color:#fff; border:none;
+  border-radius:6px; width:26px; height:26px; cursor:pointer; font-size:1rem; line-height:1; }
+.mip-head button:hover { background:rgba(255,255,255,.34); }
+
+.mip-body { flex:1; overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:12px; }
+
+/* ---- Search / regex bar ---- */
+.mip-search { display:flex; flex-direction:column; gap:4px; }
+.mip-search-row { display:flex; gap:6px; align-items:center; }
+.mip-search input { flex:1; height:30px; border:1px solid var(--mip-border);
+  border-radius:6px; padding:0 8px; font-size:.82rem; background:var(--mip-surface); color:var(--mip-fg); }
+.mip-search input.mip-bad-regex { border-color:var(--mip-bad); background:#fff3f0; }
+.mip-search .mip-rx-toggle { font-size:.7rem; border:1px solid var(--mip-border);
+  background:var(--mip-surface); border-radius:6px; padding:0 8px; height:30px; cursor:pointer; color:var(--mip-muted); }
+.mip-search .mip-rx-toggle.on { background:var(--mip-accent); color:#fff; border-color:var(--mip-accent); }
+.mip-search small { color:var(--mip-muted); font-size:.68rem; }
+.mip-search small.mip-err { color:var(--mip-bad); }
+
+/* ---- Drop zone ---- */
+.mip-drop { border:2px dashed var(--mip-border); border-radius:var(--mip-radius);
+  padding:18px 12px; text-align:center; color:var(--mip-muted); cursor:pointer;
+  background:var(--mip-surface); transition:.12s; }
+.mip-drop:hover { border-color:var(--mip-accent); color:var(--mip-accent); }
+.mip-drop.mip-over { border-color:var(--mip-accent); background:#e6f3fb; color:var(--mip-accent-dk); }
+.mip-drop strong { display:block; font-size:.86rem; color:var(--mip-fg); margin-bottom:2px; }
+.mip-drop .mip-formats { font-size:.66rem; margin-top:4px; }
+
+/* ---- Section labels ---- */
+.mip-label { font-size:.7rem; text-transform:uppercase; letter-spacing:.5px;
+  color:var(--mip-muted); font-weight:700; margin:2px 0; display:flex; align-items:center; gap:6px; }
+.mip-label .mip-count { background:var(--mip-border); color:var(--mip-fg);
+  border-radius:9px; font-size:.64rem; padding:0 6px; }
+
+/* ---- Source cards ---- */
+.mip-sources { display:flex; flex-direction:column; gap:8px; }
+.mip-source { border:1px solid var(--mip-border); border-radius:var(--mip-radius);
+  overflow:hidden; background:var(--mip-bg); }
+.mip-source.mip-disabled { opacity:.55; }
+.mip-source-head { display:flex; align-items:center; gap:8px; padding:8px 10px; background:var(--mip-surface); }
+.mip-source-head .mip-sname { flex:1; font-weight:600; font-size:.82rem; min-width:0;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; border:none; background:transparent; color:var(--mip-fg); }
+.mip-source-head .mip-sname:focus { background:#fff; outline:1px solid var(--mip-accent); border-radius:4px; }
+.mip-kind-pill { font-size:.6rem; font-weight:700; padding:1px 6px; border-radius:9px;
+  background:var(--mip-accent); color:#fff; text-transform:uppercase; }
+.mip-kind-pill.csv { background:var(--mip-ok); }
+.mip-switch { position:relative; width:34px; height:18px; flex:none; cursor:pointer; }
+.mip-switch input { display:none; }
+.mip-switch span { position:absolute; inset:0; background:#c4ccd4; border-radius:10px; transition:.15s; }
+.mip-switch span::after { content:""; position:absolute; left:2px; top:2px; width:14px; height:14px;
+  background:#fff; border-radius:50%; transition:.15s; }
+.mip-switch input:checked + span { background:var(--mip-ok); }
+.mip-switch input:checked + span::after { transform:translateX(16px); }
+.mip-icon-btn { border:none; background:transparent; cursor:pointer; color:var(--mip-muted);
+  font-size:.95rem; padding:2px 4px; border-radius:4px; }
+.mip-icon-btn:hover { color:var(--mip-bad); background:#fbeae6; }
+.mip-source-body { padding:6px 10px 10px; font-size:.74rem; color:var(--mip-muted); display:flex;
+  flex-direction:column; gap:5px; }
+.mip-ds-row { display:flex; align-items:center; gap:6px; }
+.mip-ds-row .mip-ds-role { font-weight:600; color:var(--mip-fg); text-transform:capitalize; }
+.mip-ds-row .mip-ds-meta { margin-left:auto; }
+.mip-assoc { display:flex; align-items:center; gap:6px; margin-top:2px;
+  padding-top:6px; border-top:1px dashed var(--mip-border); flex-wrap:wrap; }
+.mip-assoc select { font-size:.72rem; padding:2px 4px; border:1px solid var(--mip-border);
+  border-radius:5px; background:#fff; color:var(--mip-fg); }
+.mip-assoc .mip-assoc-state { font-weight:600; }
+.mip-assoc .mip-assoc-state.linked { color:var(--mip-ok); }
+.mip-assoc .mip-assoc-state.standalone { color:var(--mip-warn); }
+
+.mip-empty { text-align:center; color:var(--mip-muted); font-size:.78rem; padding:14px 4px; }
+
+/* ---- Popup / modal ---- */
+.mip-modal-bg { position:fixed; inset:0; background:rgba(15,30,45,.45); z-index:9100;
+  display:flex; align-items:center; justify-content:center; padding:20px; }
+.mip-modal { background:var(--mip-bg); color:var(--mip-fg); border-radius:12px;
+  width:min(760px,96vw); max-height:92vh; display:flex; flex-direction:column;
+  box-shadow:0 18px 60px rgba(0,0,0,.32); overflow:hidden; }
+.mip-modal-head { padding:14px 18px; background:linear-gradient(135deg,var(--mip-accent-dk),var(--mip-accent));
+  color:#fff; display:flex; align-items:center; gap:10px; }
+.mip-modal-head h3 { margin:0; font-size:1rem; flex:1; }
+.mip-modal-head .mip-fname { font-size:.74rem; opacity:.85; font-weight:400; }
+.mip-modal-body { padding:16px 18px; overflow-y:auto; flex:1; display:flex; flex-direction:column; gap:14px; }
+.mip-modal-foot { padding:12px 18px; border-top:1px solid var(--mip-border); display:flex;
+  gap:8px; justify-content:flex-end; align-items:center; }
+.mip-modal-foot .mip-foot-msg { margin-right:auto; font-size:.76rem; color:var(--mip-muted); }
+
+.mip-btn { border:none; border-radius:7px; padding:8px 16px; font-size:.82rem; font-weight:600;
+  cursor:pointer; }
+.mip-btn.primary { background:var(--mip-accent); color:#fff; }
+.mip-btn.primary:hover { background:var(--mip-accent-dk); }
+.mip-btn.primary:disabled { background:#9fb8c6; cursor:not-allowed; }
+.mip-btn.ghost { background:var(--mip-surface); color:var(--mip-fg); border:1px solid var(--mip-border); }
+.mip-btn.ghost:hover { background:#e9eef2; }
+
+/* ---- Tab/role mapping rows in popup ---- */
+.mip-tabrow { border:1px solid var(--mip-border); border-radius:var(--mip-radius); overflow:hidden; }
+.mip-tabrow.ok { border-left:4px solid var(--mip-ok); }
+.mip-tabrow.warn { border-left:4px solid var(--mip-warn); }
+.mip-tabrow.bad { border-left:4px solid var(--mip-bad); }
+.mip-tabrow.ignored { border-left:4px solid #c4ccd4; opacity:.7; }
+.mip-tabrow-head { display:flex; align-items:center; gap:10px; padding:9px 12px; background:var(--mip-surface);
+  flex-wrap:wrap; }
+.mip-tabrow-head .mip-tabname { font-weight:700; font-size:.85rem; }
+.mip-tabrow-head .mip-status-pill { font-size:.64rem; font-weight:700; padding:2px 8px; border-radius:10px;
+  text-transform:uppercase; }
+.mip-status-pill.ok { background:#d8f3ee; color:#1d7d6e; }
+.mip-status-pill.warn { background:#fcefd6; color:#9a6a14; }
+.mip-status-pill.bad { background:#fbe0d8; color:#b6432a; }
+.mip-status-pill.ignored { background:#e7ebee; color:#6c757d; }
+.mip-tabrow-head .mip-role-sel { margin-left:auto; display:flex; align-items:center; gap:6px; }
+.mip-tabrow-head select, .mip-tabrow-head input { font-size:.76rem; padding:3px 6px;
+  border:1px solid var(--mip-border); border-radius:5px; background:#fff; color:var(--mip-fg); }
+.mip-tabrow-head .mip-rename { width:150px; }
+.mip-tabrow-detail { padding:8px 12px 12px; font-size:.74rem; color:var(--mip-muted);
+  display:flex; flex-direction:column; gap:8px; }
+.mip-valid-line { display:flex; gap:6px; align-items:flex-start; }
+.mip-valid-line .mip-vi { flex:none; font-weight:700; }
+.mip-valid-line.ok .mip-vi { color:var(--mip-ok); }
+.mip-valid-line.warn .mip-vi { color:var(--mip-warn); }
+.mip-valid-line.bad .mip-vi { color:var(--mip-bad); }
+.mip-chips { display:flex; flex-wrap:wrap; gap:4px; }
+.mip-chip { font-size:.66rem; padding:1px 6px; border-radius:9px; background:var(--mip-surface);
+  border:1px solid var(--mip-border); }
+.mip-chip.found { background:#e8f5f2; border-color:#bfe3db; color:#1d7d6e; }
+.mip-chip.missing { background:#fbe9e3; border-color:#f0c7ba; color:#b6432a; }
+
+/* preview table */
+.mip-preview { overflow:auto; max-height:170px; border:1px solid var(--mip-border); border-radius:6px; }
+.mip-preview table { border-collapse:collapse; width:100%; font-size:.7rem; }
+.mip-preview th, .mip-preview td { border:1px solid var(--mip-border); padding:3px 6px;
+  text-align:left; white-space:nowrap; max-width:170px; overflow:hidden; text-overflow:ellipsis; }
+.mip-preview th { background:var(--mip-surface); position:sticky; top:0; }
+
+/* csv mapping grid */
+.mip-mapgrid { display:grid; grid-template-columns:1fr 1fr; gap:8px 14px; }
+.mip-mapgrid label { font-size:.74rem; display:flex; flex-direction:column; gap:3px; color:var(--mip-fg); }
+.mip-mapgrid select { padding:4px 6px; border:1px solid var(--mip-border); border-radius:5px;
+  background:#fff; font-size:.76rem; color:var(--mip-fg); }
+.mip-radio-row { display:flex; gap:14px; align-items:center; font-size:.78rem; flex-wrap:wrap; }
+.mip-radio-row label { display:flex; gap:5px; align-items:center; cursor:pointer; }
+.mip-note { font-size:.72rem; color:var(--mip-muted); background:var(--mip-surface);
+  border-radius:6px; padding:8px 10px; border:1px solid var(--mip-border); }
+
+  </style>
+</head>
+<body>
+<div id="app"
+  @dragover.prevent="dragging=true"
+  @dragleave.prevent="dragging=false"
+  @drop.prevent="onDrop">
+
+  <div v-if="dragging" class="drop-overlay">
+    📂 Drop your MBON Excel file here
+    <span class="sub">.xlsx or .xlsm accepted</span>
+  </div>
+  <div class="d3-tip" ref="tooltip"></div>
+
+  <header>
+    <div class="brand">
+      <h1>🌊 MBON Comparison Dashboard</h1>
+      <div class="sub">Marine Biodiversity Observation Network</div>
+    </div>
+    <nav>
+      <button :class="{active:view==='overview'}"  @click="view='overview'">Overview</button>
+      <button :class="{active:view==='samples'}"   @click="view='samples'">Samples</button>
+      <button :class="{active:view==='cruises'}"   @click="view='cruises'">Cruises</button>
+      <button :class="{active:view==='runs'}"      @click="view='runs'">Runs</button>
+      <button :class="{active:view==='taxonomy'}"  @click="view='taxonomy'">☀ Taxonomy</button>
+      <button :class="{active:view==='map'}"       @click="view='map'">🗺 Map</button>
+    </nav>
+    <label class="upload-btn" title="Upload MBON Excel tracker">
+      <span class="icon">📤</span>
+      Load XLSX
+      <span v-if="fileName" class="file-source">{{ fileName }}</span>
+      <input type="file" accept=".xlsx,.xlsm" style="display:none" @change="onFileInput"/>
+    </label>
+  </header>
+
+  <main>
+
+    <!-- ══════════════════════════════════════════
+         OVERVIEW
+    ══════════════════════════════════════════ -->
+    <div v-if="view==='overview'">
+      <div class="section-header">
+        <h2>Overview</h2>
+        <span v-if="!fileName" class="badge" style="background:#fff3cd;color:#856404">Demo data — upload XLSX to load real data</span>
+        <span v-else class="badge">{{ fileName }}</span>
+      </div>
+
+      <div class="stat-grid">
+        <div class="card"><div class="card-title">Samples</div><div class="card-value">{{ samples.length }}</div></div>
+        <div class="card"><div class="card-title">Cruises</div><div class="card-value">{{ cruises.length }}</div></div>
+        <div class="card"><div class="card-title">Runs</div><div class="card-value">{{ runs.length }}</div></div>
+        <div class="card"><div class="card-title">Unique Stations</div><div class="card-value">{{ uniqueStations }}</div></div>
+        <div class="card"><div class="card-title">Species Detected</div><div class="card-value">{{ uniqueSpecies }}</div></div>
+        <div class="card"><div class="card-title">Organism Groups</div><div class="card-value">{{ uniqueGroups }}</div></div>
+        <div class="card"><div class="card-title">Total Reads</div><div class="card-value">{{ fmtK(totalReads) }}</div></div>
+        <div class="card"><div class="card-title">Avg Salinity (PSU)</div><div class="card-value">{{ avgSalinity }}</div></div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="chart-hdr"><h3>Samples per Cruise</h3></div>
+          <div class="chart-wrap" ref="ovCruiseWrap"><svg ref="ovCruiseSvg"></svg></div>
+        </div>
+        <div class="card">
+          <div class="chart-hdr"><h3>Organism Groups (Read Count)</h3></div>
+          <div class="chart-wrap" ref="ovDonutWrap"><svg ref="ovDonutSvg"></svg></div>
+          <div class="legend" ref="ovDonutLegend"></div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="chart-hdr"><h3>Detection Rate</h3></div>
+          <div class="chart-wrap" ref="ovDetectWrap"><svg ref="ovDetectSvg"></svg></div>
+          <div class="legend" ref="ovDetectLegend"></div>
+        </div>
+        <div class="card">
+          <div class="chart-hdr"><h3>Samples by Depth (m)</h3></div>
+          <div class="chart-wrap" ref="ovDepthWrap"><svg ref="ovDepthSvg"></svg></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         SAMPLES
+    ══════════════════════════════════════════ -->
+    <div v-if="view==='samples'">
+      <div class="section-header">
+        <h2>Samples</h2>
+        <span class="badge">{{ filteredSamples.length }}</span>
+      </div>
+
+      <div class="filter-bar">
+        <input v-model="sampSearch" placeholder="🔍 Filter samples…" style="min-width:200px"/>
+        <select v-model="sampCruiseFilter">
+          <option value="">All cruises</option>
+          <option v-for="c in cruises" :key="c['Cruise Number']" :value="c['Cruise Number']">{{ c['Cruise Number'] }}</option>
+        </select>
+        <select v-model="sampCategoryFilter">
+          <option value="">All categories</option>
+          <option v-for="cat in sampleCategories" :key="cat" :value="cat">{{ cat }}</option>
+        </select>
+        <select v-model="sampDetectFilter">
+          <option value="">Any detection</option>
+          <option value="1">Detected</option>
+          <option value="0">Not Detected</option>
+        </select>
+      </div>
+
+      <!-- Sub-tabs -->
+      <div class="tab-bar">
+        <button class="tab-btn" :class="{active:sampTab==='table'}" @click="sampTab='table'">📋 Table</button>
+        <button class="tab-btn" :class="{active:sampTab==='env'}" @click="sampTab='env'">🌡 Environmental</button>
+        <button class="tab-btn" :class="{active:sampTab==='field'}" @click="sampTab='field'">🧪 Field/Lab</button>
+      </div>
+
+      <!-- Table -->
+      <div v-if="sampTab==='table'" class="card table-wrap" style="max-height:500px;overflow-y:auto">
+        <table>
+          <thead><tr>
+            <th>Sample Name</th>
+            <th>Cruise</th>
+            <th>Date</th>
+            <th>Station</th>
+            <th>Depth (m)</th>
+            <th>Salinity</th>
+            <th>Temp (°C)</th>
+            <th>Chl (µg/L)</th>
+            <th>pH</th>
+            <th>Category</th>
+            <th>Detected</th>
+            <th></th>
+          </tr></thead>
+          <tbody>
+            <tr v-if="!filteredSamples.length"><td colspan="12" class="no-data">No samples match filter</td></tr>
+            <tr v-for="s in filteredSamples" :key="s.samp_name" @click="selectedSample=s" style="cursor:pointer">
+              <td><strong>{{ s.samp_name||'–' }}</strong></td>
+              <td>{{ s['Cruise Number']||'–' }}</td>
+              <td class="text-muted">{{ fmtDate(s.eventDate||s.cruiseDate) }}</td>
+              <td>{{ s.Station||'–' }}</td>
+              <td>{{ s.minimumDepthInMeters??'–' }}</td>
+              <td>{{ s.salinity??'–' }}</td>
+              <td>{{ s.temp??'–' }}</td>
+              <td>{{ s.chlorophyll??'–' }}</td>
+              <td>{{ s.ph??'–' }}</td>
+              <td><span class="pill pill-blue">{{ s.samp_category||'–' }}</span></td>
+              <td>
+                <span v-if="s.detected_notDetected==1||s.detected_notDetected==='1'" class="pill pill-green">✓</span>
+                <span v-else-if="s.detected_notDetected==0||s.detected_notDetected==='0'" class="pill pill-red">✗</span>
+                <span v-else class="pill pill-grey">–</span>
+              </td>
+              <td><button class="btn btn-outline btn-sm" @click.stop="selectedSample=s">View</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Environmental charts -->
+      <div v-if="sampTab==='env'">
+        <div class="two-col">
+          <div class="card">
+            <div class="chart-hdr"><h3>Temperature vs Salinity</h3></div>
+            <div class="chart-wrap" ref="scatterTSWrap"><svg ref="scatterTSSvg"></svg></div>
+          </div>
+          <div class="card">
+            <div class="chart-hdr"><h3>Depth Distribution</h3></div>
+            <div class="chart-wrap" ref="depthHistWrap"><svg ref="depthHistSvg"></svg></div>
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="card">
+            <div class="chart-hdr"><h3>Salinity Distribution</h3></div>
+            <div class="chart-wrap" ref="salinityHistWrap"><svg ref="salinityHistSvg"></svg></div>
+          </div>
+          <div class="card">
+            <div class="chart-hdr"><h3>Chlorophyll vs Depth</h3></div>
+            <div class="chart-wrap" ref="chlDepthWrap"><svg ref="chlDepthSvg"></svg></div>
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="card">
+            <div class="chart-hdr"><h3>Dissolved Oxygen Distribution</h3></div>
+            <div class="chart-wrap" ref="doHistWrap"><svg ref="doHistSvg"></svg></div>
+          </div>
+          <div class="card">
+            <div class="chart-hdr"><h3>pH Distribution</h3></div>
+            <div class="chart-wrap" ref="phHistWrap"><svg ref="phHistSvg"></svg></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Field/Lab charts -->
+      <div v-if="sampTab==='field'">
+        <div class="two-col">
+          <div class="card">
+            <div class="chart-hdr"><h3>Pump Flow Rate by Station</h3></div>
+            <div class="chart-wrap" ref="flowBarWrap"><svg ref="flowBarSvg"></svg></div>
+          </div>
+          <div class="card">
+            <div class="chart-hdr"><h3>DNA Concentration (ng/µl)</h3></div>
+            <div class="chart-wrap" ref="concHistWrap"><svg ref="concHistSvg"></svg></div>
+          </div>
+        </div>
+        <div class="two-col">
+          <div class="card">
+            <div class="chart-hdr"><h3>Filter Material Breakdown</h3></div>
+            <div class="chart-wrap" ref="filterDonutWrap"><svg ref="filterDonutSvg"></svg></div>
+            <div class="legend" ref="filterDonutLegend"></div>
+          </div>
+          <div class="card">
+            <div class="chart-hdr"><h3>Sample Category Breakdown</h3></div>
+            <div class="chart-wrap" ref="catDonutWrap"><svg ref="catDonutSvg"></svg></div>
+            <div class="legend" ref="catDonutLegend"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sample detail panel -->
+      <div class="detail-panel" v-if="selectedSample">
+        <div class="detail-panel-hdr">
+          <h3>{{ selectedSample.samp_name }}</h3>
+          <button class="btn btn-sm btn-outline" @click="selectedSample=null">✕</button>
+        </div>
+        <div class="detail-panel-body">
+          <div class="kv-grid">
+            <template v-for="(v,k) in selectedSample" :key="k">
+              <span class="kv-key">{{ k }}</span>
+              <span class="kv-val">{{ v??'–' }}</span>
+            </template>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         CRUISES
+    ══════════════════════════════════════════ -->
+    <div v-if="view==='cruises'">
+      <div class="section-header">
+        <h2>Cruises / Collections</h2>
+        <span class="badge">{{ filteredCruises.length }}</span>
+      </div>
+
+      <div class="filter-bar">
+        <input v-model="cruiseSearch" placeholder="🔍 Filter cruises…" style="min-width:200px"/>
+        <select v-model="cruiseVesselFilter">
+          <option value="">All vessels</option>
+          <option v-for="v in cruiseVessels" :key="v" :value="v">{{ v }}</option>
+        </select>
+      </div>
+
+      <div class="tab-bar">
+        <button class="tab-btn" :class="{active:cruiseTab==='table'}" @click="cruiseTab='table'">📋 Table</button>
+        <button class="tab-btn" :class="{active:cruiseTab==='charts'}" @click="cruiseTab='charts'">📊 Charts</button>
+      </div>
+
+      <div v-if="cruiseTab==='table'" class="card table-wrap">
+        <table>
+          <thead><tr>
+            <th>Cruise Number</th>
+            <th>Date</th>
+            <th>Vessel/Platform</th>
+            <th>PI</th>
+            <th>Region</th>
+            <th>Assay</th>
+            <th>Seq Run ID</th>
+            <th>Notes</th>
+            <th></th>
+          </tr></thead>
+          <tbody>
+            <tr v-if="!filteredCruises.length"><td colspan="9" class="no-data">No cruises found</td></tr>
+            <tr v-for="c in filteredCruises" :key="c['Cruise Number']">
+              <td><strong>{{ c['Cruise Number']||'–' }}</strong></td>
+              <td class="text-muted">{{ fmtDate(c.cruiseDate) }}</td>
+              <td>{{ c.Platform_Vessel||'–' }}</td>
+              <td>{{ c.PI_name||'–' }}</td>
+              <td><span class="pill pill-blue">{{ c.Location_Region||'–' }}</span></td>
+              <td>{{ c.assay_name||'–' }}</td>
+              <td class="text-muted">{{ c.seq_run_id||'–' }}</td>
+              <td class="text-muted" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" :title="c.Notes">{{ c.Notes||'–' }}</td>
+              <td><button class="btn btn-outline btn-sm" @click="selectedCruise=c">View</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div v-if="cruiseTab==='charts'">
+        <div class="two-col">
+          <div class="card">
+            <div class="chart-hdr"><h3>Samples per Cruise</h3></div>
+            <div class="chart-wrap" ref="cruiseSampBarWrap"><svg ref="cruiseSampBarSvg"></svg></div>
+          </div>
+          <div class="card">
+            <div class="chart-hdr"><h3>Platform / Vessel Breakdown</h3></div>
+            <div class="chart-wrap" ref="vesselDonutWrap"><svg ref="vesselDonutSvg"></svg></div>
+            <div class="legend" ref="vesselDonutLegend"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="chart-hdr"><h3>Assay Types Used</h3></div>
+          <div class="chart-wrap" ref="assayBarWrap"><svg ref="assayBarSvg"></svg></div>
+        </div>
+      </div>
+
+      <div class="detail-panel" v-if="selectedCruise">
+        <div class="detail-panel-hdr">
+          <h3>{{ selectedCruise['Cruise Number'] }}</h3>
+          <button class="btn btn-sm btn-outline" @click="selectedCruise=null">✕</button>
+        </div>
+        <div class="detail-panel-body">
+          <div class="kv-grid">
+            <template v-for="(v,k) in selectedCruise" :key="k">
+              <span class="kv-key">{{ k }}</span>
+              <span class="kv-val">{{ v??'–' }}</span>
+            </template>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         RUNS
+    ══════════════════════════════════════════ -->
+    <div v-if="view==='runs'">
+      <div class="section-header">
+        <h2>Sequencing Runs</h2>
+        <span class="badge">{{ filteredRuns.length }}</span>
+      </div>
+
+      <div class="filter-bar">
+        <input v-model="runSearch" placeholder="🔍 Filter runs…" style="min-width:200px"/>
+        <select v-model="runPlatformFilter">
+          <option value="">All platforms</option>
+          <option v-for="p in runPlatforms" :key="p" :value="p">{{ p }}</option>
+        </select>
+      </div>
+
+      <div class="tab-bar">
+        <button class="tab-btn" :class="{active:runTab==='table'}" @click="runTab='table'">📋 Table</button>
+        <button class="tab-btn" :class="{active:runTab==='charts'}" @click="runTab='charts'">📊 Charts</button>
+      </div>
+
+      <div v-if="runTab==='table'" class="card table-wrap" style="max-height:520px;overflow-y:auto">
+        <table>
+          <thead><tr>
+            <th>Run ID</th>
+            <th>Sample</th>
+            <th>Cruise</th>
+            <th>Run Date</th>
+            <th>Platform</th>
+            <th>Instrument</th>
+            <th>Basecaller</th>
+            <th>Model</th>
+            <th>Entered By</th>
+            <th>Comments</th>
+            <th></th>
+          </tr></thead>
+          <tbody>
+            <tr v-if="!filteredRuns.length"><td colspan="11" class="no-data">No runs found</td></tr>
+            <tr v-for="r in filteredRuns" :key="r.run_id">
+              <td><strong>{{ r.run_id||'–' }}</strong></td>
+              <td>{{ r.samp_name||'–' }}</td>
+              <td>{{ r.cruise_number||'–' }}</td>
+              <td class="text-muted">{{ fmtDate(r.run_date) }}</td>
+              <td><span class="pill pill-blue">{{ r.platform||'–' }}</span></td>
+              <td>{{ r.instrument_name||'–' }}</td>
+              <td>{{ r.basecaller_software||'–' }}</td>
+              <td class="text-muted">{{ r.basecaller_model||'–' }}</td>
+              <td class="text-muted">{{ r.entered_by||'–' }}</td>
+              <td class="text-muted" style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" :title="r.comments">{{ r.comments||'–' }}</td>
+              <td><button class="btn btn-outline btn-sm" @click="selectedRun=r">View</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div v-if="runTab==='charts'">
+        <div class="two-col">
+          <div class="card">
+            <div class="chart-hdr"><h3>Runs by Platform</h3></div>
+            <div class="chart-wrap" ref="platformDonutWrap"><svg ref="platformDonutSvg"></svg></div>
+            <div class="legend" ref="platformDonutLegend"></div>
+          </div>
+          <div class="card">
+            <div class="chart-hdr"><h3>Runs by Instrument</h3></div>
+            <div class="chart-wrap" ref="instrumentBarWrap"><svg ref="instrumentBarSvg"></svg></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="chart-hdr"><h3>Run Timeline</h3></div>
+          <div class="chart-wrap" ref="runTimelineWrap"><svg ref="runTimelineSvg"></svg></div>
+        </div>
+      </div>
+
+      <div class="detail-panel" v-if="selectedRun">
+        <div class="detail-panel-hdr">
+          <h3>{{ selectedRun.run_id||'Run' }}</h3>
+          <button class="btn btn-sm btn-outline" @click="selectedRun=null">✕</button>
+        </div>
+        <div class="detail-panel-body">
+          <div class="kv-grid">
+            <template v-for="(v,k) in selectedRun" :key="k">
+              <span class="kv-key">{{ k }}</span>
+              <span class="kv-val">{{ v??'–' }}</span>
+            </template>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         TAXONOMY SUNBURST
+    ══════════════════════════════════════════ -->
+    <div v-if="view==='taxonomy'">
+      <div class="section-header">
+        <h2>Taxonomy Explorer</h2>
+        <span class="badge">{{ wilderResults.length }} observations</span>
+      </div>
+
+      <div class="filter-bar">
+        <input v-model="sbSearch" @input="drawSunburst" placeholder="🔍 Filter species…" style="min-width:200px"/>
+        <select v-model="sbGroupFilter" @change="drawSunburst">
+          <option value="">All groups</option>
+          <option v-for="g in wilderGroups" :key="g" :value="g">{{ g }}</option>
+        </select>
+        <button class="btn btn-outline" @click="sbSearch='';sbGroupFilter='';drawSunburst()">Reset</button>
+      </div>
+
+      <div class="two-col">
+        <div class="card">
+          <div class="chart-hdr"><h3>☀ Taxonomy Sunburst</h3><span class="text-muted" style="font-size:.73rem">Click to zoom · center = up</span></div>
+          <div class="sunburst-layout">
+            <div class="chart-wrap" ref="sbWrap" style="max-width:500px;flex-shrink:0"><svg ref="sbSvg"></svg></div>
+            <div class="sb-list" ref="sbList"></div>
+          </div>
+          <div class="legend" ref="sbLegend"></div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="chart-hdr"><h3>Top Species by Read Count</h3></div>
+            <div class="chart-wrap" ref="topSpeciesWrap"><svg ref="topSpeciesSvg"></svg></div>
+          </div>
+          <div class="card mt1">
+            <div class="chart-hdr"><h3>Reads by Organism Group</h3></div>
+            <div class="chart-wrap" ref="groupBarWrap"><svg ref="groupBarSvg"></svg></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Wilder Results table -->
+      <div class="card mt1">
+        <div class="tab-bar" style="margin-bottom:.75rem">
+          <button class="tab-btn active" style="color:var(--ocean);border-bottom-color:var(--ocean)">Wilder Results Table</button>
+        </div>
+        <div class="table-wrap" style="max-height:400px;overflow-y:auto">
+          <table>
+            <thead><tr>
+              <th>Scientific Name</th>
+              <th>Common Name</th>
+              <th>Group</th>
+              <th>Rank</th>
+              <th>Read Count</th>
+              <th>Sample</th>
+            </tr></thead>
+            <tbody>
+              <tr v-if="!filteredWilder.length"><td colspan="6" class="no-data">No results</td></tr>
+              <tr v-for="w in filteredWilder" :key="w.wilder_result_id||w.scientific_name+w.sample_id">
+                <td><em>{{ w.scientific_name||'–' }}</em></td>
+                <td>{{ w.common_name||'–' }}</td>
+                <td><span class="pill pill-blue">{{ w.organism_group||'–' }}</span></td>
+                <td class="text-muted">{{ w.taxonomic_rank||'–' }}</td>
+                <td><strong>{{ Number(w.read_count||0).toLocaleString() }}</strong></td>
+                <td class="text-muted">{{ w.sample_id||'–' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         MAP
+    ══════════════════════════════════════════ -->
+    <div v-if="view==='map'">
+      <div class="section-header">
+        <h2>Station Map</h2>
+        <span class="badge">{{ mapStationList.length }} stations</span>
+      </div>
+
+      <div class="filter-bar">
+        <select v-model="mapCruiseFilter" @change="refreshMap">
+          <option value="">All cruises</option>
+          <option v-for="c in cruises" :key="c['Cruise Number']" :value="c['Cruise Number']">{{ c['Cruise Number'] }}</option>
+        </select>
+        <select v-model="mapColorBy" @change="refreshMap">
+          <option value="cruise">Color by cruise</option>
+          <option value="depth">Color by depth</option>
+          <option value="salinity">Color by salinity</option>
+          <option value="temp">Color by temperature</option>
+          <option value="detected">Color by detection</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" @click="mapSelectedStations=[];renderComparePanel()">Clear selection</button>
+        <span class="map-hint">💡 Click marker = popup · <kbd>Ctrl/⌘</kbd>+click = add to comparison</span>
+      </div>
+
+      <div class="map-outer">
+        <div id="mbon-map"></div>
+
+        <!-- Selected stations chips -->
+        <div v-if="mapSelectedStations.length" class="cmp-panel">
+          <div class="cmp-panel-hdr">
+            <h3>🔬 Comparing {{ mapSelectedStations.length }} Station{{ mapSelectedStations.length>1?'s':'' }}</h3>
+            <div class="cmp-chips">
+              <span v-for="(st,i) in mapSelectedStations" :key="st"
+                class="cmp-chip" :style="{background: stationColorFn(st)}"
+                @click="removeFromComparison(st)">
+                {{ st }} <span class="rm">✕</span>
+              </span>
+            </div>
+            <button class="btn btn-sm" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.4)" @click="mapSelectedStations=[];renderComparePanel()">Clear all</button>
+          </div>
+          <div class="cmp-body">
+            <div class="cmp-tab-bar">
+              <button class="cmp-tab-btn" :class="{active:cmpTab==='scatter'}"  @click="cmpTab='scatter';renderComparePanel()">Scatter</button>
+              <button class="cmp-tab-btn" :class="{active:cmpTab==='bar'}"      @click="cmpTab='bar';renderComparePanel()">Bar</button>
+              <button class="cmp-tab-btn" :class="{active:cmpTab==='radar'}"    @click="cmpTab='radar';renderComparePanel()">Radar</button>
+              <button class="cmp-tab-btn" :class="{active:cmpTab==='bubble'}"   @click="cmpTab='bubble';renderComparePanel()">Bubble</button>
+              <button class="cmp-tab-btn" :class="{active:cmpTab==='chord'}"    @click="cmpTab='chord';renderComparePanel()">Chord</button>
+            </div>
+            <div class="cmp-charts-grid" id="cmp-grid"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+/* ===== MBON Import Panel module (inlined) ===== */
+/* ============================================================
+   MBON Import Panel  (framework-agnostic, no build step)
+   ------------------------------------------------------------
+   Exposes two globals:
+     window.MBONImportLib    — pure parse/validate/normalize fns
+                               (unit-testable in Node)
+     window.MBONImportPanel  — DOM panel + import popup factory
+   Requires SheetJS (XLSX) to be loaded on the page.
+   ============================================================ */
+(function (global) {
+  "use strict";
+
+  /* =========================================================
+     PART 1 — PURE LIBRARY  (window.MBONImportLib)
+     ========================================================= */
+  const Lib = {};
+
+  // normalize a header token for fuzzy matching
+  function norm(s) {
+    return String(s == null ? "" : s).toLowerCase().replace(/[^a-z0-9]+/g, "");
+  }
+  Lib.norm = norm;
+
+  // Role definitions. `sig` = tokens we expect; `required` = tokens (or
+  // any-of arrays) that MUST be present for a clean "ok". `label`/`desc`
+  // power the popup. Header keys are matched fuzzily via norm().
+  const ROLES = {
+    samples: {
+      label: "Samples",
+      desc: "Per-sample metadata (one row per sample): IDs, station, coordinates, environment.",
+      sig: ["sampleid","sampname","cruisenumber","station","decimallatitude","decimallongitude","sampcategory","salinity","temp","minimumdepthinmeters"],
+      required: [["sampname","sampleid"]],
+      idHint: ["sampname","sampleid"],
+    },
+    cruise: {
+      label: "Cruise (Collection)",
+      desc: "One row per cruise/collection event: vessel, PI, region, dates.",
+      sig: ["cruiseid","cruisenumber","cruisedate","platformvessel","piname","locationregion","assayname","seqrunid"],
+      required: ["cruisenumber"],
+      idHint: ["cruisenumber","cruiseid"],
+    },
+    runs: {
+      label: "Runs",
+      desc: "Sequencing / analysis runs. One row per run; a sample may have many.",
+      sig: ["runid","sampname","cruisenumber","rundate","platform","instrumentname","directory","basecallersoftware"],
+      required: ["runid"],
+      idHint: ["runid"],
+    },
+    bioinformatics: {
+      label: "Bioinformatics",
+      desc: "Pipeline runs per sample, linked to a Run and a Sample.",
+      sig: ["bioinfoid","runid","sampleid","pipelinename","versionpipeline","sopbioinformatics","coderepo"],
+      required: ["bioinfoid"],
+      idHint: ["bioinfoid"],
+    },
+    wilder: {
+      label: "Wilder Results",
+      desc: "Per-sample, per-taxon read counts (Wilderlab). One row = one taxon in one sample.",
+      sig: ["wilderresultid","sampleid","bioinfoid","wilderjobid","wilderuid","scientificname","commonname","taxonomicrank","organismgroup","taxid","readcount"],
+      required: [["sampleid"], ["scientificname"]],
+      idHint: ["wilderresultid","sampleid"],
+    },
+    kraken2: {
+      label: "Kraken2",
+      desc: "Kraken2 reports + LCA assignments.",
+      sig: ["k2reportid","bioinfoid","database","reportdate","kronalocation","lcasid","taxonomyid","parenttaxonomyid","rank","name","abundance","count"],
+      required: [["k2reportid","lcasid"]],
+      idHint: ["k2reportid","lcasid"],
+    },
+    taxtriage: {
+      label: "TaxTriage",
+      desc: "TaxTriage pipeline runs + detected-taxon reports.",
+      sig: ["taxtriagerunid","bioinfoid","database","runlocation","rundate","kronalocation","reportid","organismdetected","taxid","specimenid","specimentype","tassscore"],
+      required: [["taxtriagerunid","reportid"]],
+      idHint: ["taxtriagerunid","reportid"],
+    },
+  };
+  Lib.ROLES = ROLES;
+  Lib.ROLE_KEYS = Object.keys(ROLES);
+
+  // does a normalized header list satisfy a single required entry?
+  function reqMet(normSet, entry) {
+    if (Array.isArray(entry)) return entry.some((t) => normSet.has(t));
+    return normSet.has(entry);
+  }
+
+  // score how well a row of cells works as a header for `role` (0..1)
+  function scoreRowForRole(cells, role) {
+    const def = ROLES[role];
+    if (!def) return 0;
+    const present = new Set(cells.map(norm).filter(Boolean));
+    let hits = 0;
+    def.sig.forEach((t) => { if (present.has(t)) hits++; });
+    return hits / def.sig.length;
+  }
+  Lib.scoreRowForRole = scoreRowForRole;
+
+  // For a sheet (array-of-arrays), find best (headerRowIdx, role).
+  Lib.detectHeaderAndRole = function (rows, maxScan) {
+    maxScan = Math.min(maxScan || 12, rows.length);
+    let best = { headerRowIdx: 0, role: "unknown", score: 0 };
+    for (let r = 0; r < maxScan; r++) {
+      const cells = rows[r] || [];
+      const nonEmpty = cells.filter((c) => c != null && String(c).trim() !== "").length;
+      if (nonEmpty < 2) continue;
+      for (const role of Lib.ROLE_KEYS) {
+        const sc = scoreRowForRole(cells, role);
+        if (sc > best.score) best = { headerRowIdx: r, role, score: sc };
+      }
+    }
+    return best;
+  };
+
+  // Given a chosen role, find the most likely header row in the sheet.
+  Lib.bestHeaderRowForRole = function (rows, role, maxScan) {
+    maxScan = Math.min(maxScan || 12, rows.length);
+    let best = { idx: 0, score: -1 };
+    for (let r = 0; r < maxScan; r++) {
+      const cells = rows[r] || [];
+      const nonEmpty = cells.filter((c) => c != null && String(c).trim() !== "").length;
+      if (nonEmpty < 2) continue;
+      const sc = scoreRowForRole(cells, role);
+      if (sc > best.score) best = { idx: r, score: sc };
+    }
+    return best.idx;
+  };
+
+  // Validate a header list against a role. Returns status + explanation.
+  Lib.validate = function (role, headers) {
+    const def = ROLES[role];
+    if (!def) {
+      return { status: "bad", found: [], missing: [], score: 0,
+        reason: "No role selected — choose what this tab represents, or set it to Ignore." };
+    }
+    const normSet = new Set(headers.map(norm).filter(Boolean));
+    const found = def.sig.filter((t) => normSet.has(t));
+    const missing = def.sig.filter((t) => !normSet.has(t));
+    const score = def.sig.length ? found.length / def.sig.length : 0;
+    const reqOk = def.required.every((e) => reqMet(normSet, e));
+    let status, reason;
+    if (reqOk && score >= 0.4) {
+      status = "ok";
+      reason = `Looks like a valid ${def.label} tab — ${found.length}/${def.sig.length} expected columns present, all key identifier columns found.`;
+    } else if (score >= 0.2 || reqOk) {
+      status = "warn";
+      const miss = def.required.filter((e) => !reqMet(normSet, e))
+        .map((e) => (Array.isArray(e) ? e.join(" or ") : e));
+      reason = reqOk
+        ? `Acceptable as ${def.label}, but only ${found.length}/${def.sig.length} expected columns matched — double-check the header row.`
+        : `Partial match for ${def.label}. Missing key identifier column(s): ${miss.join(", ")}. It will import but may not link correctly.`;
+    } else {
+      status = "bad";
+      reason = `This doesn't match the expected ${def.label} format (only ${found.length}/${def.sig.length} columns matched). Pick a different role or set it to Ignore.`;
+    }
+    return { status, found, missing, score, reason };
+  };
+
+  // Build record objects from a sheet given a header row.
+  Lib.extractRecords = function (rows, headerRowIdx) {
+    const headerRow = rows[headerRowIdx] || [];
+    const headers = headerRow.map((h) => (h != null ? String(h).trim() : ""));
+    const out = [];
+    for (let r = headerRowIdx + 1; r < rows.length; r++) {
+      const row = rows[r] || [];
+      if (!row.some((c) => c != null && String(c).trim() !== "")) continue;
+      const obj = {};
+      headers.forEach((h, i) => { if (h) obj[h] = row[i] != null ? row[i] : null; });
+      out.push(obj);
+    }
+    return { headers: headers.filter(Boolean), records: out };
+  };
+
+  // sheet -> array-of-arrays via SheetJS
+  Lib.sheetToRows = function (XLSX, ws) {
+    return XLSX.utils.sheet_to_json(ws, { header: 1, defval: null, raw: false, blankrows: true });
+  };
+
+  // Analyze every sheet in a workbook.
+  Lib.analyzeWorkbook = function (XLSX, wb) {
+    return wb.SheetNames.map((name) => {
+      const rows = Lib.sheetToRows(XLSX, wb.Sheets[name]);
+      const det = Lib.detectHeaderAndRole(rows);
+      const role = det.score >= 0.25 ? det.role : "unknown";
+      const headerRowIdx = role === "unknown" ? det.headerRowIdx : Lib.bestHeaderRowForRole(rows, role);
+      const ext = Lib.extractRecords(rows, headerRowIdx);
+      return {
+        sheetName: name, rows, role, headerRowIdx,
+        headers: ext.headers, records: ext.records,
+        validation: Lib.validate(role, ext.headers),
+        autoScore: det.score,
+      };
+    });
+  };
+
+  // Re-derive a sheet analysis after the user changes role / header row / name.
+  Lib.reanalyzeSheet = function (sheet, role, headerRowIdx) {
+    const idx = headerRowIdx != null ? headerRowIdx
+      : (role === "unknown" ? sheet.headerRowIdx : Lib.bestHeaderRowForRole(sheet.rows, role));
+    const ext = Lib.extractRecords(sheet.rows, idx);
+    return Object.assign({}, sheet, {
+      role, headerRowIdx: idx, headers: ext.headers, records: ext.records,
+      validation: Lib.validate(role, ext.headers),
+    });
+  };
+
+  /* ---------- Raw CSV (stripped Wilder-style) ---------- */
+
+  // Map raw-CSV header -> normalized wilder field. Patterns are matched
+  // against norm(header). First match wins.
+  const RAW_WILDER_PATTERNS = [
+    { field: "sample_id",       any: ["samplenumberuid","samplenumber","sampleuid","sampleid","sampname","samplereference"] },
+    { field: "tax_id",          any: ["taxonid","taxid"] },
+    { field: "taxonomic_rank",  any: ["rank","taxonomicrank"] },
+    { field: "scientific_name", any: ["scientificname","species","taxon","name"] },
+    { field: "common_name",     any: ["commonname"] },
+    { field: "organism_group",  any: ["group","organismgroup"] },
+    { field: "read_count",      any: ["taxoncount","readcount","count","reads","abundance"] },
+  ];
+
+  Lib.guessColumn = function (headers, anyTokens) {
+    for (const tok of anyTokens) {
+      const hit = headers.find((h) => norm(h) === tok);
+      if (hit) return hit;
+    }
+    // looser contains-match fallback
+    for (const tok of anyTokens) {
+      const hit = headers.find((h) => norm(h).includes(tok));
+      if (hit) return hit;
+    }
+    return "";
+  };
+
+  // Decide if a flat CSV looks like raw Wilder data + propose a mapping.
+  Lib.analyzeRawCsv = function (headers, records) {
+    const mapping = {};
+    RAW_WILDER_PATTERNS.forEach((p) => { mapping[p.field] = Lib.guessColumn(headers, p.any); });
+    const haveSample = !!mapping.sample_id;
+    const haveTaxon = !!(mapping.scientific_name || mapping.tax_id);
+    const haveCount = !!mapping.read_count;
+    const kind = haveSample && haveTaxon ? "wilder_raw" : "generic";
+    // lat/lon if present (sample-level extras)
+    const latCol = Lib.guessColumn(headers, ["latitude","decimallatitude","lat"]);
+    const lonCol = Lib.guessColumn(headers, ["longitude","decimallongitude","lon","lng"]);
+    const refCol = Lib.guessColumn(headers, ["samplereference","station","site"]);
+    let status, reason;
+    if (kind === "wilder_raw" && haveCount) {
+      status = "ok";
+      reason = "Recognized as stripped Wilder results (Sample ID + taxon + count). Will import as Wilder Results keyed by Sample ID.";
+    } else if (haveSample && haveTaxon) {
+      status = "warn";
+      reason = "Looks Wilder-like but no clear read-count column was found — counts will default to blank. Confirm the mapping below.";
+    } else {
+      status = "bad";
+      reason = "Couldn't find a Sample-ID column and a taxon column. Map them manually below, or this file can't be imported as Wilder results.";
+    }
+    return { kind, mapping, latCol, lonCol, refCol, status, reason };
+  };
+
+  // Build normalized wilder records + synthesized sample rows from a raw CSV.
+  Lib.buildRawWilder = function (records, opts) {
+    const m = opts.mapping, link = opts.link || { mode: "standalone", cruise: "" },
+      sidCol = m.sample_id, latCol = opts.latCol, lonCol = opts.lonCol, refCol = opts.refCol,
+      srcId = opts.srcId || "csv";
+    const wilder = [];
+    const sampleSet = new Map();
+    records.forEach((row, i) => {
+      const sid = sidCol ? row[sidCol] : null;
+      if (sid == null || String(sid).trim() === "") return;
+      const sidS = String(sid).trim();
+      wilder.push({
+        wilder_result_id: `${srcId}-W${i + 1}`,
+        sample_id: sidS,
+        scientific_name: m.scientific_name ? row[m.scientific_name] : null,
+        common_name: m.common_name ? row[m.common_name] : null,
+        taxonomic_rank: m.taxonomic_rank ? row[m.taxonomic_rank] : null,
+        organism_group: m.organism_group ? row[m.organism_group] : null,
+        tax_id: m.tax_id ? row[m.tax_id] : null,
+        read_count: m.read_count ? row[m.read_count] : null,
+        _source: srcId,
+      });
+      if (!sampleSet.has(sidS)) {
+        sampleSet.set(sidS, {
+          SAMPLE_ID: sidS, samp_name: sidS,
+          "Cruise Number": link.mode === "cruise" ? link.cruise : "",
+          Station: refCol && row[refCol] ? row[refCol] : "",
+          decimalLatitude: latCol && row[latCol] ? row[latCol] : null,
+          decimalLongitude: lonCol && row[lonCol] ? row[lonCol] : null,
+          samp_category: "imported (Wilder CSV)",
+          _source: srcId, _synthetic: true,
+        });
+      }
+    });
+    return { wilder, samples: [...sampleSet.values()] };
+  };
+
+  global.MBONImportLib = Lib;
+
+  /* =========================================================
+     PART 2 — DOM PANEL  (window.MBONImportPanel)
+     ========================================================= */
+
+  function el(tag, attrs, kids) {
+    const n = document.createElement(tag);
+    if (attrs) for (const k in attrs) {
+      if (k === "class") n.className = attrs[k];
+      else if (k === "html") n.innerHTML = attrs[k];
+      else if (k === "text") n.textContent = attrs[k];
+      else if (k.slice(0, 2) === "on" && typeof attrs[k] === "function") n.addEventListener(k.slice(2), attrs[k]);
+      else if (attrs[k] != null) n.setAttribute(k, attrs[k]);
+    }
+    (kids || []).forEach((c) => { if (c != null) n.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+    return n;
+  }
+
+  function uid() { return "src_" + Math.random().toString(36).slice(2, 9); }
+
+  const Panel = {};
+
+  Panel.create = function (opts) {
+    opts = opts || {};
+    const XLSX = global.XLSX;
+    const getCruises = opts.getCruises || (() => []);
+    const onChange = opts.onChange || function () {};
+    const startWidth = opts.width || 380;
+
+    const state = {
+      sources: [],          // committed sources
+      open: false,
+      regex: "",
+      useRegex: true,
+    };
+
+    // ---------- root + launcher ----------
+    const root = el("div", { class: "mip-root" });
+    const launcher = el("button", { class: "mip-launcher", title: "Open data import panel",
+      onclick: () => api.toggle(true) }, ["⬆ Import data ", el("span", { class: "mip-badge", text: "0" })]);
+    const launcherBadge = launcher.querySelector(".mip-badge");
+
+    const panel = el("div", { class: "mip-panel mip-hidden" });
+    panel.style.width = startWidth + "px";
+
+    // resizer (left border)
+    const resizer = el("div", { class: "mip-resizer", title: "Drag to resize" });
+    resizer.addEventListener("mousedown", (e) => {
+      e.preventDefault();
+      const startX = e.clientX, w0 = panel.getBoundingClientRect().width;
+      document.body.classList.add("mip-resizing");
+      function mv(ev) {
+        let w = w0 + (startX - ev.clientX);
+        w = Math.max(280, Math.min(window.innerWidth * 0.9, w));
+        panel.style.width = w + "px";
+      }
+      function up() {
+        document.body.classList.remove("mip-resizing");
+        window.removeEventListener("mousemove", mv);
+        window.removeEventListener("mouseup", up);
+      }
+      window.addEventListener("mousemove", mv);
+      window.addEventListener("mouseup", up);
+    });
+
+    const head = el("div", { class: "mip-head" }, [
+      el("h3", { text: "Data Import" }),
+      el("button", { title: "Collapse", text: "✕", onclick: () => api.toggle(false) }),
+    ]);
+
+    const body = el("div", { class: "mip-body" });
+    panel.appendChild(resizer);
+    panel.appendChild(head);
+    panel.appendChild(body);
+    root.appendChild(launcher);
+    root.appendChild(panel);
+    (opts.mount || document.body).appendChild(root);
+
+    // ---------- search / regex bar ----------
+    const searchInput = el("input", { type: "text", placeholder: "Filter sources & rows… (regex)" });
+    const rxToggle = el("button", { class: "mip-rx-toggle on", title: "Toggle regex mode", text: ".*" });
+    const searchErr = el("small", {});
+    rxToggle.addEventListener("click", () => {
+      state.useRegex = !state.useRegex;
+      rxToggle.classList.toggle("on", state.useRegex);
+      renderSources();
+    });
+    searchInput.addEventListener("input", () => { state.regex = searchInput.value; renderSources(); });
+    const searchBox = el("div", { class: "mip-search" }, [
+      el("div", { class: "mip-search-row" }, [searchInput, rxToggle]),
+      searchErr,
+    ]);
+
+    // ---------- drop zone ----------
+    const fileInput = el("input", { type: "file", accept: ".xlsx,.xlsm,.xls,.csv,.tsv,.txt", multiple: "multiple" });
+    fileInput.style.display = "none";
+    fileInput.addEventListener("change", (e) => { handleFiles([...e.target.files]); fileInput.value = ""; });
+    const drop = el("div", { class: "mip-drop", onclick: () => fileInput.click() }, [
+      el("strong", { text: "Drop files here or click to choose" }),
+      el("div", { text: "One or more files — workbooks or raw tables" }),
+      el("div", { class: "mip-formats", text: ".xlsx · .xlsm · .csv · .tsv" }),
+      fileInput,
+    ]);
+    ["dragenter", "dragover"].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add("mip-over"); }));
+    ["dragleave", "drop"].forEach((ev) => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove("mip-over"); }));
+    drop.addEventListener("drop", (e) => { if (e.dataTransfer && e.dataTransfer.files.length) handleFiles([...e.dataTransfer.files]); });
+
+    // ---------- sources list ----------
+    const sourcesLabel = el("div", { class: "mip-label" }, [
+      "Imported sources ", el("span", { class: "mip-count", text: "0" }),
+    ]);
+    const sourcesWrap = el("div", { class: "mip-sources" });
+
+    body.appendChild(searchBox);
+    body.appendChild(drop);
+    body.appendChild(sourcesLabel);
+    body.appendChild(sourcesWrap);
+
+    // ================= file handling =================
+    function readFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error("Could not read " + file.name));
+        const lower = file.name.toLowerCase();
+        const isText = /\.(csv|tsv|txt)$/.test(lower);
+        reader.onload = (ev) => {
+          try {
+            if (isText) {
+              const wb = XLSX.read(ev.target.result, { type: "string", raw: false });
+              const first = wb.SheetNames[0];
+              const rows = Lib.sheetToRows(XLSX, wb.Sheets[first]);
+              resolve({ file, type: "csv", rows });
+            } else {
+              const wb = XLSX.read(new Uint8Array(ev.target.result), { type: "array", cellDates: true, raw: false });
+              resolve({ file, type: "workbook", wb });
+            }
+          } catch (err) { reject(err); }
+        };
+        if (isText) reader.readAsText(file); else reader.readAsArrayBuffer(file);
+      });
+    }
+
+    async function handleFiles(files) {
+      for (const f of files) {
+        try {
+          const parsed = await readFile(f);
+          if (parsed.type === "workbook") openWorkbookPopup(parsed);
+          else openCsvPopup(parsed);
+        } catch (err) {
+          alert("Error reading " + f.name + ": " + err.message);
+        }
+      }
+    }
+
+    // ================= rendering sources =================
+    function buildRegex() {
+      if (!state.regex) return null;
+      if (!state.useRegex) {
+        const esc = state.regex.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        return new RegExp(esc, "i");
+      }
+      try { const r = new RegExp(state.regex, "i"); searchInput.classList.remove("mip-bad-regex"); searchErr.textContent = ""; searchErr.className = ""; return r; }
+      catch (e) { searchInput.classList.add("mip-bad-regex"); searchErr.textContent = "Invalid regex: " + e.message; searchErr.className = "mip-err"; return null; }
+    }
+
+    function sourceMatches(src, rx) {
+      if (!rx) return true;
+      if (rx.test(src.name) || rx.test(src.fileName)) return true;
+      return src.datasets.some((d) =>
+        rx.test(d.role) ||
+        (d.headers || []).some((h) => rx.test(String(h))) ||
+        d.records.slice(0, 200).some((r) => Object.values(r).some((v) => v != null && rx.test(String(v))))
+      );
+    }
+
+    function renderSources() {
+      const rx = buildRegex();
+      sourcesWrap.innerHTML = "";
+      const list = state.sources.filter((s) => sourceMatches(s, rx));
+      sourcesLabel.querySelector(".mip-count").textContent = state.sources.length;
+      launcherBadge.textContent = state.sources.filter((s) => s.enabled).length;
+      if (!state.sources.length) {
+        sourcesWrap.appendChild(el("div", { class: "mip-empty", text: "No sources yet. Drop a file above to begin." }));
+        return;
+      }
+      if (!list.length) {
+        sourcesWrap.appendChild(el("div", { class: "mip-empty", text: "No sources match your filter." }));
+        return;
+      }
+      list.forEach((src) => sourcesWrap.appendChild(renderSourceCard(src)));
+    }
+
+    function renderSourceCard(src) {
+      const card = el("div", { class: "mip-source" + (src.enabled ? "" : " mip-disabled") });
+      const nameInput = el("input", { class: "mip-sname", value: src.name, title: "Rename source" });
+      nameInput.addEventListener("change", () => { src.name = nameInput.value.trim() || src.fileName; emit(); });
+      const sw = el("label", { class: "mip-switch", title: "Show / hide in dashboard" });
+      const cb = el("input", { type: "checkbox" }); cb.checked = src.enabled;
+      cb.addEventListener("change", () => { src.enabled = cb.checked; card.classList.toggle("mip-disabled", !src.enabled); emit(); });
+      sw.appendChild(cb); sw.appendChild(el("span", {}));
+      const head = el("div", { class: "mip-source-head" }, [
+        el("span", { class: "mip-kind-pill" + (src.kind === "csv" ? " csv" : ""), text: src.kind === "csv" ? "CSV" : "XLSX" }),
+        nameInput, sw,
+        el("button", { class: "mip-icon-btn", title: "Remove source", text: "🗑",
+          onclick: () => { state.sources = state.sources.filter((s) => s !== src); renderSources(); emit(); } }),
+      ]);
+      const bodyEl = el("div", { class: "mip-source-body" });
+      src.datasets.forEach((d) => {
+        bodyEl.appendChild(el("div", { class: "mip-ds-row" }, [
+          el("span", { class: "mip-ds-role", text: (ROLES[d.role] ? ROLES[d.role].label : d.role) }),
+          el("span", { class: "mip-ds-meta", text: `${d.records.length} rows · ${d.headers.length} cols` }),
+        ]));
+      });
+      // associate / dissociate (CSV wilder sources)
+      if (src.kind === "csv" && src.csvMeta) {
+        const sel = el("select", { title: "Associate these samples with a cruise" });
+        sel.appendChild(el("option", { value: "", text: "— Standalone (no cruise) —" }));
+        getCruises().forEach((c) => {
+          const o = el("option", { value: c, text: c }); if (src.csvMeta.link.cruise === c && src.csvMeta.link.mode === "cruise") o.selected = true; sel.appendChild(o);
+        });
+        sel.value = src.csvMeta.link.mode === "cruise" ? src.csvMeta.link.cruise : "";
+        sel.addEventListener("change", () => {
+          if (sel.value) src.csvMeta.link = { mode: "cruise", cruise: sel.value };
+          else src.csvMeta.link = { mode: "standalone", cruise: "" };
+          rebuildCsvSource(src); renderStateLabel(); emit();
+        });
+        const stateLab = el("span", { class: "mip-assoc-state" });
+        function renderStateLabel() {
+          const linked = src.csvMeta.link.mode === "cruise";
+          stateLab.textContent = linked ? "Linked → " + src.csvMeta.link.cruise : "Standalone";
+          stateLab.className = "mip-assoc-state " + (linked ? "linked" : "standalone");
+        }
+        renderStateLabel();
+        bodyEl.appendChild(el("div", { class: "mip-assoc" }, [
+          el("span", { text: "Cruise:" }), sel, stateLab,
+        ]));
+      }
+      card.appendChild(head); card.appendChild(bodyEl);
+      return card;
+    }
+
+    // rebuild a CSV source's datasets/samples after a link change
+    function rebuildCsvSource(src) {
+      const built = Lib.buildRawWilder(src.csvMeta.records, {
+        mapping: src.csvMeta.mapping, latCol: src.csvMeta.latCol, lonCol: src.csvMeta.lonCol,
+        refCol: src.csvMeta.refCol, link: src.csvMeta.link, srcId: src.id,
+      });
+      src.datasets = [
+        { role: "wilder", headers: Object.keys(built.wilder[0] || {}), records: built.wilder, sheetName: src.fileName },
+        { role: "samples", headers: Object.keys(built.samples[0] || {}), records: built.samples, sheetName: "(synthesized)" },
+      ];
+    }
+
+    // ================= merged output + emit =================
+    function getMerged() {
+      const merged = { samples: [], cruise: [], runs: [], bioinformatics: [], wilder: [], kraken2: [], taxtriage: [] };
+      state.sources.filter((s) => s.enabled).forEach((s) => {
+        s.datasets.forEach((d) => { if (merged[d.role]) merged[d.role] = merged[d.role].concat(d.records); });
+      });
+      return merged;
+    }
+
+    function emit() {
+      renderSources();
+      onChange({ sources: state.sources, merged: getMerged() });
+    }
+
+    // ================= WORKBOOK popup =================
+    function openWorkbookPopup(parsed) {
+      const analyses = Lib.analyzeWorkbook(XLSX, parsed.wb); // [{sheetName, role, ...}]
+      // working copy (mutable) per sheet
+      const working = analyses.map((a) => Object.assign({}, a));
+
+      const bg = el("div", { class: "mip-modal-bg" });
+      const foot = el("div", { class: "mip-modal-foot" });
+      const footMsg = el("span", { class: "mip-foot-msg" });
+      const importBtn = el("button", { class: "mip-btn primary", text: "Import selected tabs" });
+      const cancelBtn = el("button", { class: "mip-btn ghost", text: "Cancel", onclick: () => bg.remove() });
+      foot.appendChild(footMsg); foot.appendChild(cancelBtn); foot.appendChild(importBtn);
+
+      const bodyWrap = el("div", { class: "mip-modal-body" });
+      bodyWrap.appendChild(el("div", { class: "mip-note",
+        html: "Each tab in this workbook is shown below with the role it was matched to. " +
+          "<b>Change the role</b> if a tab is mismatched, <b>rename</b> it freely (the original sheet name isn't hard-coded), " +
+          "or set it to <b>Ignore</b>. Validation explains why each tab is or isn't a good fit." }));
+
+      function refreshFoot() {
+        const importable = working.filter((w) => w.role !== "unknown" && w._ignore !== true);
+        const okCount = importable.length;
+        footMsg.textContent = okCount ? `${okCount} tab(s) will be imported.` : "Nothing selected to import.";
+        importBtn.disabled = !okCount;
+      }
+
+      working.forEach((w) => bodyWrap.appendChild(renderTabRow(w, refreshFoot)));
+
+      const modal = el("div", { class: "mip-modal" }, [
+        el("div", { class: "mip-modal-head" }, [
+          el("h3", { text: "Import workbook" }),
+          el("span", { class: "mip-fname", text: parsed.file.name }),
+        ]),
+        bodyWrap, foot,
+      ]);
+      bg.appendChild(modal);
+      document.body.appendChild(bg);
+      refreshFoot();
+
+      importBtn.addEventListener("click", () => {
+        const datasets = working
+          .filter((w) => w.role !== "unknown" && w._ignore !== true)
+          .map((w) => ({ role: w.role, sheetName: w.displayName || w.sheetName, headers: w.headers, records: w.records }));
+        if (!datasets.length) return;
+        const src = { id: uid(), name: parsed.file.name.replace(/\.(xlsx|xlsm|xls)$/i, ""), fileName: parsed.file.name,
+          kind: "workbook", enabled: true, datasets };
+        state.sources.push(src);
+        bg.remove();
+        api.toggle(true);
+        emit();
+      });
+    }
+
+    function renderTabRow(w, refreshFoot) {
+      const row = el("div", { class: "mip-tabrow" });
+      const detail = el("div", { class: "mip-tabrow-detail" });
+
+      const roleSel = el("select", {});
+      roleSel.appendChild(el("option", { value: "ignore", text: "Ignore this tab" }));
+      Lib.ROLE_KEYS.forEach((rk) => {
+        const o = el("option", { value: rk, text: ROLES[rk].label }); if (w.role === rk) o.selected = true; roleSel.appendChild(o);
+      });
+      if (w.role === "unknown") { const o = el("option", { value: "ignore", selected: "selected", text: "Ignore this tab" }); }
+      roleSel.value = (w.role === "unknown") ? "ignore" : w.role;
+
+      const rename = el("input", { class: "mip-rename", value: w.sheetName, title: "Display name for this dataset" });
+      rename.addEventListener("change", () => { w.displayName = rename.value.trim() || w.sheetName; });
+      w.displayName = w.sheetName;
+
+      const headInfo = el("div", { class: "mip-tabrow-head" }, [
+        el("span", { class: "mip-tabname", text: w.sheetName }),
+        el("span", { class: "mip-status-pill" }),
+        el("div", { class: "mip-role-sel" }, [el("span", { text: "as" }), roleSel, el("span", { text: "named" }), rename]),
+      ]);
+      const statusPill = headInfo.querySelector(".mip-status-pill");
+
+      function paint() {
+        row.className = "mip-tabrow " + (w._ignore ? "ignored" : w.validation.status);
+        statusPill.className = "mip-status-pill " + (w._ignore ? "ignored" : w.validation.status);
+        statusPill.textContent = w._ignore ? "ignored" : w.validation.status;
+        detail.innerHTML = "";
+        if (w._ignore) {
+          detail.appendChild(el("div", { class: "mip-valid-line", text: "This tab will be skipped." }));
+          if (refreshFoot) refreshFoot();
+          return;
+        }
+        const def = ROLES[w.role];
+        if (def) detail.appendChild(el("div", { class: "mip-note", text: def.desc }));
+        detail.appendChild(el("div", { class: "mip-valid-line " + w.validation.status }, [
+          el("span", { class: "mip-vi", text: w.validation.status === "ok" ? "✓" : w.validation.status === "warn" ? "!" : "✕" }),
+          el("span", { text: w.validation.reason }),
+        ]));
+        detail.appendChild(el("div", { text: `Header row detected at line ${w.headerRowIdx + 1} · ${w.records.length} data rows · ${w.headers.length} columns` }));
+        // found / missing chips
+        if (def) {
+          const chips = el("div", { class: "mip-chips" });
+          w.validation.found.forEach((t) => chips.appendChild(el("span", { class: "mip-chip found", text: pretty(t) })));
+          w.validation.missing.forEach((t) => chips.appendChild(el("span", { class: "mip-chip missing", text: pretty(t) })));
+          detail.appendChild(chips);
+        }
+        detail.appendChild(buildPreview(w.headers, w.records));
+        if (refreshFoot) refreshFoot();
+      }
+
+      roleSel.addEventListener("change", () => {
+        if (roleSel.value === "ignore") { w._ignore = true; }
+        else {
+          w._ignore = false;
+          const re = Lib.reanalyzeSheet(w, roleSel.value);
+          Object.assign(w, re);
+        }
+        paint();
+      });
+
+      row.appendChild(headInfo); row.appendChild(detail);
+      if (w.role === "unknown") w._ignore = true;
+      paint();
+      return row;
+    }
+
+    function pretty(tok) {
+      // map a normalized token back to something readable from any role sig
+      return tok;
+    }
+
+    function buildPreview(headers, records) {
+      const wrap = el("div", { class: "mip-preview" });
+      if (!records.length) { wrap.appendChild(el("div", { class: "mip-empty", text: "No data rows." })); return wrap; }
+      const cols = headers.slice(0, 8);
+      const table = el("table");
+      const thead = el("thead"); const trh = el("tr");
+      cols.forEach((h) => trh.appendChild(el("th", { text: h })));
+      if (headers.length > 8) trh.appendChild(el("th", { text: `+${headers.length - 8} more` }));
+      thead.appendChild(trh); table.appendChild(thead);
+      const tb = el("tbody");
+      records.slice(0, 5).forEach((r) => {
+        const tr = el("tr");
+        cols.forEach((h) => tr.appendChild(el("td", { text: r[h] == null ? "" : String(r[h]) })));
+        if (headers.length > 8) tr.appendChild(el("td", { text: "…" }));
+        tb.appendChild(tr);
+      });
+      table.appendChild(tb); wrap.appendChild(table);
+      return wrap;
+    }
+
+    // ================= CSV popup =================
+    function openCsvPopup(parsed) {
+      const ext = Lib.extractRecords(parsed.rows, Lib.detectHeaderAndRole(parsed.rows).headerRowIdx);
+      // for flat CSV header is almost always row 0
+      const headers0 = (parsed.rows[0] || []).map((h) => (h != null ? String(h).trim() : "")).filter(Boolean);
+      const headers = headers0.length ? headers0 : ext.headers;
+      const recExt = Lib.extractRecords(parsed.rows, 0);
+      const records = recExt.records;
+      const analysis = Lib.analyzeRawCsv(headers, records);
+      const link = { mode: "standalone", cruise: "" };
+
+      const bg = el("div", { class: "mip-modal-bg" });
+      const bodyWrap = el("div", { class: "mip-modal-body" });
+      bodyWrap.appendChild(el("div", { class: "mip-note",
+        html: "This is a flat table (no cruise/run structure). It will be imported as <b>Wilder Results</b>, " +
+          "keyed only by <b>Sample ID</b>. Choose whether to keep these samples standalone or associate them with a cruise — " +
+          "you can change this later from the source card." }));
+
+      // validation line
+      bodyWrap.appendChild(el("div", { class: "mip-valid-line " + analysis.status }, [
+        el("span", { class: "mip-vi", text: analysis.status === "ok" ? "✓" : analysis.status === "warn" ? "!" : "✕" }),
+        el("span", { text: analysis.reason }),
+      ]));
+
+      // column mapping grid
+      const mapping = Object.assign({}, analysis.mapping);
+      const fields = [
+        ["sample_id", "Sample ID  (required)"],
+        ["scientific_name", "Scientific name"],
+        ["common_name", "Common name"],
+        ["taxonomic_rank", "Rank"],
+        ["organism_group", "Group"],
+        ["tax_id", "Taxon ID"],
+        ["read_count", "Read / taxon count"],
+      ];
+      const grid = el("div", { class: "mip-mapgrid" });
+      fields.forEach(([f, lbl]) => {
+        const sel = el("select", {});
+        sel.appendChild(el("option", { value: "", text: "— none —" }));
+        headers.forEach((h) => { const o = el("option", { value: h, text: h }); if (mapping[f] === h) o.selected = true; sel.appendChild(o); });
+        sel.value = mapping[f] || "";
+        sel.addEventListener("change", () => { mapping[f] = sel.value; refresh(); });
+        grid.appendChild(el("label", {}, [lbl, sel]));
+      });
+      bodyWrap.appendChild(el("div", { class: "mip-label", text: "Column mapping" }));
+      bodyWrap.appendChild(grid);
+
+      // associate / dissociate radio
+      const cruiseSel = el("select", {});
+      getCruises().forEach((c) => cruiseSel.appendChild(el("option", { value: c, text: c })));
+      cruiseSel.disabled = true;
+      const rStand = el("input", { type: "radio", name: "mip-link", checked: "checked" });
+      const rCruise = el("input", { type: "radio", name: "mip-link" });
+      rStand.addEventListener("change", () => { link.mode = "standalone"; cruiseSel.disabled = true; });
+      rCruise.addEventListener("change", () => { link.mode = "cruise"; cruiseSel.disabled = false; link.cruise = cruiseSel.value || (getCruises()[0] || ""); });
+      cruiseSel.addEventListener("change", () => { link.cruise = cruiseSel.value; });
+      bodyWrap.appendChild(el("div", { class: "mip-label", text: "Cruise association" }));
+      bodyWrap.appendChild(el("div", { class: "mip-radio-row" }, [
+        el("label", {}, [rStand, "Dissociate — standalone samples (Sample ID only)"]),
+        el("label", {}, [rCruise, "Associate with cruise:"]),
+        cruiseSel,
+      ]));
+
+      const previewWrap = el("div", {});
+      bodyWrap.appendChild(el("div", { class: "mip-label", text: "Preview (as Wilder Results)" }));
+      bodyWrap.appendChild(previewWrap);
+
+      const footMsg = el("span", { class: "mip-foot-msg" });
+      const importBtn = el("button", { class: "mip-btn primary", text: "Import as Wilder Results" });
+      const cancelBtn = el("button", { class: "mip-btn ghost", text: "Cancel", onclick: () => bg.remove() });
+      const foot = el("div", { class: "mip-modal-foot" }, [footMsg, cancelBtn, importBtn]);
+
+      function refresh() {
+        const built = Lib.buildRawWilder(records, { mapping, latCol: analysis.latCol, lonCol: analysis.lonCol, refCol: analysis.refCol, link, srcId: "preview" });
+        previewWrap.innerHTML = "";
+        previewWrap.appendChild(buildPreview(["sample_id", "scientific_name", "common_name", "taxonomic_rank", "organism_group", "read_count"], built.wilder));
+        const okay = !!mapping.sample_id && built.wilder.length > 0;
+        importBtn.disabled = !okay;
+        footMsg.textContent = okay
+          ? `${built.wilder.length} taxon rows · ${built.samples.length} unique samples`
+          : "Map a Sample ID column to continue.";
+      }
+      refresh();
+
+      const modal = el("div", { class: "mip-modal" }, [
+        el("div", { class: "mip-modal-head" }, [
+          el("h3", { text: "Import raw table" }),
+          el("span", { class: "mip-fname", text: parsed.file.name }),
+        ]),
+        bodyWrap, foot,
+      ]);
+      bg.appendChild(modal);
+      document.body.appendChild(bg);
+
+      importBtn.addEventListener("click", () => {
+        const id = uid();
+        const src = {
+          id, name: parsed.file.name.replace(/\.(csv|tsv|txt)$/i, ""), fileName: parsed.file.name,
+          kind: "csv", enabled: true, datasets: [],
+          csvMeta: { records, mapping, latCol: analysis.latCol, lonCol: analysis.lonCol, refCol: analysis.refCol, link: JSON.parse(JSON.stringify(link)) },
+        };
+        rebuildCsvSource(src);
+        state.sources.push(src);
+        bg.remove();
+        api.toggle(true);
+        emit();
+      });
+    }
+
+    // ================= public api =================
+    const api = {
+      el: root,
+      toggle(open) {
+        state.open = open == null ? !state.open : open;
+        panel.classList.toggle("mip-hidden", !state.open);
+        launcher.style.display = state.open ? "none" : "";
+      },
+      getMerged,
+      getSources: () => state.sources,
+      refresh: renderSources,
+      addFiles: (files) => { api.toggle(true); return handleFiles([...files]); },
+    };
+
+    renderSources();
+    return api;
+  };
+
+  global.MBONImportPanel = Panel;
+})(window);
+
+</script>
+<script>
+const { createApp, ref, computed, watch, nextTick, onMounted } = Vue;
+
+// ─────────────────────────────────────────────────────────────────
+// DUMMY DATA
+// ─────────────────────────────────────────────────────────────────
+const DUMMY_CRUISES = [
+  { 'Cruise Number':'CRUISE-2024-SPR', cruiseDate:'2024-03-15', Platform_Vessel:'R/V Atlantic Explorer', PI_name:'Dr. Jane Smith', Location_Region:'Mid-Atlantic Bight', assay_name:'18S V4 eDNA', seq_run_id:'SEQ-2024-001', Notes:'Spring 2024 MBON cruise' },
+  { 'Cruise Number':'CRUISE-2024-SUM', cruiseDate:'2024-07-10', Platform_Vessel:'R/V Sally Ride', PI_name:'Dr. Maria Santos', Location_Region:'Santa Barbara Channel, CA', assay_name:'12S rRNA (SSU mitochondria)', seq_run_id:'SEQ-2024-002', Notes:'Summer 2024 MBON cruise' },
+  { 'Cruise Number':'CRUISE-2024-FAL', cruiseDate:'2024-10-05', Platform_Vessel:'R/V Savannah', PI_name:'Dr. James Chen', Location_Region:'Gulf of Mexico', assay_name:'16S rRNA (SSU prokaryote)', seq_run_id:'SEQ-2024-003', Notes:'Fall 2024 MBON cruise' },
+];
+
+const stations = ['Station_01','Station_07','Station_14','Station_21','Station_28','Station_35','Station_42','Station_50'];
+const filterMats = ['glass fiber','cellulose ester','thermoplastic membrane','nylon','polycarbonate'];
+const rnd = (min,max) => +(Math.random()*(max-min)+min).toFixed(2);
+
+function mkSample(i, cruise){
+  const st = stations[i % stations.length];
+  const depth = [5,10,25,50,100,150,200][i%7];
+  const sal = rnd(30,37);
+  const tmp = rnd(4,26);
+  const chl = rnd(0.3,18);
+  return {
+    samp_name: `MBON-2024-S${String(i+1).padStart(3,'0')}`,
+    'Cruise Number': cruise,
+    cruiseDate: DUMMY_CRUISES.find(c=>c['Cruise Number']===cruise)?.cruiseDate||'',
+    eventDate: DUMMY_CRUISES.find(c=>c['Cruise Number']===cruise)?.cruiseDate||'',
+    Station: st,
+    decimalLatitude: rnd(37,39),
+    decimalLongitude: rnd(-71,-73),
+    minimumDepthInMeters: depth,
+    maximumDepthInMeters: depth,
+    tot_depth_water_col: depth + rnd(10,800),
+    temp: tmp,
+    salinity: sal,
+    chlorophyll: chl,
+    ph: rnd(7.7,8.4),
+    diss_oxygen: rnd(5.5,10.5),
+    turbidity: rnd(0.1,5),
+    water_current: rnd(0,0.5),
+    pump_flow_rate: rnd(0.5,3),
+    pump_flow_rate_unit: 'L/min',
+    samp_size: rnd(0.5,4),
+    samp_size_unit: 'L',
+    filter_material: filterMats[i%filterMats.length],
+    samp_category: i%7===0?'negative control':i%11===0?'positive control':'eDNA',
+    concentration: rnd(5,80),
+    concentration_unit: 'ng/µl',
+    ratioOfAbsorbance260_280: rnd(1.7,2.1),
+    detected_notDetected: (sal>31&&tmp>5&&chl>1)?'1':'0',
+    geo_loc_name: 'USA: Atlantic coast',
+    env_medium: 'seawater',
+  };
+}
+
+const DUMMY_SAMPLES = [];
+const cruiseNums = DUMMY_CRUISES.map(c=>c['Cruise Number']);
+for(let i=0;i<30;i++) DUMMY_SAMPLES.push(mkSample(i, cruiseNums[i%3]));
+
+const DUMMY_RUNS = [
+  { run_id:'RUN-001', samp_name:'MBON-2024-S001', cruise_number:'CRUISE-2024-SPR', run_date:'2024-03-16', completed_at:'2024-03-16', platform:'Oxford Nanopore', instrument_name:'MinION', directory:'/data/runs/run_001/', basecaller_software:'Dorado', basecaller_version:'7.3.9', basecaller_model:'HAC', entered_by:'analyst@example.org', comments:'18S V4 eDNA — Spring cruise' },
+  { run_id:'RUN-002', samp_name:'MBON-2024-S003', cruise_number:'CRUISE-2024-SPR', run_date:'2024-03-17', completed_at:'2024-03-17', platform:'Illumina', instrument_name:'MiSeq', directory:'/data/runs/run_002/', basecaller_software:'bcl2fastq', basecaller_version:'2.20', basecaller_model:'', entered_by:'analyst@example.org', comments:'16S amplicon run' },
+  { run_id:'RUN-003', samp_name:'MBON-2024-S010', cruise_number:'CRUISE-2024-SPR', run_date:'2024-03-18', completed_at:'2024-03-18', platform:'Oxford Nanopore', instrument_name:'PromethION', directory:'/data/runs/run_003/', basecaller_software:'Dorado', basecaller_version:'7.4.0', basecaller_model:'SUP', entered_by:'msantos@mbari.org', comments:'Metagenomic deep run' },
+  { run_id:'RUN-004', samp_name:'MBON-2024-S012', cruise_number:'CRUISE-2024-SUM', run_date:'2024-07-12', completed_at:'2024-07-12', platform:'Illumina', instrument_name:'NovaSeq', directory:'/data/runs/run_004/', basecaller_software:'DRAGEN', basecaller_version:'3.9', basecaller_model:'', entered_by:'msantos@mbari.org', comments:'12S amplicon — high depth' },
+  { run_id:'RUN-005', samp_name:'MBON-2024-S015', cruise_number:'CRUISE-2024-SUM', run_date:'2024-07-14', completed_at:'2024-07-14', platform:'Oxford Nanopore', instrument_name:'MinION', directory:'/data/runs/run_005/', basecaller_software:'Dorado', basecaller_version:'7.4.1', basecaller_model:'HAC', entered_by:'jchen@gom.edu', comments:'18S V9 eDNA' },
+  { run_id:'RUN-006', samp_name:'MBON-2024-S020', cruise_number:'CRUISE-2024-FAL', run_date:'2024-10-07', completed_at:'2024-10-07', platform:'Illumina', instrument_name:'MiSeq', directory:'/data/runs/run_006/', basecaller_software:'bcl2fastq', basecaller_version:'2.20', basecaller_model:'', entered_by:'jchen@gom.edu', comments:'16S rRNA — Gulf of Mexico' },
+  { run_id:'RUN-007', samp_name:'MBON-2024-S024', cruise_number:'CRUISE-2024-FAL', run_date:'2024-10-09', completed_at:'2024-10-09', platform:'Pacific Biosciences', instrument_name:'Sequel IIe', directory:'/data/runs/run_007/', basecaller_software:'CCS', basecaller_version:'6.4.0', basecaller_model:'', entered_by:'jchen@gom.edu', comments:'Long-read 18S survey' },
+  { run_id:'RUN-008', samp_name:'MBON-2024-S027', cruise_number:'CRUISE-2024-FAL', run_date:'2024-10-11', completed_at:'2024-10-11', platform:'Oxford Nanopore', instrument_name:'GridION', directory:'/data/runs/run_008/', basecaller_software:'Guppy', basecaller_version:'6.5.7', basecaller_model:'HAC', entered_by:'analyst@example.org', comments:'Metabarcoding validation run' },
+];
+
+const DUMMY_WILDER = [
+  { wilder_result_id:'WR-001', sample_id:'MBON-2024-S001', scientific_name:'Gadus morhua', common_name:'Atlantic cod', taxonomic_rank:'species', organism_group:'Fish', read_count:1247 },
+  { wilder_result_id:'WR-002', sample_id:'MBON-2024-S001', scientific_name:'Clupea harengus', common_name:'Atlantic herring', taxonomic_rank:'species', organism_group:'Fish', read_count:834 },
+  { wilder_result_id:'WR-003', sample_id:'MBON-2024-S002', scientific_name:'Scomber scombrus', common_name:'Atlantic mackerel', taxonomic_rank:'species', organism_group:'Fish', read_count:612 },
+  { wilder_result_id:'WR-004', sample_id:'MBON-2024-S003', scientific_name:'Merluccius merluccius', common_name:'European hake', taxonomic_rank:'species', organism_group:'Fish', read_count:389 },
+  { wilder_result_id:'WR-005', sample_id:'MBON-2024-S004', scientific_name:'Thunnus albacares', common_name:'Yellowfin tuna', taxonomic_rank:'species', organism_group:'Fish', read_count:215 },
+  { wilder_result_id:'WR-006', sample_id:'MBON-2024-S005', scientific_name:'Scophthalmus maximus', common_name:'Turbot', taxonomic_rank:'species', organism_group:'Fish', read_count:178 },
+  { wilder_result_id:'WR-007', sample_id:'MBON-2024-S001', scientific_name:'Delphinus delphis', common_name:'Short-beaked common dolphin', taxonomic_rank:'species', organism_group:'Mammals', read_count:523 },
+  { wilder_result_id:'WR-008', sample_id:'MBON-2024-S006', scientific_name:'Balaenoptera acutorostrata', common_name:'Minke whale', taxonomic_rank:'species', organism_group:'Mammals', read_count:290 },
+  { wilder_result_id:'WR-009', sample_id:'MBON-2024-S007', scientific_name:'Halichoerus grypus', common_name:'Gray seal', taxonomic_rank:'species', organism_group:'Mammals', read_count:134 },
+  { wilder_result_id:'WR-010', sample_id:'MBON-2024-S002', scientific_name:'Calanus finmarchicus', common_name:'Calanus copepod', taxonomic_rank:'species', organism_group:'Invertebrates', read_count:2108 },
+  { wilder_result_id:'WR-011', sample_id:'MBON-2024-S003', scientific_name:'Euphausia superba', common_name:'Antarctic krill', taxonomic_rank:'species', organism_group:'Invertebrates', read_count:1456 },
+  { wilder_result_id:'WR-012', sample_id:'MBON-2024-S004', scientific_name:'Homarus americanus', common_name:'American lobster', taxonomic_rank:'species', organism_group:'Invertebrates', read_count:765 },
+  { wilder_result_id:'WR-013', sample_id:'MBON-2024-S008', scientific_name:'Crangon crangon', common_name:'Brown shrimp', taxonomic_rank:'species', organism_group:'Invertebrates', read_count:443 },
+  { wilder_result_id:'WR-014', sample_id:'MBON-2024-S009', scientific_name:'Mytilus edulis', common_name:'Blue mussel', taxonomic_rank:'species', organism_group:'Invertebrates', read_count:321 },
+  { wilder_result_id:'WR-015', sample_id:'MBON-2024-S010', scientific_name:'Aurelia aurita', common_name:'Moon jellyfish', taxonomic_rank:'species', organism_group:'Cnidaria', read_count:892 },
+  { wilder_result_id:'WR-016', sample_id:'MBON-2024-S011', scientific_name:'Pelagia noctiluca', common_name:'Mauve stinger', taxonomic_rank:'species', organism_group:'Cnidaria', read_count:310 },
+  { wilder_result_id:'WR-017', sample_id:'MBON-2024-S005', scientific_name:'Fucus vesiculosus', common_name:'Bladderwrack', taxonomic_rank:'species', organism_group:'Algae/Plants', read_count:674 },
+  { wilder_result_id:'WR-018', sample_id:'MBON-2024-S006', scientific_name:'Ulva lactuca', common_name:'Sea lettuce', taxonomic_rank:'species', organism_group:'Algae/Plants', read_count:512 },
+  { wilder_result_id:'WR-019', sample_id:'MBON-2024-S012', scientific_name:'Emiliania huxleyi', common_name:'Coccolithophore', taxonomic_rank:'species', organism_group:'Algae/Plants', read_count:388 },
+  { wilder_result_id:'WR-020', sample_id:'MBON-2024-S007', scientific_name:'Synechococcus sp.', common_name:'Cyanobacteria', taxonomic_rank:'genus', organism_group:'Bacteria', read_count:3420 },
+  { wilder_result_id:'WR-021', sample_id:'MBON-2024-S008', scientific_name:'Prochlorococcus marinus', common_name:'Prochlorococcus', taxonomic_rank:'species', organism_group:'Bacteria', read_count:2980 },
+  { wilder_result_id:'WR-022', sample_id:'MBON-2024-S013', scientific_name:'Alteromonas macleodii', common_name:'', taxonomic_rank:'species', organism_group:'Bacteria', read_count:1245 },
+  { wilder_result_id:'WR-023', sample_id:'MBON-2024-S009', scientific_name:'Aspergillus sydowii', common_name:'', taxonomic_rank:'species', organism_group:'Fungi', read_count:234 },
+  { wilder_result_id:'WR-024', sample_id:'MBON-2024-S014', scientific_name:'Cladosporium halotolerans', common_name:'', taxonomic_rank:'species', organism_group:'Fungi', read_count:178 },
+];
+
+// ─────────────────────────────────────────────────────────────────
+// XLSX PARSING HELPERS
+// ─────────────────────────────────────────────────────────────────
+function parseSheet(wb, sheetName, headerRowIdx){
+  const ws = wb.Sheets[sheetName];
+  if(!ws) return [];
+  const raw = XLSX.utils.sheet_to_json(ws, {header:1, defval:null, raw:false});
+  if(raw.length <= headerRowIdx) return [];
+  const headers = raw[headerRowIdx].map(h => h != null ? String(h).trim() : null);
+  return raw.slice(headerRowIdx+1)
+    .filter(row => row.some(c => c !== null && c !== ''))
+    .map(row => {
+      const obj = {};
+      headers.forEach((h,i) => { if(h) obj[h] = row[i] != null ? row[i] : null; });
+      return obj;
+    });
+}
+
+// ─────────────────────────────────────────────────────────────────
+// APP
+// ─────────────────────────────────────────────────────────────────
+createApp({
+  setup(){
+    const view = ref('overview');
+    const tooltip = ref(null);
+    const fileName = ref('');
+    const dragging = ref(false);
+    let importPanel = null;   // floating import side-panel (created in onMounted)
+
+    // Data
+    const samples = ref([...DUMMY_SAMPLES]);
+    const cruises = ref([...DUMMY_CRUISES]);
+    const runs = ref([...DUMMY_RUNS]);
+    const wilderResults = ref([...DUMMY_WILDER]);
+
+    // Filters
+    const sampSearch = ref(''); const sampCruiseFilter = ref(''); const sampCategoryFilter = ref(''); const sampDetectFilter = ref('');
+    const cruiseSearch = ref(''); const cruiseVesselFilter = ref('');
+    const runSearch = ref(''); const runPlatformFilter = ref('');
+    const sbSearch = ref(''); const sbGroupFilter = ref('');
+
+    // Sub-tabs
+    const sampTab = ref('table'); const cruiseTab = ref('table'); const runTab = ref('table');
+
+    // Selected rows
+    const selectedSample = ref(null); const selectedCruise = ref(null); const selectedRun = ref(null);
+
+    // ── Map state ────────────────────────────────────────────────
+    const mapCruiseFilter  = ref('');
+    const mapColorBy       = ref('cruise');
+    const mapSelectedStations = ref([]);
+    const cmpTab           = ref('scatter');
+    let _leafletMap        = null;
+    let _markerLayer       = null;
+
+    // ── Computed stats ──────────────────────────────────────────
+    const uniqueStations = computed(() => new Set(samples.value.map(s=>s.Station).filter(Boolean)).size);
+    const uniqueSpecies  = computed(() => new Set(wilderResults.value.map(w=>w.scientific_name).filter(Boolean)).size);
+    const uniqueGroups   = computed(() => new Set(wilderResults.value.map(w=>w.organism_group).filter(Boolean)).size);
+    const totalReads     = computed(() => wilderResults.value.reduce((a,w)=>a+(+w.read_count||0),0));
+    const avgSalinity    = computed(() => {
+      const vals = samples.value.map(s=>+s.salinity).filter(v=>!isNaN(v)&&v>0);
+      return vals.length ? (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1) : '–';
+    });
+    const sampleCategories = computed(() => [...new Set(samples.value.map(s=>s.samp_category).filter(Boolean))]);
+    const cruiseVessels    = computed(() => [...new Set(cruises.value.map(c=>c.Platform_Vessel).filter(Boolean))]);
+    const runPlatforms     = computed(() => [...new Set(runs.value.map(r=>r.platform).filter(Boolean))]);
+    const wilderGroups     = computed(() => [...new Set(wilderResults.value.map(w=>w.organism_group).filter(Boolean))].sort());
+
+    // Map: aggregate samples by Station
+    const mapStationList = computed(() => {
+      const byStation = {};
+      samples.value.forEach(s => {
+        const st = s.Station || 'Unknown';
+        const lat = +s.decimalLatitude, lon = +s.decimalLongitude;
+        if(isNaN(lat)||isNaN(lon)) return;
+        if(mapCruiseFilter.value && s['Cruise Number'] !== mapCruiseFilter.value) return;
+        if(!byStation[st]) byStation[st] = { station:st, lat, lon, samples:[], cruises:new Set() };
+        byStation[st].samples.push(s);
+        byStation[st].cruises.add(s['Cruise Number']||'');
+      });
+      return Object.values(byStation).map(d => {
+        const samps = d.samples;
+        const avg = key => { const v=samps.map(s=>+s[key]).filter(x=>!isNaN(x)&&x); return v.length?(v.reduce((a,b)=>a+b,0)/v.length).toFixed(2):null; };
+        return { ...d, cruises:[...d.cruises], count:samps.length, avgDepth:+avg('minimumDepthInMeters'), avgSalinity:+avg('salinity'), avgTemp:+avg('temp'), avgChl:+avg('chlorophyll'), avgPh:+avg('ph'), avgDO:+avg('diss_oxygen'), avgFlow:+avg('pump_flow_rate'), detected: samps.filter(s=>String(s.detected_notDetected)==='1').length };
+      });
+    });
+
+    // Stable color scale for stations
+    const _cruiseColorScale = d3.scaleOrdinal(d3.schemeTableau10);
+    const _depthColorScale  = d3.scaleSequential(d3.interpolateBlues).domain([0, 250]);
+    const _salColorScale    = d3.scaleSequential(d3.interpolateRdYlBu).domain([28, 38]);
+    const _tempColorScale   = d3.scaleSequential(d3.interpolateOrRd).domain([0, 30]);
+    const _stationColorScale = d3.scaleOrdinal(d3.schemeTableau10);
+
+    function stationColorFn(stationName) {
+      return _stationColorScale(stationName);
+    }
+    function markerColorFn(st) {
+      switch(mapColorBy.value) {
+        case 'cruise':    return _cruiseColorScale(st.cruises[0]||'');
+        case 'depth':     return _depthColorScale(st.avgDepth||0);
+        case 'salinity':  return _salColorScale(st.avgSalinity||33);
+        case 'temp':      return _tempColorScale(st.avgTemp||15);
+        case 'detected':  return st.detected>0?'#2a9d8f':'#e76f51';
+        default:          return _cruiseColorScale(st.cruises[0]||'');
+      }
+    }
+
+    const filteredSamples = computed(() => {
+      let d = samples.value;
+      if(sampSearch.value) { const q=sampSearch.value.toLowerCase(); d=d.filter(s=>Object.values(s).some(v=>v&&String(v).toLowerCase().includes(q))); }
+      if(sampCruiseFilter.value) d=d.filter(s=>s['Cruise Number']===sampCruiseFilter.value);
+      if(sampCategoryFilter.value) d=d.filter(s=>s.samp_category===sampCategoryFilter.value);
+      if(sampDetectFilter.value!=='') d=d.filter(s=>String(s.detected_notDetected)===sampDetectFilter.value);
+      return d;
+    });
+    const filteredCruises = computed(() => {
+      let d = cruises.value;
+      if(cruiseSearch.value){ const q=cruiseSearch.value.toLowerCase(); d=d.filter(c=>Object.values(c).some(v=>v&&String(v).toLowerCase().includes(q))); }
+      if(cruiseVesselFilter.value) d=d.filter(c=>c.Platform_Vessel===cruiseVesselFilter.value);
+      return d;
+    });
+    const filteredRuns = computed(() => {
+      let d = runs.value;
+      if(runSearch.value){ const q=runSearch.value.toLowerCase(); d=d.filter(r=>Object.values(r).some(v=>v&&String(v).toLowerCase().includes(q))); }
+      if(runPlatformFilter.value) d=d.filter(r=>r.platform===runPlatformFilter.value);
+      return d;
+    });
+    const filteredWilder = computed(() => {
+      let d = wilderResults.value;
+      if(sbSearch.value){ const q=sbSearch.value.toLowerCase(); d=d.filter(w=>(w.scientific_name||'').toLowerCase().includes(q)||(w.common_name||'').toLowerCase().includes(q)); }
+      if(sbGroupFilter.value) d=d.filter(w=>w.organism_group===sbGroupFilter.value);
+      return d;
+    });
+
+    // ── Helpers ─────────────────────────────────────────────────
+    function fmtDate(v){
+      if(!v) return '–';
+      const d = new Date(v);
+      if(isNaN(d)) return String(v).split('T')[0];
+      return d.toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'});
+    }
+    function fmtK(n){ return n>=1000000?`${(n/1000000).toFixed(1)}M`:n>=1000?`${(n/1000).toFixed(1)}K`:n; }
+
+    // Tooltip
+    function showTip(e, html){ const t=tooltip.value; if(!t)return; t.innerHTML=html; t.style.opacity=1; moveTip(e); }
+    function moveTip(e){ const t=tooltip.value; if(!t)return; t.style.left=`${e.clientX+14}px`; t.style.top=`${e.clientY-10}px`; }
+    function hideTip(){ const t=tooltip.value; if(t) t.style.opacity=0; }
+
+    // ── File upload ─────────────────────────────────────────────
+    // Both the top "choose file" control and full-window drag-drop now route
+    // into the floating Import panel, which handles xlsx/xlsm + csv/tsv,
+    // multi-file selection, the mapping/validation popup, and accumulating
+    // toggleable sources.
+    function onFileInput(e){ const fs=[...e.target.files]; if(fs.length && importPanel) importPanel.addFiles(fs); e.target.value=''; }
+    function onDrop(e){ dragging.value=false; const fs=e.dataTransfer?[...e.dataTransfer.files]:[]; if(fs.length && importPanel) importPanel.addFiles(fs); }
+
+    // Apply the merged output of all enabled import sources to the dashboard.
+    // If a role has any imported rows they replace the demo/dummy data for that
+    // role; otherwise the demo data is shown. Multiple sources accumulate.
+    function applyImported(payload){
+      const m = (payload && payload.merged) || { samples:[], cruise:[], runs:[], wilder:[] };
+      samples.value      = m.samples.length ? m.samples : [...DUMMY_SAMPLES];
+      cruises.value      = m.cruise.length  ? m.cruise  : [...DUMMY_CRUISES];
+      runs.value         = m.runs.length    ? m.runs    : [...DUMMY_RUNS];
+      wilderResults.value= m.wilder.length  ? m.wilder  : [...DUMMY_WILDER];
+      fileName.value = (payload && payload.sources && payload.sources.length)
+        ? payload.sources.filter(s=>s.enabled).map(s=>s.name).join(', ') : '';
+      mapSelectedStations.value = [];
+      nextTick(() => { redrawAll(); refreshMapMarkers(); });
+    }
+
+    // ── Color scales ────────────────────────────────────────────
+    const COLOR_SEQ = d3.schemeTableau10;
+    function catColor(cats){ return d3.scaleOrdinal(COLOR_SEQ).domain(cats); }
+
+    const GROUP_COLORS = {
+      'Fish':'#0077b6','Mammals':'#023e8a','Invertebrates':'#2a9d8f',
+      'Cnidaria':'#e76f51','Algae/Plants':'#57cc99','Bacteria':'#f4a261',
+      'Fungi':'#9b5de5','Other':'#adb5bd',
+    };
+    function groupColor(g){ return GROUP_COLORS[g]||'#adb5bd'; }
+
+    // ── Shared D3 helpers ────────────────────────────────────────
+    function setupSvg(svgEl, wrapEl, marginObj){
+      const W = (wrapEl?.clientWidth||500);
+      const { top=20, right=20, bottom=40, left=50 } = marginObj||{};
+      const H = 220;
+      const svg = d3.select(svgEl).attr('width',W).attr('height',H);
+      svg.selectAll('*').remove();
+      const g = svg.append('g').attr('transform',`translate(${left},${top})`);
+      return { svg, g, W, H, iW: W-left-right, iH: H-top-bottom };
+    }
+
+    function drawBar(svgEl, wrapEl, data, xKey, yKey, color='#0077b6', opts={}){
+      const m = { top:15, right:15, bottom:60, left:50 };
+      const { svg, g, W, H, iW, iH } = setupSvg(svgEl, wrapEl, m);
+      if(!data.length) return;
+      const x = d3.scaleBand().domain(data.map(d=>d[xKey])).range([0,iW]).padding(0.28);
+      const y = d3.scaleLinear().domain([0,d3.max(data,d=>d[yKey])*1.12]).range([iH,0]);
+      g.append('g').attr('class','grid').call(d3.axisLeft(y).ticks(4).tickSize(-iW).tickFormat('')).call(ag=>ag.select('.domain').remove()).selectAll('line').attr('stroke','#dee2e6').attr('stroke-dasharray','3,3');
+      g.append('g').attr('transform',`translate(0,${iH})`).call(d3.axisBottom(x).tickSize(0))
+        .selectAll('text').attr('transform','rotate(-30)').style('text-anchor','end').attr('dy','0.3em').style('font-size','10px');
+      g.append('g').call(d3.axisLeft(y).ticks(4).tickFormat(opts.pct?v=>v+'%':d3.format(','))).call(ag=>ag.select('.domain').remove()).selectAll('text').style('font-size','10px');
+      g.selectAll('rect').data(data).join('rect')
+        .attr('x',d=>x(d[xKey])).attr('width',x.bandwidth())
+        .attr('y',d=>y(d[yKey])).attr('height',d=>iH-y(d[yKey]))
+        .attr('fill',typeof color==='function'?color:color).attr('rx',3)
+        .on('mouseover',(e,d)=>showTip(e,`<strong>${d[xKey]}</strong>${opts.label||yKey}: ${typeof d[yKey]==='number'?d[yKey].toLocaleString():d[yKey]}`))
+        .on('mousemove',moveTip).on('mouseleave',hideTip);
+    }
+
+    function drawHist(svgEl, wrapEl, values, label, color='#0077b6', bins=10){
+      const m = { top:15, right:15, bottom:40, left:50 };
+      const { g, W, H, iW, iH } = setupSvg(svgEl, wrapEl, m);
+      const vals = values.filter(v=>v!==null&&!isNaN(v));
+      if(!vals.length) return;
+      const x = d3.scaleLinear().domain([d3.min(vals),d3.max(vals)]).range([0,iW]);
+      const binner = d3.bin().domain(x.domain()).thresholds(bins)(vals);
+      const y = d3.scaleLinear().domain([0,d3.max(binner,d=>d.length)*1.15]).range([iH,0]);
+      g.append('g').attr('class','grid').call(d3.axisLeft(y).ticks(4).tickSize(-iW).tickFormat('')).call(ag=>ag.select('.domain').remove()).selectAll('line').attr('stroke','#dee2e6').attr('stroke-dasharray','3,3');
+      g.append('g').attr('transform',`translate(0,${iH})`).call(d3.axisBottom(x).ticks(6)).selectAll('text').style('font-size','10px');
+      g.append('g').call(d3.axisLeft(y).ticks(4)).call(ag=>ag.select('.domain').remove()).selectAll('text').style('font-size','10px');
+      g.append('text').attr('x',iW/2).attr('y',iH+35).attr('text-anchor','middle').attr('font-size',11).attr('fill','#6c757d').text(label);
+      g.selectAll('rect').data(binner).join('rect')
+        .attr('x',d=>x(d.x0)+1).attr('width',d=>Math.max(0,x(d.x1)-x(d.x0)-2))
+        .attr('y',d=>y(d.length)).attr('height',d=>iH-y(d.length))
+        .attr('fill',color).attr('fill-opacity',.8).attr('rx',2)
+        .on('mouseover',(e,d)=>showTip(e,`${label}: ${d.x0.toFixed(1)} – ${d.x1.toFixed(1)}<br>Count: ${d.length}`))
+        .on('mousemove',moveTip).on('mouseleave',hideTip);
+    }
+
+    function drawScatter(svgEl, wrapEl, data, xKey, yKey, xLabel, yLabel, colorFn){
+      const m = { top:15, right:20, bottom:45, left:52 };
+      const { g, W, H, iW, iH } = setupSvg(svgEl, wrapEl, m);
+      const xs = data.map(d=>+d[xKey]).filter(v=>!isNaN(v));
+      const ys = data.map(d=>+d[yKey]).filter(v=>!isNaN(v));
+      if(!xs.length) return;
+      const x = d3.scaleLinear().domain([d3.min(xs)*0.97,d3.max(xs)*1.03]).range([0,iW]);
+      const y = d3.scaleLinear().domain([d3.min(ys)*0.97,d3.max(ys)*1.03]).range([iH,0]);
+      g.append('g').attr('class','grid').call(d3.axisLeft(y).ticks(4).tickSize(-iW).tickFormat('')).call(ag=>ag.select('.domain').remove()).selectAll('line').attr('stroke','#dee2e6').attr('stroke-dasharray','3,3');
+      g.append('g').attr('transform',`translate(0,${iH})`).call(d3.axisBottom(x).ticks(6)).selectAll('text').style('font-size','10px');
+      g.append('g').call(d3.axisLeft(y).ticks(5)).call(ag=>ag.select('.domain').remove()).selectAll('text').style('font-size','10px');
+      g.append('text').attr('x',iW/2).attr('y',iH+38).attr('text-anchor','middle').attr('font-size',11).attr('fill','#6c757d').text(xLabel);
+      g.append('text').attr('transform','rotate(-90)').attr('x',-iH/2).attr('y',-40).attr('text-anchor','middle').attr('font-size',11).attr('fill','#6c757d').text(yLabel);
+      g.selectAll('circle').data(data.filter(d=>!isNaN(+d[xKey])&&!isNaN(+d[yKey]))).join('circle')
+        .attr('cx',d=>x(+d[xKey])).attr('cy',d=>y(+d[yKey]))
+        .attr('r',5).attr('fill',d=>colorFn?colorFn(d):'#0077b6').attr('fill-opacity',.7).attr('stroke','#fff').attr('stroke-width',1)
+        .on('mouseover',(e,d)=>showTip(e,`<strong>${d.samp_name||''}</strong>${xLabel}: ${(+d[xKey]).toFixed(2)}<br>${yLabel}: ${(+d[yKey]).toFixed(2)}`))
+        .on('mousemove',moveTip).on('mouseleave',hideTip);
+    }
+
+    function drawDonut(svgEl, wrapEl, legendEl, data, labelKey, valueKey, colorFn){
+      const W = wrapEl?.clientWidth||400;
+      const R = Math.min(W/2, 100);
+      const H = R*2+20;
+      const svg = d3.select(svgEl).attr('width',W).attr('height',H); svg.selectAll('*').remove();
+      const g = svg.append('g').attr('transform',`translate(${W/2},${H/2})`);
+      const arc = d3.arc().innerRadius(R*.55).outerRadius(R);
+      const pie = d3.pie().value(d=>d[valueKey]).sort(null);
+      const arcs = pie(data);
+      g.selectAll('path').data(arcs).join('path')
+        .attr('d',arc).attr('fill',d=>colorFn(d.data[labelKey]))
+        .attr('stroke','#fff').attr('stroke-width',2)
+        .on('mouseover',(e,d)=>showTip(e,`<strong>${d.data[labelKey]}</strong>${Number(d.data[valueKey]).toLocaleString()}`))
+        .on('mousemove',moveTip).on('mouseleave',hideTip);
+      if(legendEl){
+        legendEl.innerHTML='';
+        data.forEach(d=>{
+          const item=document.createElement('div'); item.className='legend-item';
+          item.innerHTML=`<div class="legend-swatch" style="background:${colorFn(d[labelKey])}"></div><span>${d[labelKey]}</span>`;
+          legendEl.appendChild(item);
+        });
+      }
+    }
+
+    // ── Refs for SVG elements ────────────────────────────────────
+    const ovCruiseSvg=ref(); const ovCruiseWrap=ref();
+    const ovDonutSvg=ref(); const ovDonutWrap=ref(); const ovDonutLegend=ref();
+    const ovDetectSvg=ref(); const ovDetectWrap=ref(); const ovDetectLegend=ref();
+    const ovDepthSvg=ref(); const ovDepthWrap=ref();
+    const scatterTSSvg=ref(); const scatterTSWrap=ref();
+    const depthHistSvg=ref(); const depthHistWrap=ref();
+    const salinityHistSvg=ref(); const salinityHistWrap=ref();
+    const chlDepthSvg=ref(); const chlDepthWrap=ref();
+    const doHistSvg=ref(); const doHistWrap=ref();
+    const phHistSvg=ref(); const phHistWrap=ref();
+    const flowBarSvg=ref(); const flowBarWrap=ref();
+    const concHistSvg=ref(); const concHistWrap=ref();
+    const filterDonutSvg=ref(); const filterDonutWrap=ref(); const filterDonutLegend=ref();
+    const catDonutSvg=ref(); const catDonutWrap=ref(); const catDonutLegend=ref();
+    const cruiseSampBarSvg=ref(); const cruiseSampBarWrap=ref();
+    const vesselDonutSvg=ref(); const vesselDonutWrap=ref(); const vesselDonutLegend=ref();
+    const assayBarSvg=ref(); const assayBarWrap=ref();
+    const platformDonutSvg=ref(); const platformDonutWrap=ref(); const platformDonutLegend=ref();
+    const instrumentBarSvg=ref(); const instrumentBarWrap=ref();
+    const runTimelineSvg=ref(); const runTimelineWrap=ref();
+    const sbSvg=ref(); const sbWrap=ref(); const sbLegend=ref(); const sbList=ref();
+    const topSpeciesSvg=ref(); const topSpeciesWrap=ref();
+    const groupBarSvg=ref(); const groupBarWrap=ref();
+
+    // ── Draw Overview charts ────────────────────────────────────
+    function drawOverview(){
+      // Samples per cruise bar
+      const cruiseCounts = {};
+      samples.value.forEach(s=>{ const c=s['Cruise Number']||'Unknown'; cruiseCounts[c]=(cruiseCounts[c]||0)+1; });
+      const cruiseData = Object.entries(cruiseCounts).map(([cruise,count])=>({cruise,count}));
+      drawBar(ovCruiseSvg.value, ovCruiseWrap.value, cruiseData, 'cruise', 'count', d=>d3.schemeTableau10[cruiseData.indexOf(d)%10], {label:'Samples'});
+
+      // Organism groups donut
+      const groupTotals = {};
+      wilderResults.value.forEach(w=>{ const g=w.organism_group||'Other'; groupTotals[g]=(groupTotals[g]||0)+(+w.read_count||0); });
+      const groupData = Object.entries(groupTotals).map(([group,reads])=>({group,reads})).sort((a,b)=>b.reads-a.reads);
+      drawDonut(ovDonutSvg.value, ovDonutWrap.value, ovDonutLegend.value, groupData, 'group','reads', g=>groupColor(g));
+
+      // Detection rate donut
+      let det=0,notDet=0,unk=0;
+      samples.value.forEach(s=>{ const v=String(s.detected_notDetected); if(v==='1') det++; else if(v==='0') notDet++; else unk++; });
+      const detData=[{label:'Detected',val:det},{label:'Not Detected',val:notDet},{label:'Unknown',val:unk}].filter(d=>d.val>0);
+      const detColors={'Detected':'#2a9d8f','Not Detected':'#e76f51','Unknown':'#adb5bd'};
+      drawDonut(ovDetectSvg.value, ovDetectWrap.value, ovDetectLegend.value, detData, 'label','val', l=>detColors[l]||'#adb5bd');
+
+      // Depth histogram
+      drawHist(ovDepthSvg.value, ovDepthWrap.value, samples.value.map(s=>+s.minimumDepthInMeters).filter(v=>!isNaN(v)&&v>0), 'Depth (m)', '#0077b6');
+    }
+
+    // ── Draw Samples charts ─────────────────────────────────────
+    function drawSamplesEnv(){
+      const sd = filteredSamples.value;
+      const cruiseColorFn = (()=>{ const sc=catColor([...new Set(sd.map(s=>s['Cruise Number']))]); return s=>sc(s['Cruise Number']); })();
+      drawScatter(scatterTSSvg.value, scatterTSWrap.value, sd, 'salinity','temp','Salinity (PSU)','Temp (°C)', cruiseColorFn);
+      drawHist(depthHistSvg.value, depthHistWrap.value, sd.map(s=>+s.minimumDepthInMeters).filter(v=>!isNaN(v)&&v>0), 'Depth (m)', '#0077b6');
+      drawHist(salinityHistSvg.value, salinityHistWrap.value, sd.map(s=>+s.salinity).filter(v=>!isNaN(v)), 'Salinity (PSU)', '#00b4d8');
+      drawScatter(chlDepthSvg.value, chlDepthWrap.value, sd, 'minimumDepthInMeters','chlorophyll','Depth (m)','Chlorophyll (µg/L)', cruiseColorFn);
+      drawHist(doHistSvg.value, doHistWrap.value, sd.map(s=>+s.diss_oxygen).filter(v=>!isNaN(v)), 'Dissolved Oxygen (mg/L)', '#2a9d8f');
+      drawHist(phHistSvg.value, phHistWrap.value, sd.map(s=>+s.ph).filter(v=>!isNaN(v)), 'pH', '#9b5de5');
+    }
+
+    function drawSamplesField(){
+      const sd = filteredSamples.value;
+      // Flow rate by station bar
+      const stationFlow = {};
+      sd.forEach(s=>{ const st=s.Station||'?'; if(s.pump_flow_rate) stationFlow[st]=(stationFlow[st]||[]).concat(+s.pump_flow_rate); });
+      const flowData = Object.entries(stationFlow).map(([station,vals])=>({station,flow:vals.reduce((a,b)=>a+b,0)/vals.length})).sort((a,b)=>b.flow-a.flow);
+      drawBar(flowBarSvg.value, flowBarWrap.value, flowData, 'station','flow','#e9c46a', {label:'Avg Flow (L/min)'});
+
+      // Concentration histogram
+      drawHist(concHistSvg.value, concHistWrap.value, sd.map(s=>+s.concentration).filter(v=>!isNaN(v)&&v>0), 'Concentration (ng/µl)', '#e76f51');
+
+      // Filter material donut
+      const filterCounts = {};
+      sd.forEach(s=>{ const f=s.filter_material||'Unknown'; filterCounts[f]=(filterCounts[f]||0)+1; });
+      const filterData = Object.entries(filterCounts).map(([filter,count])=>({filter,count}));
+      const fColors = d3.scaleOrdinal(d3.schemePaired);
+      drawDonut(filterDonutSvg.value, filterDonutWrap.value, filterDonutLegend.value, filterData, 'filter','count', f=>fColors(f));
+
+      // Category donut
+      const catCounts = {};
+      sd.forEach(s=>{ const c=s.samp_category||'Unknown'; catCounts[c]=(catCounts[c]||0)+1; });
+      const catData = Object.entries(catCounts).map(([cat,count])=>({cat,count}));
+      const cColors={'eDNA':'#0077b6','negative control':'#e76f51','positive control':'#2a9d8f','PCR standard':'#e9c46a','Unknown':'#adb5bd'};
+      drawDonut(catDonutSvg.value, catDonutWrap.value, catDonutLegend.value, catData, 'cat','count', c=>cColors[c]||'#adb5bd');
+    }
+
+    // ── Draw Cruises charts ─────────────────────────────────────
+    function drawCruisesCharts(){
+      const samplesByCruise = {};
+      samples.value.forEach(s=>{ const c=s['Cruise Number']||'Unknown'; samplesByCruise[c]=(samplesByCruise[c]||0)+1; });
+      const csData = cruises.value.map(c=>({cruise:c['Cruise Number']||'?',count:samplesByCruise[c['Cruise Number']]||0}));
+      drawBar(cruiseSampBarSvg.value, cruiseSampBarWrap.value, csData, 'cruise','count', d=>d3.schemeTableau10[csData.indexOf(d)%10], {label:'Samples'});
+
+      const vesselCounts = {};
+      cruises.value.forEach(c=>{ const v=c.Platform_Vessel||'Unknown'; vesselCounts[v]=(vesselCounts[v]||0)+1; });
+      const vesselData = Object.entries(vesselCounts).map(([vessel,count])=>({vessel,count}));
+      const vc = d3.scaleOrdinal(d3.schemeTableau10);
+      drawDonut(vesselDonutSvg.value, vesselDonutWrap.value, vesselDonutLegend.value, vesselData, 'vessel','count', v=>vc(v));
+
+      const assayCounts = {};
+      cruises.value.forEach(c=>{ const a=c.assay_name||'Unknown'; assayCounts[a]=(assayCounts[a]||0)+1; });
+      const assayData = Object.entries(assayCounts).map(([assay,count])=>({assay,count})).sort((a,b)=>b.count-a.count);
+      drawBar(assayBarSvg.value, assayBarWrap.value, assayData, 'assay','count', d=>d3.schemeSet2[assayData.indexOf(d)%8], {label:'Uses'});
+    }
+
+    // ── Draw Runs charts ────────────────────────────────────────
+    function drawRunsCharts(){
+      const platCounts = {};
+      runs.value.forEach(r=>{ const p=r.platform||'Unknown'; platCounts[p]=(platCounts[p]||0)+1; });
+      const platData = Object.entries(platCounts).map(([platform,count])=>({platform,count}));
+      const pc = d3.scaleOrdinal(d3.schemeTableau10);
+      drawDonut(platformDonutSvg.value, platformDonutWrap.value, platformDonutLegend.value, platData, 'platform','count', p=>pc(p));
+
+      const instCounts = {};
+      runs.value.forEach(r=>{ const i=r.instrument_name||'Unknown'; instCounts[i]=(instCounts[i]||0)+1; });
+      const instData = Object.entries(instCounts).map(([instrument,count])=>({instrument,count})).sort((a,b)=>b.count-a.count);
+      drawBar(instrumentBarSvg.value, instrumentBarWrap.value, instData, 'instrument','count', d=>pc(d.instrument), {label:'Runs'});
+
+      // Timeline — dots on a time axis
+      drawRunTimeline();
+    }
+
+    function drawRunTimeline(){
+      const m={top:20,right:20,bottom:40,left:100};
+      const svgEl=runTimelineSvg.value; const wrapEl=runTimelineWrap.value;
+      const W=wrapEl?.clientWidth||700; const H=160;
+      const svg=d3.select(svgEl).attr('width',W).attr('height',H); svg.selectAll('*').remove();
+      const g=svg.append('g').attr('transform',`translate(${m.left},${m.top})`);
+      const iW=W-m.left-m.right; const iH=H-m.top-m.bottom;
+      const rd=runs.value.filter(r=>r.run_date).map(r=>({...r,_date:new Date(r.run_date)})).filter(r=>!isNaN(r._date));
+      if(!rd.length) return;
+      const x=d3.scaleTime().domain(d3.extent(rd,d=>d._date)).range([0,iW]);
+      const plats=[...new Set(rd.map(d=>d.platform))];
+      const y=d3.scalePoint().domain(plats).range([0,iH]).padding(.5);
+      const pc=d3.scaleOrdinal(d3.schemeTableau10).domain(plats);
+      g.append('g').attr('transform',`translate(0,${iH})`).call(d3.axisBottom(x).ticks(5)).selectAll('text').style('font-size','10px');
+      g.append('g').call(d3.axisLeft(y)).selectAll('text').style('font-size','10px');
+      plats.forEach(p=>{ g.append('line').attr('x1',0).attr('x2',iW).attr('y1',y(p)).attr('y2',y(p)).attr('stroke','#dee2e6').attr('stroke-dasharray','4,3'); });
+      g.selectAll('circle').data(rd).join('circle')
+        .attr('cx',d=>x(d._date)).attr('cy',d=>y(d.platform)).attr('r',7)
+        .attr('fill',d=>pc(d.platform)).attr('stroke','#fff').attr('stroke-width',1.5)
+        .on('mouseover',(e,d)=>showTip(e,`<strong>${d.run_id}</strong>Platform: ${d.platform}<br>Instrument: ${d.instrument_name||'–'}<br>Date: ${fmtDate(d.run_date)}`))
+        .on('mousemove',moveTip).on('mouseleave',hideTip);
+    }
+
+    // ── Sunburst ────────────────────────────────────────────────
+    let sbFocused = null;
+
+    function buildSunburstData(){
+      const wd = filteredWilder.value;
+      const groupMap = {};
+      wd.forEach(w=>{
+        const g=w.organism_group||'Other';
+        const sp=w.scientific_name||'Unknown';
+        const nm=w.common_name?`${sp} (${w.common_name})`:sp;
+        if(!groupMap[g]) groupMap[g]={name:g, children:{}};
+        if(!groupMap[g].children[sp]) groupMap[g].children[sp]={name:nm, sci:sp, value:0};
+        groupMap[g].children[sp].value += (+w.read_count||0);
+      });
+      return {
+        name:'Life',
+        children: Object.values(groupMap).map(g=>({
+          name:g.name,
+          children: Object.values(g.children)
+        }))
+      };
+    }
+
+    function drawSunburst(){
+      const svgEl=sbSvg.value; const wrapEl=sbWrap.value; const legendEl=sbLegend.value; const listEl=sbList.value;
+      if(!svgEl||!wrapEl) return;
+      const treeData=buildSunburstData();
+      const W=Math.max(wrapEl.clientWidth||0, 300);
+      const R=Math.min(W/2, 230);
+      const H=R*2+20;
+      const svg=d3.select(svgEl).attr('width',W).attr('height',H);
+      svg.selectAll('*').remove();
+
+      const root=d3.hierarchy(treeData).sum(d=>d.value||0);
+      d3.partition().size([2*Math.PI,R])(root);
+
+      const arc=d3.arc()
+        .startAngle(d=>d.x0).endAngle(d=>d.x1)
+        .innerRadius(d=>d.y0).outerRadius(d=>d.y1)
+        .padAngle(0.004).padRadius(R/2).cornerRadius(3);
+
+      const g=svg.append('g').attr('transform',`translate(${W/2},${H/2})`);
+
+      function nodeColor(d){
+        const anc=d.ancestors().find(a=>a.depth===1);
+        return anc?groupColor(anc.data.name):'#adb5bd';
+      }
+
+      const paths=g.selectAll('path')
+        .data(root.descendants().filter(d=>d.depth>0&&d.x1>d.x0))
+        .join('path')
+        .attr('d',arc)
+        .attr('fill',d=>nodeColor(d))
+        .attr('fill-opacity',d=>d.depth===1?1:0.7)
+        .attr('stroke','#fff').attr('stroke-width',.7)
+        .style('cursor','pointer');
+
+      // Labels on outer rings
+      g.selectAll('text.sb-label')
+        .data(root.descendants().filter(d=>d.depth===1&&(d.x1-d.x0)>0.3))
+        .join('text').attr('class','sb-label')
+        .attr('transform',d=>{ const a=(d.x0+d.x1)/2-Math.PI/2; const r=(d.y0+d.y1)/2; return `rotate(${a*180/Math.PI}) translate(${r},0) rotate(${a>Math.PI/2?180:0})`; })
+        .attr('text-anchor','middle').attr('font-size',10).attr('font-weight',700).attr('fill','#fff').attr('pointer-events','none')
+        .text(d=>d.data.name);
+
+      // Center circle
+      const innerR=Math.max(12, R*0.08);
+      const cg=g.append('g').style('cursor','pointer');
+      cg.append('circle').attr('r',innerR).attr('fill','white').attr('fill-opacity',.95);
+      const cl=cg.append('text').attr('text-anchor','middle').attr('fill','#333').style('pointer-events','none').style('user-select','none');
+      const clName=cl.append('tspan').attr('x',0).attr('dy','-.3em').attr('font-size',10).attr('font-weight',700).text('Life');
+      const clSub=cl.append('tspan').attr('x',0).attr('dy','1.3em').attr('font-size',8).attr('fill','#888').text(root.descendants().filter(d=>d.depth>0).length+' taxa');
+
+      function focusOn(d){
+        sbFocused=d;
+        const t=svg.transition().duration(550);
+        const x2=d3.scaleLinear().domain([d.x0,d.x1]).range([0,2*Math.PI]);
+        const y2=d3.scaleLinear().domain([d.y0?d.y0:0,R]).range([d.y0?innerR*1.5:0,R]);
+        paths.transition(t).attr('d',node=>arc({
+          x0:Math.max(0,Math.min(2*Math.PI,x2(node.x0))),
+          x1:Math.max(0,Math.min(2*Math.PI,x2(node.x1))),
+          y0:Math.max(0,y2(node.y0)),
+          y1:Math.max(0,y2(node.y1)),
+        }));
+        clName.text(d.data.name);
+        clSub.text(d.value?.toLocaleString()||'' + ' reads');
+      }
+
+      paths.on('mouseover',(e,d)=>{
+          const pct=(d.value/(root.value||1)*100).toFixed(1);
+          showTip(e,`<strong>${d.data.name}</strong>Reads: ${(d.value||0).toLocaleString()}<br>${pct}% of total${d.depth>1?`<br>Group: ${d.ancestors().find(a=>a.depth===1)?.data.name||''}`:''}<br><em style="opacity:.7;font-size:.7rem">Click to zoom</em>`);
+        })
+        .on('mousemove',moveTip).on('mouseleave',hideTip)
+        .on('click',(e,d)=>{ e.stopPropagation(); focusOn(d); });
+      cg.on('click',()=>{
+        const target=sbFocused&&sbFocused!==root&&sbFocused.parent?sbFocused.parent:root;
+        focusOn(target);
+      });
+
+      // Legend
+      if(legendEl){
+        legendEl.innerHTML='';
+        const groups=[...new Set(root.descendants().filter(d=>d.depth===1).map(d=>d.data.name))];
+        groups.forEach(g=>{
+          const item=document.createElement('div'); item.className='legend-item';
+          item.innerHTML=`<div class="legend-swatch" style="background:${groupColor(g)}"></div><span>${g}</span>`;
+          legendEl.appendChild(item);
+        });
+      }
+
+      // Species list (sidebar)
+      if(listEl){
+        listEl.innerHTML='<div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#6c757d;margin-bottom:.4rem">Species List</div>';
+        const leaves=root.leaves().sort((a,b)=>b.value-a.value);
+        const maxV=d3.max(leaves,d=>d.value)||1;
+        leaves.forEach(d=>{
+          const g=d.ancestors().find(a=>a.depth===1)?.data.name||'';
+          const item=document.createElement('div'); item.className='sb-list-item';
+          const pct=Math.round(d.value/maxV*100);
+          item.innerHTML=`<div class="sb-list-dot" style="background:${groupColor(g)}"></div><span class="sb-list-name"><em>${d.data.name}</em></span><div style="width:60px;background:#dee2e6;border-radius:3px;height:4px;overflow:hidden;flex-shrink:0"><div style="width:${pct}%;height:4px;background:${groupColor(g)};border-radius:3px"></div></div><span class="sb-list-val">${(d.value||0).toLocaleString()}</span>`;
+          item.addEventListener('click',()=>focusOn(d));
+          listEl.appendChild(item);
+        });
+      }
+    }
+
+    function drawTopSpecies(){
+      const totals={};
+      filteredWilder.value.forEach(w=>{ const s=w.scientific_name||'?'; totals[s]=(totals[s]||0)+(+w.read_count||0); });
+      const top=Object.entries(totals).map(([sci,reads])=>({sci,reads})).sort((a,b)=>b.reads-a.reads).slice(0,12);
+      const m={top:15,right:15,bottom:20,left:180};
+      const svgEl=topSpeciesSvg.value; const wrapEl=topSpeciesWrap.value;
+      const W=wrapEl?.clientWidth||500; const H=Math.max(180,top.length*26+m.top+m.bottom);
+      const svg=d3.select(svgEl).attr('width',W).attr('height',H); svg.selectAll('*').remove();
+      const g=svg.append('g').attr('transform',`translate(${m.left},${m.top})`);
+      const iW=W-m.left-m.right; const iH=H-m.top-m.bottom;
+      const y=d3.scaleBand().domain(top.map(d=>d.sci)).range([0,iH]).padding(.25);
+      const x=d3.scaleLinear().domain([0,d3.max(top,d=>d.reads)*1.1]).range([0,iW]);
+      g.append('g').call(d3.axisLeft(y)).call(ag=>ag.select('.domain').remove()).selectAll('text').style('font-size','10px').style('font-style','italic');
+      g.selectAll('rect').data(top).join('rect')
+        .attr('x',0).attr('y',d=>y(d.sci)).attr('width',d=>x(d.reads))
+        .attr('height',y.bandwidth()).attr('fill',d=>{ const w=filteredWilder.value.find(w=>w.scientific_name===d.sci); return groupColor(w?.organism_group||''); }).attr('rx',3)
+        .on('mouseover',(e,d)=>showTip(e,`<strong><em>${d.sci}</em></strong>Reads: ${d.reads.toLocaleString()}`))
+        .on('mousemove',moveTip).on('mouseleave',hideTip);
+      g.selectAll('text.val').data(top).join('text').attr('class','val')
+        .attr('x',d=>x(d.reads)+4).attr('y',d=>y(d.sci)+y.bandwidth()/2+4)
+        .attr('font-size',10).attr('fill','#6c757d').text(d=>d.reads.toLocaleString());
+    }
+
+    function drawGroupBar(){
+      const totals={};
+      filteredWilder.value.forEach(w=>{ const g=w.organism_group||'Other'; totals[g]=(totals[g]||0)+(+w.read_count||0); });
+      const data=Object.entries(totals).map(([group,reads])=>({group,reads})).sort((a,b)=>b.reads-a.reads);
+      drawBar(groupBarSvg.value, groupBarWrap.value, data, 'group','reads', d=>groupColor(d.group), {label:'Reads'});
+    }
+
+    // ── Helpers ─────────────────────────────────────────────────
+    function removeFromComparison(st){ mapSelectedStations.value = mapSelectedStations.value.filter(s=>s!==st); refreshMapMarkers(); renderComparePanel(); }
+
+    // ── Map init & refresh ───────────────────────────────────────
+    function initMap(){
+      if(_leafletMap) return;
+      _leafletMap = L.map('mbon-map', { center:[35,-75], zoom:5, zoomControl:true });
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{
+        attribution:'© OpenStreetMap contributors © CARTO', subdomains:'abcd', maxZoom:19
+      }).addTo(_leafletMap);
+      _markerLayer = L.layerGroup().addTo(_leafletMap);
+    }
+
+    function svgIcon(color, selected){
+      const border = selected ? '#fff' : 'rgba(255,255,255,.8)';
+      const ring   = selected ? '3' : '1.5';
+      const r      = selected ? 10 : 8;
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${r*2+8}" height="${r*2+8}">
+        <circle cx="${r+4}" cy="${r+4}" r="${r}" fill="${color}" stroke="${border}" stroke-width="${ring}" filter="drop-shadow(0 1px 3px rgba(0,0,0,.35))"/>
+        ${selected?`<circle cx="${r+4}" cy="${r+4}" r="${r+3}" fill="none" stroke="${color}" stroke-width="2" opacity=".5"/>`:''}
+      </svg>`;
+      return L.divIcon({ html:svg, className:'', iconSize:[r*2+8,r*2+8], iconAnchor:[r+4,r+4] });
+    }
+
+    function buildStationPopupHTML(st){
+      const metrics = [
+        {label:'Depth (m)',  val:st.avgDepth,    max:250, color:'#0077b6'},
+        {label:'Salinity',   val:st.avgSalinity, max:40,  color:'#00b4d8'},
+        {label:'Temp (°C)',  val:st.avgTemp,     max:30,  color:'#e9c46a'},
+        {label:'Chl (µg/L)',val:st.avgChl,      max:20,  color:'#2a9d8f'},
+        {label:'pH',         val:st.avgPh,       max:9,   color:'#9b5de5'},
+        {label:'DO (mg/L)', val:st.avgDO,       max:12,  color:'#57cc99'},
+      ];
+      const sparkBars = metrics.map(m=>{
+        if(!m.val) return '';
+        const pct = Math.min(100, m.val/m.max*100).toFixed(1);
+        return `<div class="sparkbar">
+          <div class="sparkbar-label">${m.label}</div>
+          <div class="sparkbar-bg"><div class="sparkbar-fill" style="width:${pct}%;background:${m.color}"></div></div>
+          <div class="sparkbar-val">${(+m.val).toFixed(1)}</div>
+        </div>`;
+      }).join('');
+
+      // Per-sample mini table
+      const rows = st.samples.slice(0,8).map(s=>`<tr>
+        <td>${s.samp_name||'–'}</td>
+        <td>${s['Cruise Number']||'–'}</td>
+        <td>${s.minimumDepthInMeters??'–'}</td>
+        <td>${s.salinity??'–'}</td>
+        <td>${s.temp??'–'}</td>
+        <td style="color:${String(s.detected_notDetected)==='1'?'#155724':'#721c24'};font-weight:700">${String(s.detected_notDetected)==='1'?'✓':'✗'}</td>
+      </tr>`).join('');
+
+      return `<div class="st-popup">
+        <h4>📍 ${st.station} <span style="font-size:10px;color:#6c757d;font-weight:400">${st.count} sample${st.count!==1?'s':''} · ${st.cruises.join(', ')}</span></h4>
+        <div class="st-popup-tabs">
+          <button class="st-popup-tab active" onclick="this.closest('.st-popup').querySelectorAll('.st-popup-tab,.st-popup-pane').forEach(e=>{e.classList.remove('active')});this.classList.add('active');this.closest('.st-popup').querySelector('#pane-env-${st.station.replace(/\W/g,'_')}').classList.add('active')">Environment</button>
+          <button class="st-popup-tab" onclick="this.closest('.st-popup').querySelectorAll('.st-popup-tab,.st-popup-pane').forEach(e=>{e.classList.remove('active')});this.classList.add('active');this.closest('.st-popup').querySelector('#pane-samp-${st.station.replace(/\W/g,'_')}').classList.add('active')">Samples</button>
+        </div>
+        <div id="pane-env-${st.station.replace(/\W/g,'_')}" class="st-popup-pane active">${sparkBars}</div>
+        <div id="pane-samp-${st.station.replace(/\W/g,'_')}" class="st-popup-pane">
+          <div style="max-height:160px;overflow-y:auto">
+            <table style="width:100%;border-collapse:collapse;font-size:10px">
+              <thead style="position:sticky;top:0;background:#e0f7fa">
+                <tr><th style="padding:2px 4px;text-align:left">Sample</th><th>Cruise</th><th>Depth</th><th>Sal</th><th>Temp</th><th>Det.</th></tr>
+              </thead><tbody>${rows}</tbody>
+            </table>
+            ${st.samples.length>8?`<div style="font-size:10px;color:#6c757d;margin-top:3px">…and ${st.samples.length-8} more</div>`:''}
+          </div>
+        </div>
+      </div>`;
+    }
+
+    function refreshMapMarkers(){
+      if(!_markerLayer) return;
+      _markerLayer.clearLayers();
+      const stList = mapStationList.value;
+      if(!stList.length) return;
+      const bounds = [];
+      stList.forEach(st => {
+        const selected = mapSelectedStations.value.includes(st.station);
+        const color = markerColorFn(st);
+        const marker = L.marker([st.lat, st.lon], {
+          icon: svgIcon(color, selected),
+          zIndexOffset: selected ? 1000 : 0
+        });
+        marker.bindPopup(buildStationPopupHTML(st), {maxWidth:440, minWidth:340});
+        marker.on('click', e => {
+          if(e.originalEvent.ctrlKey || e.originalEvent.metaKey){
+            e.originalEvent.stopPropagation();
+            marker.closePopup();
+            if(selected) mapSelectedStations.value = mapSelectedStations.value.filter(s=>s!==st.station);
+            else if(!mapSelectedStations.value.includes(st.station)) mapSelectedStations.value = [...mapSelectedStations.value, st.station];
+            refreshMapMarkers();
+            nextTick(()=>renderComparePanel());
+          }
+        });
+        // Label
+        const lbl = L.tooltip({ permanent:true, direction:'top', offset:[0,-10], className:'map-station-label', opacity:1 });
+        lbl.setContent(st.station);
+        marker.bindTooltip(lbl);
+        _markerLayer.addLayer(marker);
+        bounds.push([st.lat, st.lon]);
+      });
+      if(bounds.length) _leafletMap.fitBounds(bounds, {padding:[40,40], maxZoom:9});
+    }
+
+    function refreshMap(){
+      nextTick(()=>{ refreshMapMarkers(); if(mapSelectedStations.value.length) renderComparePanel(); });
+    }
+
+    // ── Comparison panel charts ──────────────────────────────────
+    function getStationData(stationName){ return mapStationList.value.find(s=>s.station===stationName); }
+    function getWilderForStation(stationName){
+      const sampIds = new Set((getStationData(stationName)?.samples||[]).map(s=>s.samp_name));
+      return wilderResults.value.filter(w=>sampIds.has(w.sample_id));
+    }
+
+    const ENV_METRICS = [
+      {key:'avgDepth',    label:'Depth (m)',    max:250},
+      {key:'avgSalinity', label:'Salinity',      max:40},
+      {key:'avgTemp',     label:'Temp (°C)',     max:30},
+      {key:'avgChl',      label:'Chlorophyll',   max:20},
+      {key:'avgPh',       label:'pH',            max:9},
+      {key:'avgDO',       label:'DO (mg/L)',     max:12},
+      {key:'avgFlow',     label:'Flow (L/min)',  max:4},
+    ];
+
+    function renderComparePanel(){
+      const grid = document.getElementById('cmp-grid');
+      if(!grid) return;
+      grid.innerHTML = '';
+      const stations = mapSelectedStations.value;
+      if(!stations.length) return;
+
+      const tab = cmpTab.value;
+      const stData = stations.map(s=>getStationData(s)).filter(Boolean);
+
+      if(tab==='scatter')  renderCmpScatter(grid, stData);
+      if(tab==='bar')      renderCmpBar(grid, stData);
+      if(tab==='radar')    renderCmpRadar(grid, stData);
+      if(tab==='bubble')   renderCmpBubble(grid, stData);
+      if(tab==='chord')    renderCmpChord(grid, stations);
+    }
+
+    function mkCmpCard(grid, title){
+      const card = document.createElement('div'); card.className='cmp-chart-card';
+      const h4 = document.createElement('h4'); h4.textContent=title; card.appendChild(h4);
+      const svgEl = document.createElementNS('http://www.w3.org/2000/svg','svg'); card.appendChild(svgEl);
+      grid.appendChild(card);
+      return svgEl;
+    }
+
+    function renderCmpScatter(grid, stData){
+      // Scatter: Salinity vs Temp, sized by sample count, colored by station
+      const svgEl = mkCmpCard(grid, 'Temp vs Salinity (avg per station)');
+      const W=420, H=240, m={top:15,right:20,bottom:45,left:50};
+      const iW=W-m.left-m.right, iH=H-m.top-m.bottom;
+      const svg=d3.select(svgEl).attr('width',W).attr('height',H);
+      svg.selectAll('*').remove();
+      const g=svg.append('g').attr('transform',`translate(${m.left},${m.top})`);
+      const allSamples = stData.flatMap(st=>st.samples);
+      const xs=allSamples.map(s=>+s.salinity).filter(v=>!isNaN(v));
+      const ys=allSamples.map(s=>+s.temp).filter(v=>!isNaN(v));
+      if(!xs.length) return;
+      const x=d3.scaleLinear().domain([d3.min(xs)*.97,d3.max(xs)*1.03]).range([0,iW]);
+      const y=d3.scaleLinear().domain([d3.min(ys)*.95,d3.max(ys)*1.05]).range([iH,0]);
+      g.append('g').attr('transform',`translate(0,${iH})`).call(d3.axisBottom(x).ticks(5)).selectAll('text').style('font-size','10px');
+      g.append('g').call(d3.axisLeft(y).ticks(5)).call(ag=>ag.select('.domain').remove()).selectAll('text').style('font-size','10px');
+      g.append('text').attr('x',iW/2).attr('y',iH+36).attr('text-anchor','middle').attr('font-size',11).attr('fill','#6c757d').text('Salinity (PSU)');
+      g.append('text').attr('transform','rotate(-90)').attr('x',-iH/2).attr('y',-38).attr('text-anchor','middle').attr('font-size',11).attr('fill','#6c757d').text('Temp (°C)');
+      // Gridlines
+      g.append('g').call(d3.axisLeft(y).ticks(5).tickSize(-iW).tickFormat('')).call(ag=>ag.select('.domain').remove()).selectAll('line').attr('stroke','#e9ecef').attr('stroke-dasharray','3,3');
+      // D3 zoom
+      const zoom=d3.zoom().scaleExtent([0.5,10]).on('zoom',ev=>{ const t=ev.transform; g.attr('transform',`translate(${m.left+t.x},${m.top+t.y}) scale(${t.k})`); });
+      svg.call(zoom);
+      stData.forEach(st=>{
+        const color=stationColorFn(st.station);
+        const pts=st.samples.filter(s=>!isNaN(+s.salinity)&&!isNaN(+s.temp));
+        g.selectAll(`.dot-${st.station.replace(/\W/g,'_')}`).data(pts).join('circle')
+          .attr('cx',d=>x(+d.salinity)).attr('cy',d=>y(+d.temp))
+          .attr('r',5).attr('fill',color).attr('fill-opacity',.7).attr('stroke','#fff').attr('stroke-width',1)
+          .on('mouseover',(e,d)=>showTip(e,`<strong>${st.station}</strong>${d.samp_name}<br>Salinity: ${d.salinity}<br>Temp: ${d.temp}°C`))
+          .on('mousemove',moveTip).on('mouseleave',hideTip);
+        // Station centroid
+        g.append('circle').attr('cx',x(+st.avgSalinity)).attr('cy',y(+st.avgTemp))
+          .attr('r',8).attr('fill',color).attr('stroke','#fff').attr('stroke-width',2).attr('fill-opacity',.95)
+          .on('mouseover',e=>showTip(e,`<strong>${st.station} avg</strong>Salinity: ${st.avgSalinity}<br>Temp: ${st.avgTemp}°C<br>n=${st.count}`))
+          .on('mousemove',moveTip).on('mouseleave',hideTip);
+        g.append('text').attr('x',x(+st.avgSalinity)+10).attr('y',y(+st.avgTemp)+4).attr('font-size',9).attr('font-weight',700).attr('fill',color).text(st.station);
+      });
+      // Legend hint
+      svg.append('text').attr('x',W-5).attr('y',H-5).attr('text-anchor','end').attr('font-size',9).attr('fill','#adb5bd').text('Scroll to zoom · drag to pan');
+
+      // Depth vs Chlorophyll scatter too
+      const svgEl2 = mkCmpCard(grid, 'Depth vs Chlorophyll');
+      const svg2=d3.select(svgEl2).attr('width',W).attr('height',H);
+      svg2.selectAll('*').remove();
+      const g2=svg2.append('g').attr('transform',`translate(${m.left},${m.top})`);
+      const alld=allSamples.map(s=>({depth:+s.minimumDepthInMeters,chl:+s.chlorophyll,st:s.Station})).filter(d=>!isNaN(d.depth)&&!isNaN(d.chl));
+      const xd=d3.scaleLinear().domain([0,d3.max(alld,d=>d.depth)*1.1||10]).range([0,iW]);
+      const yd=d3.scaleLinear().domain([0,d3.max(alld,d=>d.chl)*1.1||5]).range([iH,0]);
+      g2.append('g').attr('transform',`translate(0,${iH})`).call(d3.axisBottom(xd).ticks(5)).selectAll('text').style('font-size','10px');
+      g2.append('g').call(d3.axisLeft(yd).ticks(5)).call(ag=>ag.select('.domain').remove()).selectAll('text').style('font-size','10px');
+      g2.append('text').attr('x',iW/2).attr('y',iH+36).attr('text-anchor','middle').attr('font-size',11).attr('fill','#6c757d').text('Depth (m)');
+      g2.append('text').attr('transform','rotate(-90)').attr('x',-iH/2).attr('y',-38).attr('text-anchor','middle').attr('font-size',11).attr('fill','#6c757d').text('Chlorophyll (µg/L)');
+      g2.append('g').call(d3.axisLeft(yd).ticks(5).tickSize(-iW).tickFormat('')).call(ag=>ag.select('.domain').remove()).selectAll('line').attr('stroke','#e9ecef').attr('stroke-dasharray','3,3');
+      const zoom2=d3.zoom().scaleExtent([0.5,10]).on('zoom',ev=>g2.attr('transform',`translate(${m.left+ev.transform.x},${m.top+ev.transform.y}) scale(${ev.transform.k})`));
+      svg2.call(zoom2);
+      stData.forEach(st=>{
+        const color=stationColorFn(st.station);
+        const pts=st.samples.filter(s=>!isNaN(+s.minimumDepthInMeters)&&!isNaN(+s.chlorophyll));
+        g2.selectAll(`.dot2-${st.station.replace(/\W/g,'_')}`).data(pts).join('circle')
+          .attr('cx',d=>xd(+d.minimumDepthInMeters)).attr('cy',d=>yd(+d.chlorophyll))
+          .attr('r',5).attr('fill',color).attr('fill-opacity',.7).attr('stroke','#fff').attr('stroke-width',1)
+          .on('mouseover',(e,d)=>showTip(e,`<strong>${st.station}</strong>${d.samp_name}<br>Depth: ${d.minimumDepthInMeters}m<br>Chl: ${d.chlorophyll} µg/L`))
+          .on('mousemove',moveTip).on('mouseleave',hideTip);
+      });
+    }
+
+    function renderCmpBar(grid, stData){
+      // Grouped bar for each metric
+      const metrics2 = ENV_METRICS.filter(m=>m.key!=='avgDepth');
+      const svgEl = mkCmpCard(grid, 'Environmental Metrics — Grouped Bar');
+      const W=560, H=260, m={top:20,right:20,bottom:55,left:50};
+      const iW=W-m.left-m.right, iH=H-m.top-m.bottom;
+      const svg=d3.select(svgEl).attr('width',W).attr('height',H);
+      svg.selectAll('*').remove();
+      const g=svg.append('g').attr('transform',`translate(${m.left},${m.top})`);
+      const stations2=stData.map(s=>s.station);
+      const xG=d3.scaleBand().domain(metrics2.map(m=>m.label)).range([0,iW]).padding(.22);
+      const xS=d3.scaleBand().domain(stations2).range([0,xG.bandwidth()]).padding(.08);
+      const maxY=d3.max(stData.flatMap(st=>metrics2.map(m=>+(st[m.key])||0)));
+      const y=d3.scaleLinear().domain([0,maxY*1.15]).range([iH,0]);
+      g.append('g').attr('transform',`translate(0,${iH})`).call(d3.axisBottom(xG).tickSize(0)).selectAll('text').attr('transform','rotate(-20)').style('text-anchor','end').style('font-size','10px');
+      g.append('g').call(d3.axisLeft(y).ticks(5)).call(ag=>ag.select('.domain').remove()).selectAll('text').style('font-size','9px');
+      g.append('g').call(d3.axisLeft(y).ticks(5).tickSize(-iW).tickFormat('')).call(ag=>ag.select('.domain').remove()).selectAll('line').attr('stroke','#e9ecef').attr('stroke-dasharray','3,3');
+      // zoom
+      const zoom=d3.zoom().scaleExtent([1,6]).translateExtent([[0,0],[iW,iH]]).on('zoom',ev=>g.attr('transform',`translate(${m.left+ev.transform.x},${m.top}) scale(${ev.transform.k},1)`));
+      svg.call(zoom);
+      metrics2.forEach(met=>{
+        stData.forEach(st=>{
+          const val=+(st[met.key])||0;
+          const color=stationColorFn(st.station);
+          g.append('rect')
+            .attr('x',xG(met.label)+xS(st.station)).attr('width',xS.bandwidth())
+            .attr('y',y(val)).attr('height',iH-y(val))
+            .attr('fill',color).attr('rx',2)
+            .on('mouseover',e=>showTip(e,`<strong>${st.station}</strong>${met.label}: ${val.toFixed(2)}`))
+            .on('mousemove',moveTip).on('mouseleave',hideTip);
+        });
+      });
+      // Legend
+      stations2.forEach((st,i)=>{
+        svg.append('circle').attr('cx',m.left+i*100).attr('cy',H-5).attr('r',5).attr('fill',stationColorFn(st));
+        svg.append('text').attr('x',m.left+i*100+9).attr('y',H-1).attr('font-size',9).attr('fill','#6c757d').text(st);
+      });
+
+      // Sample count bar
+      const svgEl2=mkCmpCard(grid,'Sample Count per Station');
+      const W2=420,H2=200,m2={top:15,right:15,bottom:60,left:50};
+      const iW2=W2-m2.left-m2.right,iH2=H2-m2.top-m2.bottom;
+      const svg2=d3.select(svgEl2).attr('width',W2).attr('height',H2);
+      svg2.selectAll('*').remove();
+      const g2=svg2.append('g').attr('transform',`translate(${m2.left},${m2.top})`);
+      const xb=d3.scaleBand().domain(stData.map(s=>s.station)).range([0,iW2]).padding(.3);
+      const yb=d3.scaleLinear().domain([0,d3.max(stData,s=>s.count)*1.2]).range([iH2,0]);
+      g2.append('g').attr('transform',`translate(0,${iH2})`).call(d3.axisBottom(xb).tickSize(0)).selectAll('text').attr('transform','rotate(-25)').style('text-anchor','end').style('font-size','10px');
+      g2.append('g').call(d3.axisLeft(yb).ticks(5)).call(ag=>ag.select('.domain').remove()).selectAll('text').style('font-size','9px');
+      stData.forEach(st=>{
+        g2.append('rect').attr('x',xb(st.station)).attr('width',xb.bandwidth())
+          .attr('y',yb(st.count)).attr('height',iH2-yb(st.count))
+          .attr('fill',stationColorFn(st.station)).attr('rx',3)
+          .on('mouseover',e=>showTip(e,`<strong>${st.station}</strong>${st.count} samples`))
+          .on('mousemove',moveTip).on('mouseleave',hideTip);
+        g2.append('text').attr('x',xb(st.station)+xb.bandwidth()/2).attr('y',yb(st.count)-4)
+          .attr('text-anchor','middle').attr('font-size',10).attr('font-weight',700).attr('fill',stationColorFn(st.station)).text(st.count);
+      });
+    }
+
+    function renderCmpRadar(grid, stData){
+      const metrics3=ENV_METRICS.slice(0,6);
+      const svgEl=mkCmpCard(grid,'Radar — Environmental Profile');
+      const SIZE=300, cx=SIZE/2, cy=SIZE/2, R=110;
+      const svg=d3.select(svgEl).attr('width',SIZE).attr('height',SIZE);
+      svg.selectAll('*').remove();
+      const N=metrics3.length;
+      const angle=i=>((i/N)*2*Math.PI)-Math.PI/2;
+      const rScale=d3.scaleLinear().domain([0,1]).range([0,R]);
+      // Axis lines & labels
+      metrics3.forEach((m,i)=>{
+        const a=angle(i);
+        svg.append('line').attr('x1',cx).attr('y1',cy).attr('x2',cx+R*Math.cos(a)).attr('y2',cy+R*Math.sin(a)).attr('stroke','#dee2e6').attr('stroke-width',1);
+        // concentric rings
+        [0.25,0.5,0.75,1].forEach(t=>{
+          const pts=metrics3.map((_,j)=>{ const aj=angle(j); return [cx+R*t*Math.cos(aj),cy+R*t*Math.sin(aj)]; });
+          svg.append('polygon').attr('points',pts.map(p=>p.join(',')).join(' ')).attr('fill','none').attr('stroke','#dee2e6').attr('stroke-width',.7);
+        });
+        const lx=cx+(R+20)*Math.cos(a), ly=cy+(R+20)*Math.sin(a);
+        svg.append('text').attr('x',lx).attr('y',ly).attr('text-anchor','middle').attr('dominant-baseline','middle').attr('font-size',9).attr('fill','#6c757d').text(m.label);
+      });
+      stData.forEach(st=>{
+        const color=stationColorFn(st.station);
+        const vals=metrics3.map(m=>Math.min(1,(+(st[m.key])||0)/m.max));
+        const pts=vals.map((v,i)=>{ const a=angle(i); return [cx+rScale(v)*Math.cos(a), cy+rScale(v)*Math.sin(a)]; });
+        svg.append('polygon').attr('points',pts.map(p=>p.join(',')).join(' '))
+          .attr('fill',color).attr('fill-opacity',.18).attr('stroke',color).attr('stroke-width',2);
+        pts.forEach(([px,py],i)=>{
+          svg.append('circle').attr('cx',px).attr('cy',py).attr('r',4).attr('fill',color).attr('stroke','#fff').attr('stroke-width',1)
+            .on('mouseover',e=>showTip(e,`<strong>${st.station}</strong>${metrics3[i].label}: ${(+(st[metrics3[i].key])||0).toFixed(2)}`))
+            .on('mousemove',moveTip).on('mouseleave',hideTip);
+        });
+        svg.append('text').attr('x',pts[0][0]+5).attr('y',pts[0][1]-5).attr('font-size',9).attr('font-weight',700).attr('fill',color).text(st.station);
+      });
+    }
+
+    function renderCmpBubble(grid, stData){
+      const svgEl=mkCmpCard(grid,'Bubble — Salinity / Temp / Sample Count');
+      const W=460,H=280,m={top:20,right:20,bottom:45,left:55};
+      const iW=W-m.left-m.right,iH=H-m.top-m.bottom;
+      const svg=d3.select(svgEl).attr('width',W).attr('height',H);
+      svg.selectAll('*').remove();
+      const g=svg.append('g').attr('transform',`translate(${m.left},${m.top})`);
+      const xs2=stData.map(s=>+s.avgSalinity).filter(v=>!isNaN(v));
+      const ys2=stData.map(s=>+s.avgTemp).filter(v=>!isNaN(v));
+      if(!xs2.length) return;
+      const x=d3.scaleLinear().domain([d3.min(xs2)*.97,d3.max(xs2)*1.03]).range([0,iW]);
+      const y=d3.scaleLinear().domain([d3.min(ys2)*.9,d3.max(ys2)*1.1]).range([iH,0]);
+      const rSc=d3.scaleSqrt().domain([0,d3.max(stData,s=>s.count)]).range([10,45]);
+      g.append('g').attr('transform',`translate(0,${iH})`).call(d3.axisBottom(x).ticks(5)).selectAll('text').style('font-size','10px');
+      g.append('g').call(d3.axisLeft(y).ticks(5)).call(ag=>ag.select('.domain').remove()).selectAll('text').style('font-size','10px');
+      g.append('text').attr('x',iW/2).attr('y',iH+36).attr('text-anchor','middle').attr('font-size',11).attr('fill','#6c757d').text('Avg Salinity (PSU)');
+      g.append('text').attr('transform','rotate(-90)').attr('x',-iH/2).attr('y',-42).attr('text-anchor','middle').attr('font-size',11).attr('fill','#6c757d').text('Avg Temp (°C)');
+      g.append('g').call(d3.axisLeft(y).ticks(5).tickSize(-iW).tickFormat('')).call(ag=>ag.select('.domain').remove()).selectAll('line').attr('stroke','#e9ecef').attr('stroke-dasharray','3,3');
+      const zoom=d3.zoom().scaleExtent([0.5,8]).on('zoom',ev=>g.attr('transform',`translate(${m.left+ev.transform.x},${m.top+ev.transform.y}) scale(${ev.transform.k})`));
+      svg.call(zoom);
+      stData.forEach(st=>{
+        const color=stationColorFn(st.station);
+        const sx=+st.avgSalinity,sy=+st.avgTemp,sr=rSc(st.count);
+        if(isNaN(sx)||isNaN(sy)) return;
+        g.append('circle').attr('cx',x(sx)).attr('cy',y(sy)).attr('r',sr)
+          .attr('fill',color).attr('fill-opacity',.45).attr('stroke',color).attr('stroke-width',2)
+          .on('mouseover',e=>showTip(e,`<strong>${st.station}</strong>Salinity: ${sx.toFixed(2)}<br>Temp: ${sy.toFixed(2)}°C<br>Samples: ${st.count}<br>Chl: ${st.avgChl}<br>DO: ${st.avgDO}`))
+          .on('mousemove',moveTip).on('mouseleave',hideTip);
+        g.append('text').attr('x',x(sx)).attr('y',y(sy)+4).attr('text-anchor','middle').attr('font-size',9).attr('font-weight',700).attr('fill','#1b2631').text(st.station);
+        g.append('text').attr('x',x(sx)).attr('y',y(sy)+sr+13).attr('text-anchor','middle').attr('font-size',8).attr('fill','#6c757d').text(`n=${st.count}`);
+      });
+
+      // Bubble: depth vs DO sized by chl
+      const svgEl2=mkCmpCard(grid,'Bubble — Depth / DO / Chlorophyll (size)');
+      const svg2=d3.select(svgEl2).attr('width',W).attr('height',H);
+      svg2.selectAll('*').remove();
+      const g2=svg2.append('g').attr('transform',`translate(${m.left},${m.top})`);
+      const xd2=d3.scaleLinear().domain([0,d3.max(stData,s=>+s.avgDepth||0)*1.2||10]).range([0,iW]);
+      const yd2=d3.scaleLinear().domain([d3.min(stData,s=>+s.avgDO||0)*.9,d3.max(stData,s=>+s.avgDO||0)*1.1||10]).range([iH,0]);
+      const chlSc=d3.scaleSqrt().domain([0,d3.max(stData,s=>+s.avgChl||0)||5]).range([8,40]);
+      g2.append('g').attr('transform',`translate(0,${iH})`).call(d3.axisBottom(xd2).ticks(5)).selectAll('text').style('font-size','10px');
+      g2.append('g').call(d3.axisLeft(yd2).ticks(5)).call(ag=>ag.select('.domain').remove()).selectAll('text').style('font-size','10px');
+      g2.append('text').attr('x',iW/2).attr('y',iH+36).attr('text-anchor','middle').attr('font-size',11).attr('fill','#6c757d').text('Avg Depth (m)');
+      g2.append('text').attr('transform','rotate(-90)').attr('x',-iH/2).attr('y',-42).attr('text-anchor','middle').attr('font-size',11).attr('fill','#6c757d').text('Avg DO (mg/L)');
+      g2.append('g').call(d3.axisLeft(yd2).ticks(5).tickSize(-iW).tickFormat('')).call(ag=>ag.select('.domain').remove()).selectAll('line').attr('stroke','#e9ecef').attr('stroke-dasharray','3,3');
+      const zoom2=d3.zoom().scaleExtent([0.5,8]).on('zoom',ev=>g2.attr('transform',`translate(${m.left+ev.transform.x},${m.top+ev.transform.y}) scale(${ev.transform.k})`));
+      svg2.call(zoom2);
+      stData.forEach(st=>{
+        const color=stationColorFn(st.station);
+        const sx=+st.avgDepth||0,sy=+st.avgDO||0,sr=chlSc(+st.avgChl||0);
+        g2.append('circle').attr('cx',xd2(sx)).attr('cy',yd2(sy)).attr('r',sr)
+          .attr('fill',color).attr('fill-opacity',.45).attr('stroke',color).attr('stroke-width',2)
+          .on('mouseover',e=>showTip(e,`<strong>${st.station}</strong>Depth: ${sx}m<br>DO: ${sy.toFixed(2)} mg/L<br>Chl: ${st.avgChl} µg/L`))
+          .on('mousemove',moveTip).on('mouseleave',hideTip);
+        g2.append('text').attr('x',xd2(sx)).attr('y',yd2(sy)+4).attr('text-anchor','middle').attr('font-size',9).attr('font-weight',700).attr('fill','#1b2631').text(st.station);
+      });
+    }
+
+    function renderCmpChord(grid, stations){
+      // Chord: shared species between stations
+      const svgEl=mkCmpCard(grid,'Chord — Shared Species Between Stations');
+      const SIZE=380, m2=60, R=SIZE/2-m2;
+      const svg=d3.select(svgEl).attr('width',SIZE).attr('height',SIZE);
+      svg.selectAll('*').remove();
+      const g=svg.append('g').attr('transform',`translate(${SIZE/2},${SIZE/2})`);
+      const n=stations.length;
+      if(n<2){ g.append('text').attr('text-anchor','middle').attr('font-size',12).attr('fill','#6c757d').text('Select 2+ stations'); return; }
+      // Build species sets per station
+      const spSets = stations.map(st=>new Set(getWilderForStation(st).map(w=>w.scientific_name)));
+      // Build NxN shared-species matrix
+      const matrix=stations.map((_,i)=>stations.map((_,j)=>{ if(i===j) return spSets[i].size; const inter=[...spSets[i]].filter(s=>spSets[j].has(s)); return inter.length; }));
+      const chord=d3.chord().padAngle(.06).sortSubgroups(d3.descending);
+      const chords=chord(matrix);
+      const arc2=d3.arc().innerRadius(R).outerRadius(R+20);
+      const ribbon=d3.ribbon().radius(R);
+      // Groups (arcs)
+      const groups=g.append('g').selectAll('g').data(chords.groups).join('g');
+      groups.append('path').attr('d',arc2).attr('fill',d=>stationColorFn(stations[d.index])).attr('stroke','#fff').attr('stroke-width',.5)
+        .on('mouseover',(e,d)=>showTip(e,`<strong>${stations[d.index]}</strong>${spSets[d.index].size} species`))
+        .on('mousemove',moveTip).on('mouseleave',hideTip);
+      groups.append('text').each(d=>{d.angle=(d.startAngle+d.endAngle)/2;}).attr('dy','0.35em')
+        .attr('transform',d=>`rotate(${d.angle*180/Math.PI-90}) translate(${R+26}) ${d.angle>Math.PI?'rotate(180)':''}`)
+        .attr('text-anchor',d=>d.angle>Math.PI?'end':'start').attr('font-size',10).attr('font-weight',700).attr('fill','#334155').text(d=>stations[d.index]);
+      // Ribbons
+      g.append('g').selectAll('path').data(chords).join('path')
+        .attr('d',ribbon).attr('fill',d=>stationColorFn(stations[d.source.index])).attr('fill-opacity',.55).attr('stroke','#fff').attr('stroke-width',.5)
+        .on('mouseover',(e,d)=>{ const shared=[...spSets[d.source.index]].filter(s=>spSets[d.target.index].has(s)); showTip(e,`<strong>${stations[d.source.index]} ↔ ${stations[d.target.index]}</strong>${shared.length} shared species${shared.length?':<br><em>'+shared.slice(0,4).join(', ')+(shared.length>4?'…':'')+'</em>':''}`); })
+        .on('mousemove',moveTip).on('mouseleave',hideTip);
+
+      // Also show species union bar for context
+      const svgEl2=mkCmpCard(grid,'Species Detected per Station');
+      const W2=420,H2=200,mb={top:15,right:15,bottom:60,left:50};
+      const iW2=W2-mb.left-mb.right,iH2=H2-mb.top-mb.bottom;
+      const svg2=d3.select(svgEl2).attr('width',W2).attr('height',H2);
+      svg2.selectAll('*').remove();
+      const g2=svg2.append('g').attr('transform',`translate(${mb.left},${mb.top})`);
+      const specData=stations.map((st,i)=>({st,count:spSets[i].size}));
+      const xb=d3.scaleBand().domain(specData.map(d=>d.st)).range([0,iW2]).padding(.3);
+      const yb=d3.scaleLinear().domain([0,d3.max(specData,d=>d.count)*1.3||1]).range([iH2,0]);
+      g2.append('g').attr('transform',`translate(0,${iH2})`).call(d3.axisBottom(xb).tickSize(0)).selectAll('text').attr('transform','rotate(-25)').style('text-anchor','end').style('font-size','10px');
+      g2.append('g').call(d3.axisLeft(yb).ticks(5)).call(ag=>ag.select('.domain').remove()).selectAll('text').style('font-size','9px');
+      specData.forEach(d=>{
+        g2.append('rect').attr('x',xb(d.st)).attr('width',xb.bandwidth())
+          .attr('y',yb(d.count)).attr('height',iH2-yb(d.count))
+          .attr('fill',stationColorFn(d.st)).attr('rx',3)
+          .on('mouseover',e=>showTip(e,`<strong>${d.st}</strong>${d.count} species detected`))
+          .on('mousemove',moveTip).on('mouseleave',hideTip);
+        g2.append('text').attr('x',xb(d.st)+xb.bandwidth()/2).attr('y',yb(d.count)-4)
+          .attr('text-anchor','middle').attr('font-size',10).attr('font-weight',700).attr('fill',stationColorFn(d.st)).text(d.count);
+      });
+    }
+
+    // ── Master redraw ────────────────────────────────────────────
+    function redrawAll(){
+      nextTick(()=>{
+        if(view.value==='overview') drawOverview();
+        else if(view.value==='samples'){
+          if(sampTab.value==='env') drawSamplesEnv();
+          else if(sampTab.value==='field') drawSamplesField();
+        } else if(view.value==='cruises' && cruiseTab.value==='charts') drawCruisesCharts();
+        else if(view.value==='runs' && runTab.value==='charts') drawRunsCharts();
+        else if(view.value==='taxonomy'){ drawSunburst(); drawTopSpecies(); drawGroupBar(); }
+      });
+    }
+
+    // ── Watchers ─────────────────────────────────────────────────
+    watch(view, () => {
+      selectedSample.value=null; selectedCruise.value=null; selectedRun.value=null;
+      redrawAll();
+      if(view.value==='map'){
+        nextTick(()=>{
+          initMap();
+          // invalidateSize tells Leaflet to remeasure the container — needed
+          // when the map div was hidden (display:none via v-if) during init
+          _leafletMap.invalidateSize();
+          // refreshMapMarkers reads the reactive mapStationList computed, so it
+          // always has the latest data regardless of when XLSX was loaded
+          refreshMapMarkers();
+        });
+      }
+    });
+    watch(sampTab, redrawAll);
+    watch(cruiseTab, redrawAll);
+    watch(runTab, redrawAll);
+    watch(filteredSamples, ()=>{ if(view.value==='samples'&&sampTab.value!=='table') redrawAll(); });
+    watch(filteredWilder, ()=>{ if(view.value==='taxonomy') redrawAll(); });
+    // Refresh map whenever underlying sample data changes (XLSX upload, filter changes).
+    // refreshMapMarkers() is safe to call anytime — it early-exits when the map
+    // layer isn't initialised yet, and uses the reactive mapStationList computed
+    // so it always reflects the latest data when it does run.
+    watch(samples, ()=>{ nextTick(()=>refreshMapMarkers()); });
+
+    onMounted(()=>{
+      nextTick(()=>{ setTimeout(()=>{ redrawAll(); }, 80); });
+      // Create the floating, resizable Import side-panel.
+      importPanel = MBONImportPanel.create({
+        getCruises: () => {
+          const set = new Set();
+          cruises.value.forEach(c => { const v=c['Cruise Number']; if(v) set.add(v); });
+          samples.value.forEach(s => { const v=s['Cruise Number']; if(v) set.add(v); });
+          return [...set].sort();
+        },
+        onChange: (payload) => applyImported(payload),
+      });
+    });
+
+    return {
+      view, tooltip, fileName, dragging,
+      mapCruiseFilter, mapColorBy, mapSelectedStations, cmpTab,
+      mapStationList, stationColorFn, removeFromComparison, refreshMap, renderComparePanel,
+      samples, cruises, runs, wilderResults,
+      sampSearch, sampCruiseFilter, sampCategoryFilter, sampDetectFilter,
+      cruiseSearch, cruiseVesselFilter, runSearch, runPlatformFilter,
+      sbSearch, sbGroupFilter,
+      sampTab, cruiseTab, runTab,
+      selectedSample, selectedCruise, selectedRun,
+      filteredSamples, filteredCruises, filteredRuns, filteredWilder,
+      uniqueStations, uniqueSpecies, uniqueGroups, totalReads, avgSalinity,
+      sampleCategories, cruiseVessels, runPlatforms, wilderGroups,
+      fmtDate, fmtK,
+      onFileInput, onDrop, drawSunburst,
+      // Refs
+      ovCruiseSvg, ovCruiseWrap, ovDonutSvg, ovDonutWrap, ovDonutLegend,
+      ovDetectSvg, ovDetectWrap, ovDetectLegend, ovDepthSvg, ovDepthWrap,
+      scatterTSSvg, scatterTSWrap, depthHistSvg, depthHistWrap,
+      salinityHistSvg, salinityHistWrap, chlDepthSvg, chlDepthWrap,
+      doHistSvg, doHistWrap, phHistSvg, phHistWrap,
+      flowBarSvg, flowBarWrap, concHistSvg, concHistWrap,
+      filterDonutSvg, filterDonutWrap, filterDonutLegend,
+      catDonutSvg, catDonutWrap, catDonutLegend,
+      cruiseSampBarSvg, cruiseSampBarWrap, vesselDonutSvg, vesselDonutWrap, vesselDonutLegend,
+      assayBarSvg, assayBarWrap, platformDonutSvg, platformDonutWrap, platformDonutLegend,
+      instrumentBarSvg, instrumentBarWrap, runTimelineSvg, runTimelineWrap,
+      sbSvg, sbWrap, sbLegend, sbList, topSpeciesSvg, topSpeciesWrap,
+      groupBarSvg, groupBarWrap,
+    };
+  }
+}).mount('#app');
+</script>
+</body>
+</html>

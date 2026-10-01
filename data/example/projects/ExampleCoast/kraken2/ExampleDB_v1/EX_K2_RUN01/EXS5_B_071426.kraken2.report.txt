@@ -1,0 +1,35 @@
+ 10.70	1993	1993	U	0	unclassified
+ 89.30	16632	0	R	1	root
+ 89.30	16632	0	R1	131567	  cellular organisms
+ 89.30	16632	0	D	2759	    Eukaryota
+ 48.37	9009	0	K	33090	      Viridiplantae
+ 48.37	9009	0	P	3041	        Chlorophyta
+ 48.37	9009	0	C	1035538	          Mamiellophyceae
+ 35.63	6636	0	G	418751	            Bathycoccus
+ 35.63	6636	6636	S	41875	              Bathycoccus prasinos (Green alga)
+ 12.74	2373	0	G	388331	            Micromonas
+ 12.74	2373	2373	S	38833	              Micromonas pusilla (Green alga)
+ 40.19	7485	0	K	33208	      Metazoa
+ 23.35	4349	0	P	6656	        Arthropoda
+ 13.43	2501	0	C	6658	          Branchiopoda
+ 13.43	2501	0	G	1241401	            Penilia
+ 13.43	2501	2501	S	124140	              Penilia avirostris (Water flea)
+  9.92	1848	0	C	72037	          Hexanauplia
+  9.92	1848	0	G	1361801	            Acartia
+  9.92	1848	1848	S	136180	              Acartia tonsa (Copepod)
+ 12.17	2267	0	P	10197	        Ctenophora
+ 12.17	2267	0	C	10198	          Tentaculata
+ 12.17	2267	0	G	279231	            Mnemiopsis
+ 12.17	2267	2267	S	27923	              Mnemiopsis leidyi (American comb jelly)
+  3.31	617	0	P	7711	        Chordata
+  3.31	617	0	C	186623	          Actinopteri
+  3.31	617	0	G	82571	            Paralichthys
+  3.31	617	617	S	8257	              Paralichthys dentatus (Summer flounder)
+  1.35	252	0	P	6447	        Mollusca
+  1.35	252	0	C	6544	          Bivalvia
+  1.35	252	0	G	65501	            Mytilus
+  1.35	252	252	S	6550	              Mytilus edulis (Blue mussel)
+  0.74	138	0	P	2836	      Bacillariophyta
+  0.74	138	0	C	33849	        Mediophyceae
+  0.74	138	0	G	351281	          Thalassiosira
+  0.74	138	138	S	35128	            Thalassiosira pseudonana (Diatom)

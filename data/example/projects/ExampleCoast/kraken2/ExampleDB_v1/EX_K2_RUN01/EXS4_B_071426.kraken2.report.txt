@@ -1,0 +1,36 @@
+  3.24	831	831	U	0	unclassified
+ 96.76	24804	0	R	1	root
+ 96.76	24804	0	R1	131567	  cellular organisms
+ 95.45	24469	0	D	2759	    Eukaryota
+ 52.71	13513	0	K	33208	      Metazoa
+ 29.91	7667	0	P	7711	        Chordata
+ 29.91	7667	0	C	186623	          Actinopteri
+ 26.33	6750	0	G	551181	            Brevoortia
+ 26.33	6750	6750	S	55118	              Brevoortia tyrannus (Atlantic menhaden)
+  2.27	582	0	G	291541	            Micropogonias
+  2.27	582	582	S	29154	              Micropogonias undulatus (Atlantic croaker)
+  1.31	335	0	G	80961	            Menidia
+  1.31	335	335	S	8096	              Menidia menidia (Atlantic silverside)
+ 22.80	5846	0	P	6656	        Arthropoda
+ 16.41	4206	0	C	72037	          Hexanauplia
+ 16.41	4206	0	G	1361801	            Acartia
+ 16.41	4206	4206	S	136180	              Acartia tonsa (Copepod)
+  6.40	1640	0	C	6658	          Branchiopoda
+  6.40	1640	0	G	1241401	            Penilia
+  6.40	1640	1640	S	124140	              Penilia avirostris (Water flea)
+ 34.05	8729	0	K	33090	      Viridiplantae
+ 34.05	8729	0	P	3041	        Chlorophyta
+ 34.05	8729	0	C	1035538	          Mamiellophyceae
+ 30.28	7762	0	G	388331	            Micromonas
+ 30.28	7762	7762	S	38833	              Micromonas pusilla (Green alga)
+  3.77	967	0	G	418751	            Bathycoccus
+  3.77	967	967	S	41875	              Bathycoccus prasinos (Green alga)
+  8.69	2227	0	P	2836	      Bacillariophyta
+  8.69	2227	0	C	33849	        Mediophyceae
+  8.69	2227	0	G	28431	          Skeletonema
+  8.69	2227	2227	S	2843	            Skeletonema costatum (Diatom)
+  1.31	335	0	D	2	    Bacteria
+  1.31	335	0	P	1224	      Pseudomonadota
+  1.31	335	0	C	1236	        Gammaproteobacteria
+  1.31	335	0	G	6721	          Vibrio
+  1.31	335	335	S	672	            Vibrio vulnificus

@@ -1,0 +1,246 @@
+{
+  "project_dir": "ExampleCoast",
+  "generated_at": "2026-10-01T13:29:13",
+  "kraken2": {
+    "ExampleDB_v1/EX_K2_RUN01/EXS1_B_071426.kraken2.report.txt": {
+      "stem": "EXS1_B_071426",
+      "samp_number": "EX0002"
+    },
+    "ExampleDB_v1/EX_K2_RUN01/EXS1_B_092226.kraken2.report.txt": {
+      "stem": "EXS1_B_092226",
+      "samp_number": "EX0015"
+    },
+    "ExampleDB_v1/EX_K2_RUN01/EXS1_S_071426.kraken2.report.txt": {
+      "stem": "EXS1_S_071426",
+      "samp_number": "EX0001"
+    },
+    "ExampleDB_v1/EX_K2_RUN01/EXS1_S_092226.kraken2.report.txt": {
+      "stem": "EXS1_S_092226",
+      "samp_number": "EX0014"
+    },
+    "ExampleDB_v1/EX_K2_RUN01/EXS2_B_071426.kraken2.report.txt": {
+      "stem": "EXS2_B_071426",
+      "samp_number": "EX0004"
+    },
+    "ExampleDB_v1/EX_K2_RUN01/EXS2_B_092226.kraken2.report.txt": {
+      "stem": "EXS2_B_092226",
+      "samp_number": "EX0017"
+    },
+    "ExampleDB_v1/EX_K2_RUN01/EXS2_S_071426.kraken2.report.txt": {
+      "stem": "EXS2_S_071426",
+      "samp_number": "EX0003"
+    },
+    "ExampleDB_v1/EX_K2_RUN01/EXS2_S_092226.kraken2.report.txt": {
+      "stem": "EXS2_S_092226",
+      "samp_number": "EX0016"
+    },
+    "ExampleDB_v1/EX_K2_RUN01/EXS3_B_071426.kraken2.report.txt": {
+      "stem": "EXS3_B_071426",
+      "samp_number": "EX0006"
+    },
+    "ExampleDB_v1/EX_K2_RUN01/EXS3_B_092226.kraken2.report.txt": {
+      "stem": "EXS3_B_092226",
+      "samp_number": "EX0019"
+    },
+    "ExampleDB_v1/EX_K2_RUN01/EXS3_S_071426.kraken2.report.txt": {
+      "stem": "EXS3_S_071426",
+      "samp_number": "EX0005"
+    },
+    "ExampleDB_v1/EX_K2_RUN01/EXS3_S_092226.kraken2.report.txt": {
+      "stem": "EXS3_S_092226",
+      "samp_number": "EX0018"
+    },
+    "ExampleDB_v1/EX_K2_RUN01/EXS4_B_071426.kraken2.report.txt": {
+      "stem": "EXS4_B_071426",
+      "samp_number": "EX0008"
+    },
+    "ExampleDB_v1/EX_K2_RUN01/EXS4_B_092226.kraken2.report.txt": {
+      "stem": "EXS4_B_092226",
+      "samp_number": "EX0021"
+    },
+    "ExampleDB_v1/EX_K2_RUN01/EXS4_S_071426.kraken2.report.txt": {
+      "stem": "EXS4_S_071426",
+      "samp_number": "EX0007"
+    },
+    "ExampleDB_v1/EX_K2_RUN01/EXS4_S_092226.kraken2.report.txt": {
+      "stem": "EXS4_S_092226",
+      "samp_number": "EX0020"
+    },
+    "ExampleDB_v1/EX_K2_RUN01/EXS5_B_071426.kraken2.report.txt": {
+      "stem": "EXS5_B_071426",
+      "samp_number": "EX0010"
+    },
+    "ExampleDB_v1/EX_K2_RUN01/EXS5_B_092226.kraken2.report.txt": {
+      "stem": "EXS5_B_092226",
+      "samp_number": "EX0023"
+    },
+    "ExampleDB_v1/EX_K2_RUN01/EXS5_S_071426.kraken2.report.txt": {
+      "stem": "EXS5_S_071426",
+      "samp_number": "EX0009"
+    },
+    "ExampleDB_v1/EX_K2_RUN01/EXS5_S_092226.kraken2.report.txt": {
+      "stem": "EXS5_S_092226",
+      "samp_number": "EX0022"
+    },
+    "ExampleDB_v1/EX_K2_RUN01/EXS6_B_071426.kraken2.report.txt": {
+      "stem": "EXS6_B_071426",
+      "samp_number": "EX0012"
+    },
+    "ExampleDB_v1/EX_K2_RUN01/EXS6_B_092226.kraken2.report.txt": {
+      "stem": "EXS6_B_092226",
+      "samp_number": "EX0025"
+    },
+    "ExampleDB_v1/EX_K2_RUN01/EXS6_S_071426.kraken2.report.txt": {
+      "stem": "EXS6_S_071426",
+      "samp_number": "EX0011"
+    },
+    "ExampleDB_v1/EX_K2_RUN01/EXS6_S_092226.kraken2.report.txt": {
+      "stem": "EXS6_S_092226",
+      "samp_number": "EX0024"
+    },
+    "ExampleDB_v1/EX_K2_RUN01/FIELDBLANK_071426.kraken2.report.txt": {
+      "stem": "FIELDBLANK_071426",
+      "samp_number": "EX0013"
+    },
+    "ExampleDB_v1/EX_K2_RUN01/FIELDBLANK_092226.kraken2.report.txt": {
+      "stem": "FIELDBLANK_092226",
+      "samp_number": "EX0026"
+    }
+  },
+  "wilder": {
+    "WLMEX0001:900101": {
+      "uid": "900101",
+      "client_sample_id": "EX0001",
+      "samp_number": "EX0001"
+    },
+    "WLMEX0001:900102": {
+      "uid": "900102",
+      "client_sample_id": "EX0002",
+      "samp_number": "EX0002"
+    },
+    "WLMEX0001:900103": {
+      "uid": "900103",
+      "client_sample_id": "EX0003",
+      "samp_number": "EX0003"
+    },
+    "WLMEX0001:900104": {
+      "uid": "900104",
+      "client_sample_id": "EX0004",
+      "samp_number": "EX0004"
+    },
+    "WLMEX0001:900105": {
+      "uid": "900105",
+      "client_sample_id": "EX0005",
+      "samp_number": "EX0005"
+    },
+    "WLMEX0001:900106": {
+      "uid": "900106",
+      "client_sample_id": "EX0006",
+      "samp_number": "EX0006"
+    },
+    "WLMEX0001:900107": {
+      "uid": "900107",
+      "client_sample_id": "EX0007",
+      "samp_number": "EX0007"
+    },
+    "WLMEX0001:900108": {
+      "uid": "900108",
+      "client_sample_id": "EX0008",
+      "samp_number": "EX0008"
+    },
+    "WLMEX0001:900109": {
+      "uid": "900109",
+      "client_sample_id": "EX0009",
+      "samp_number": "EX0009"
+    },
+    "WLMEX0001:900110": {
+      "uid": "900110",
+      "client_sample_id": "EX0010",
+      "samp_number": "EX0010"
+    },
+    "WLMEX0001:900111": {
+      "uid": "900111",
+      "client_sample_id": "EX0011",
+      "samp_number": "EX0011"
+    },
+    "WLMEX0001:900112": {
+      "uid": "900112",
+      "client_sample_id": "EX0012",
+      "samp_number": "EX0012"
+    },
+    "WLMEX0001:900113": {
+      "uid": "900113",
+      "client_sample_id": "EX0013",
+      "samp_number": "EX0013"
+    },
+    "WLMEX0002:900201": {
+      "uid": "900201",
+      "client_sample_id": "EX0014",
+      "samp_number": "EX0014"
+    },
+    "WLMEX0002:900202": {
+      "uid": "900202",
+      "client_sample_id": "EX0015",
+      "samp_number": "EX0015"
+    },
+    "WLMEX0002:900203": {
+      "uid": "900203",
+      "client_sample_id": "EX0016",
+      "samp_number": "EX0016"
+    },
+    "WLMEX0002:900204": {
+      "uid": "900204",
+      "client_sample_id": "EX0017",
+      "samp_number": "EX0017"
+    },
+    "WLMEX0002:900205": {
+      "uid": "900205",
+      "client_sample_id": "EX0018",
+      "samp_number": "EX0018"
+    },
+    "WLMEX0002:900206": {
+      "uid": "900206",
+      "client_sample_id": "EX0019",
+      "samp_number": "EX0019"
+    },
+    "WLMEX0002:900207": {
+      "uid": "900207",
+      "client_sample_id": "EX0020",
+      "samp_number": "EX0020"
+    },
+    "WLMEX0002:900208": {
+      "uid": "900208",
+      "client_sample_id": "EX0021",
+      "samp_number": "EX0021"
+    },
+    "WLMEX0002:900209": {
+      "uid": "900209",
+      "client_sample_id": "EX0022",
+      "samp_number": "EX0022"
+    },
+    "WLMEX0002:900210": {
+      "uid": "900210",
+      "client_sample_id": "EX0023",
+      "samp_number": "EX0023"
+    },
+    "WLMEX0002:900211": {
+      "uid": "900211",
+      "client_sample_id": "EX0024",
+      "samp_number": "EX0024"
+    },
+    "WLMEX0002:900212": {
+      "uid": "900212",
+      "client_sample_id": "EX0025",
+      "samp_number": "EX0025"
+    },
+    "WLMEX0002:900213": {
+      "uid": "900213",
+      "client_sample_id": "EX0026",
+      "samp_number": "EX0026"
+    }
+  },
+  "unmatched": {
+    "kraken2": [],
+    "wilder": []
+  }
+}

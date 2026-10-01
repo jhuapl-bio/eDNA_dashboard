@@ -1,0 +1,43 @@
+  3.57	1222	1222	U	0	unclassified
+ 96.43	32996	0	R	1	root
+ 96.43	32996	0	R1	131567	  cellular organisms
+ 96.43	32996	0	D	2759	    Eukaryota
+ 83.74	28654	0	K	33208	      Metazoa
+ 64.58	22099	0	P	7711	        Chordata
+ 64.58	22099	0	C	186623	          Actinopteri
+ 31.06	10629	0	G	2247181	            Anchoa
+ 31.06	10629	10629	S	224718	              Anchoa mitchilli (Bay anchovy)
+ 19.87	6798	0	G	551181	            Brevoortia
+ 19.87	6798	6798	S	55118	              Brevoortia tyrannus (Atlantic menhaden)
+  4.16	1422	0	G	80961	            Menidia
+  4.16	1422	1422	S	8096	              Menidia menidia (Atlantic silverside)
+  4.06	1389	0	G	82571	            Paralichthys
+  4.06	1389	1389	S	8257	              Paralichthys dentatus (Summer flounder)
+  3.00	1025	0	G	81671	            Pomatomus
+  3.00	1025	1025	S	8167	              Pomatomus saltatrix (Bluefish)
+  2.44	836	0	G	291541	            Micropogonias
+  2.44	836	836	S	29154	              Micropogonias undulatus (Atlantic croaker)
+ 11.40	3900	0	P	6656	        Arthropoda
+  7.88	2696	0	C	72037	          Hexanauplia
+  7.88	2696	0	G	4631891	            Centropages
+  7.88	2696	2696	S	463189	              Centropages typicus (Copepod)
+  3.52	1204	0	C	6681	          Malacostraca
+  3.52	1204	0	G	67631	            Callinectes
+  3.52	1204	1204	S	6763	              Callinectes sapidus (Blue crab)
+  4.03	1380	0	P	6447	        Mollusca
+  4.03	1380	0	C	6544	          Bivalvia
+  4.03	1380	0	G	65651	            Crassostrea
+  4.03	1380	1380	S	6565	              Crassostrea virginica (Eastern oyster)
+  3.73	1275	0	P	10197	        Ctenophora
+  3.73	1275	0	C	10198	          Tentaculata
+  3.73	1275	0	G	279231	            Mnemiopsis
+  3.73	1275	1275	S	27923	              Mnemiopsis leidyi (American comb jelly)
+  9.19	3143	0	P	2836	      Bacillariophyta
+  9.19	3143	0	C	33849	        Mediophyceae
+  9.19	3143	0	G	28431	          Skeletonema
+  9.19	3143	3143	S	2843	            Skeletonema costatum (Diatom)
+  3.50	1199	0	K	33090	      Viridiplantae
+  3.50	1199	0	P	3041	        Chlorophyta
+  3.50	1199	0	C	1035538	          Mamiellophyceae
+  3.50	1199	0	G	418751	            Bathycoccus
+  3.50	1199	1199	S	41875	              Bathycoccus prasinos (Green alga)

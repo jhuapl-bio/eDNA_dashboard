@@ -1,0 +1,35 @@
+  9.91	1123	1123	U	0	unclassified
+ 90.09	10214	0	R	1	root
+ 90.09	10214	0	R1	131567	  cellular organisms
+ 89.45	10141	0	D	2759	    Eukaryota
+ 81.96	9292	0	K	33208	      Metazoa
+ 38.78	4396	0	P	6656	        Arthropoda
+ 28.39	3219	0	C	72037	          Hexanauplia
+ 28.39	3219	0	G	4631891	            Centropages
+ 28.39	3219	3219	S	463189	              Centropages typicus (Copepod)
+ 10.38	1177	0	C	6658	          Branchiopoda
+ 10.38	1177	0	G	1241401	            Penilia
+ 10.38	1177	1177	S	124140	              Penilia avirostris (Water flea)
+ 29.39	3332	0	P	7711	        Chordata
+ 29.39	3332	0	C	186623	          Actinopteri
+ 12.14	1376	0	G	81671	            Pomatomus
+ 12.14	1376	1376	S	8167	              Pomatomus saltatrix (Bluefish)
+ 10.03	1137	0	G	551181	            Brevoortia
+ 10.03	1137	1137	S	55118	              Brevoortia tyrannus (Atlantic menhaden)
+  4.09	464	0	G	2247181	            Anchoa
+  4.09	464	464	S	224718	              Anchoa mitchilli (Bay anchovy)
+  3.13	355	0	G	348161	            Morone
+  3.13	355	355	S	34816	              Morone saxatilis (Striped bass)
+ 13.80	1564	0	P	10197	        Ctenophora
+ 13.80	1564	0	C	10198	          Tentaculata
+ 13.80	1564	0	G	279231	            Mnemiopsis
+ 13.80	1564	1564	S	27923	              Mnemiopsis leidyi (American comb jelly)
+  7.49	849	0	P	2836	      Bacillariophyta
+  7.49	849	0	C	33849	        Mediophyceae
+  7.49	849	0	G	351281	          Thalassiosira
+  7.49	849	849	S	35128	            Thalassiosira pseudonana (Diatom)
+  0.64	73	0	D	2	    Bacteria
+  0.64	73	0	P	1224	      Pseudomonadota
+  0.64	73	0	C	1236	        Gammaproteobacteria
+  0.64	73	0	G	6721	          Vibrio
+  0.64	73	73	S	672	            Vibrio vulnificus

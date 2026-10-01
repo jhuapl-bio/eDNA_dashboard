@@ -1,0 +1,17 @@
+# systemd unit for the MBON API. Replace REPO_DIR and USER, then:
+#   sudo cp deploy/mbon-api.service /etc/systemd/system/ && sudo systemctl enable --now mbon-api
+[Unit]
+Description=MBON Dashboard Flask API
+After=network.target
+
+[Service]
+Type=simple
+User=USER
+WorkingDirectory=REPO_DIR/api
+EnvironmentFile=REPO_DIR/api/.env
+ExecStart=REPO_DIR/api/venv/bin/python REPO_DIR/api/app.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

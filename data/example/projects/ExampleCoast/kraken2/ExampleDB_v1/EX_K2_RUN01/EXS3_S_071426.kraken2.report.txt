@@ -1,0 +1,48 @@
+  0.60	334	334	U	0	unclassified
+ 99.40	55021	0	R	1	root
+ 99.40	55021	0	R1	131567	  cellular organisms
+ 99.40	55021	0	D	2759	    Eukaryota
+ 86.56	47916	0	K	33208	      Metazoa
+ 40.26	22287	0	P	6656	        Arthropoda
+ 36.11	19988	0	C	72037	          Hexanauplia
+ 36.11	19988	0	G	1361801	            Acartia
+ 36.11	19988	19988	S	136180	              Acartia tonsa (Copepod)
+  4.15	2299	0	C	6658	          Branchiopoda
+  4.15	2299	0	G	1241401	            Penilia
+  4.15	2299	2299	S	124140	              Penilia avirostris (Water flea)
+ 38.07	21073	0	P	7711	        Chordata
+ 37.67	20851	0	C	186623	          Actinopteri
+ 15.99	8854	0	G	2247181	            Anchoa
+ 15.99	8854	8854	S	224718	              Anchoa mitchilli (Bay anchovy)
+ 13.94	7716	0	G	551181	            Brevoortia
+ 13.94	7716	7716	S	55118	              Brevoortia tyrannus (Atlantic menhaden)
+  5.37	2973	0	G	80961	            Menidia
+  5.37	2973	2973	S	8096	              Menidia menidia (Atlantic silverside)
+  1.59	881	0	G	81671	            Pomatomus
+  1.59	881	881	S	8167	              Pomatomus saltatrix (Bluefish)
+  0.77	427	0	G	82571	            Paralichthys
+  0.77	427	427	S	8257	              Paralichthys dentatus (Summer flounder)
+  0.40	222	0	C	40674	          Mammalia
+  0.40	222	0	G	97421	            Phocoena
+  0.40	222	222	S	9742	              Phocoena phocoena (Harbor porpoise)
+  6.15	3403	0	P	6447	        Mollusca
+  6.15	3403	0	C	6544	          Bivalvia
+  4.33	2395	0	G	65651	            Crassostrea
+  4.33	2395	2395	S	6565	              Crassostrea virginica (Eastern oyster)
+  1.82	1008	0	G	65501	            Mytilus
+  1.82	1008	1008	S	6550	              Mytilus edulis (Blue mussel)
+  2.08	1153	0	P	10197	        Ctenophora
+  2.08	1153	0	C	10198	          Tentaculata
+  2.08	1153	0	G	279231	            Mnemiopsis
+  2.08	1153	1153	S	27923	              Mnemiopsis leidyi (American comb jelly)
+  9.37	5186	0	K	33090	      Viridiplantae
+  9.37	5186	0	P	3041	        Chlorophyta
+  9.37	5186	0	C	1035538	          Mamiellophyceae
+  5.41	2996	0	G	418751	            Bathycoccus
+  5.41	2996	2996	S	41875	              Bathycoccus prasinos (Green alga)
+  3.96	2190	0	G	388331	            Micromonas
+  3.96	2190	2190	S	38833	              Micromonas pusilla (Green alga)
+  3.47	1919	0	P	2836	      Bacillariophyta
+  3.47	1919	0	C	33849	        Mediophyceae
+  3.47	1919	0	G	351281	          Thalassiosira
+  3.47	1919	1919	S	35128	            Thalassiosira pseudonana (Diatom)

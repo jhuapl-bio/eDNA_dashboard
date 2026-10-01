@@ -1,0 +1,112 @@
+/* ════════════════════════════════════════════════════════════════════════
+   MBON Dashboard — universal table & chart tools (enhance.js companion)
+   Hover corner button, export / column / sort popups.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* host any card so the floating toolbar can anchor to its corner */
+.card { position: relative; }
+
+/* ── Floating corner toolbar ──────────────────────────────────────────── */
+.mbon-tools {
+  position: absolute;
+  top: 6px; right: 6px;
+  display: flex; gap: 4px;
+  z-index: 30;
+  opacity: 0;
+  transform: translateY(-3px);
+  pointer-events: none;
+  transition: opacity .15s ease, transform .15s ease;
+}
+/* reveal on hover of the host card */
+.card:hover > .mbon-tools,
+.mbon-host:hover > .mbon-tools,
+.mbon-tools:focus-within,
+.mbon-tools.mbon-pinned {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.mbon-tool-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: .25rem;
+  height: 26px; min-width: 26px; padding: 0 .45rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: rgba(255,255,255,.96);
+  color: var(--ocean-dk);
+  font-size: .74rem; font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,.12);
+  transition: background .12s, color .12s, border-color .12s;
+}
+.mbon-tool-btn:hover { background: var(--ocean); color: #fff; border-color: var(--ocean); }
+
+/* ── Popovers ─────────────────────────────────────────────────────────── */
+.mbon-pop {
+  position: fixed;
+  z-index: 10000;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: 0 8px 30px rgba(0,0,0,.22);
+  padding: .85rem .95rem;
+  width: 320px;
+  max-height: 80vh;
+  overflow-y: auto;
+  font-size: .82rem;
+  color: var(--text);
+}
+.mbon-pop h4 {
+  font-size: .74rem; text-transform: uppercase; letter-spacing: .5px;
+  color: var(--muted); margin: 0 0 .5rem; font-weight: 700;
+}
+.mbon-pop .mbon-row { display: flex; align-items: center; gap: .5rem; margin-bottom: .55rem; flex-wrap: wrap; }
+.mbon-pop label { font-size: .8rem; color: var(--text); }
+.mbon-pop select, .mbon-pop input[type=text], .mbon-pop input[type=number] {
+  border: 1px solid var(--border); border-radius: 6px;
+  padding: .3rem .5rem; font-size: .8rem; background: #fff; outline: none;
+}
+.mbon-pop select:focus, .mbon-pop input:focus { border-color: var(--ocean); }
+.mbon-pop .mbon-divider { border-top: 1px solid var(--border); margin: .65rem -.95rem; }
+.mbon-pop .mbon-actions { display: flex; justify-content: flex-end; gap: .4rem; margin-top: .6rem; }
+
+.mbon-fmt-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem; margin-bottom: .6rem; }
+.mbon-fmt-btn {
+  border: 1px solid var(--border); border-radius: 6px; background: #fff;
+  padding: .4rem .25rem; font-size: .75rem; font-weight: 600; cursor: pointer;
+  color: var(--ocean-dk); text-align: center; transition: all .12s;
+}
+.mbon-fmt-btn:hover { border-color: var(--ocean); }
+.mbon-fmt-btn.active { background: var(--ocean); color: #fff; border-color: var(--ocean); }
+
+.mbon-col-list { display: flex; flex-direction: column; gap: .2rem; margin-bottom: .4rem; }
+.mbon-col-item {
+  display: flex; align-items: center; gap: .45rem;
+  padding: .28rem .4rem; border-radius: 6px; cursor: pointer; user-select: none;
+}
+.mbon-col-item:hover { background: var(--foam); }
+.mbon-col-item input { cursor: pointer; }
+.mbon-col-item .mbon-col-name { flex: 1; }
+.mbon-col-item .mbon-col-derived { font-size: .68rem; color: var(--ocean); background: var(--foam); border-radius: 4px; padding: 0 .35rem; }
+.mbon-col-item .mbon-col-del { color: #ef4444; background: none; border: none; cursor: pointer; font-size: .85rem; }
+
+.mbon-mini-btn {
+  border: 1px solid var(--border); border-radius: 6px; background: #fff;
+  padding: .28rem .6rem; font-size: .76rem; font-weight: 600; cursor: pointer; color: var(--ocean-dk);
+}
+.mbon-mini-btn:hover { background: var(--ocean); color: #fff; border-color: var(--ocean); }
+.mbon-mini-btn.primary { background: var(--ocean); color: #fff; border-color: var(--ocean); }
+.mbon-mini-btn.ghost { color: var(--muted); }
+
+.mbon-hint { font-size: .72rem; color: var(--muted); line-height: 1.5; }
+
+/* sort affordance for tables the enhancer manages */
+th.mbon-sortable { cursor: pointer; user-select: none; }
+th.mbon-sortable .mbon-sort-ind { opacity: .45; font-size: .8em; margin-left: .25rem; }
+th.mbon-sortable.mbon-sorted .mbon-sort-ind { opacity: 1; color: var(--ocean); }
+
+/* derived column cells */
+.mbon-derived-cell, th.mbon-derived-th { background: rgba(0,119,182,.05); }
+th.mbon-derived-th { color: var(--ocean-dk); }
+
+.mbon-backdrop { position: fixed; inset: 0; z-index: 9999; background: transparent; }

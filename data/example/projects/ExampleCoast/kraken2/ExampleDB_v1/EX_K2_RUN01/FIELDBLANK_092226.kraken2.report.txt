@@ -1,0 +1,13 @@
+ 96.21	1397	1397	U	0	unclassified
+  3.79	55	0	R	1	root
+  3.79	55	0	R1	131567	  cellular organisms
+  3.79	55	0	D	2759	    Eukaryota
+  3.79	55	0	K	33208	      Metazoa
+  3.51	51	0	P	6656	        Arthropoda
+  3.51	51	0	C	72037	          Hexanauplia
+  3.51	51	0	G	4631891	            Centropages
+  3.51	51	51	S	463189	              Centropages typicus (Copepod)
+  0.28	4	0	P	6447	        Mollusca
+  0.28	4	0	C	6544	          Bivalvia
+  0.28	4	0	G	65501	            Mytilus
+  0.28	4	4	S	6550	              Mytilus edulis (Blue mussel)

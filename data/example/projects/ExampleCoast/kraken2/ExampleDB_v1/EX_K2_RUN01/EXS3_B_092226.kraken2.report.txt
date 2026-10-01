@@ -1,0 +1,36 @@
+ 20.84	2099	2099	U	0	unclassified
+ 79.16	7975	0	R	1	root
+ 79.16	7975	0	R1	131567	  cellular organisms
+ 78.09	7867	0	D	2759	    Eukaryota
+ 41.11	4141	0	K	33208	      Metazoa
+ 25.78	2597	0	P	6656	        Arthropoda
+ 13.83	1393	0	C	6681	          Malacostraca
+ 13.83	1393	0	G	67631	            Callinectes
+ 13.83	1393	1393	S	6763	              Callinectes sapidus (Blue crab)
+ 11.95	1204	0	C	72037	          Hexanauplia
+ 11.95	1204	0	G	4631891	            Centropages
+ 11.95	1204	1204	S	463189	              Centropages typicus (Copepod)
+ 10.29	1037	0	P	7711	        Chordata
+ 10.29	1037	0	C	186623	          Actinopteri
+  6.66	671	0	G	81671	            Pomatomus
+  6.66	671	671	S	8167	              Pomatomus saltatrix (Bluefish)
+  3.63	366	0	G	348161	            Morone
+  3.63	366	366	S	34816	              Morone saxatilis (Striped bass)
+  5.03	507	0	P	6447	        Mollusca
+  5.03	507	0	C	6544	          Bivalvia
+  5.03	507	0	G	65651	            Crassostrea
+  5.03	507	507	S	6565	              Crassostrea virginica (Eastern oyster)
+ 22.33	2250	0	P	2836	      Bacillariophyta
+ 22.33	2250	0	C	33849	        Mediophyceae
+ 22.33	2250	0	G	351281	          Thalassiosira
+ 22.33	2250	2250	S	35128	            Thalassiosira pseudonana (Diatom)
+ 14.65	1476	0	K	33090	      Viridiplantae
+ 14.65	1476	0	P	3041	        Chlorophyta
+ 14.65	1476	0	C	1035538	          Mamiellophyceae
+ 14.65	1476	0	G	388331	            Micromonas
+ 14.65	1476	1476	S	38833	              Micromonas pusilla (Green alga)
+  1.07	108	0	D	2	    Bacteria
+  1.07	108	0	P	1224	      Pseudomonadota
+  1.07	108	0	C	1236	        Gammaproteobacteria
+  1.07	108	0	G	6721	          Vibrio
+  1.07	108	108	S	672	            Vibrio vulnificus

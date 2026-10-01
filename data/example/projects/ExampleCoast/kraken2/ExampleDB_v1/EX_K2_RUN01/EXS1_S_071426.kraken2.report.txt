@@ -1,0 +1,37 @@
+  2.29	1178	1178	U	0	unclassified
+ 97.71	50283	0	R	1	root
+ 97.71	50283	0	R1	131567	  cellular organisms
+ 97.71	50283	0	D	2759	    Eukaryota
+ 57.09	29381	0	K	33208	      Metazoa
+ 41.48	21345	0	P	7711	        Chordata
+ 40.43	20808	0	C	186623	          Actinopteri
+ 29.69	15281	0	G	551181	            Brevoortia
+ 29.69	15281	15281	S	55118	              Brevoortia tyrannus (Atlantic menhaden)
+  6.91	3557	0	G	80961	            Menidia
+  6.91	3557	3557	S	8096	              Menidia menidia (Atlantic silverside)
+  3.83	1970	0	G	348161	            Morone
+  3.83	1970	1970	S	34816	              Morone saxatilis (Striped bass)
+  1.04	537	0	C	40674	          Mammalia
+  1.04	537	0	G	97391	            Tursiops
+  1.04	537	537	S	9739	              Tursiops truncatus (Common bottlenose dolphin)
+ 14.43	7427	0	P	6447	        Mollusca
+ 14.43	7427	0	C	6544	          Bivalvia
+ 10.35	5325	0	G	65651	            Crassostrea
+ 10.35	5325	5325	S	6565	              Crassostrea virginica (Eastern oyster)
+  4.08	2102	0	G	65501	            Mytilus
+  4.08	2102	2102	S	6550	              Mytilus edulis (Blue mussel)
+  1.18	609	0	P	6656	        Arthropoda
+  1.18	609	0	C	72037	          Hexanauplia
+  1.18	609	0	G	4631891	            Centropages
+  1.18	609	609	S	463189	              Centropages typicus (Copepod)
+ 28.97	14909	0	P	2836	      Bacillariophyta
+ 28.97	14909	0	C	33849	        Mediophyceae
+ 28.97	14909	0	G	28431	          Skeletonema
+ 28.97	14909	14909	S	2843	            Skeletonema costatum (Diatom)
+ 11.65	5993	0	K	33090	      Viridiplantae
+ 11.65	5993	0	P	3041	        Chlorophyta
+ 11.65	5993	0	C	1035538	          Mamiellophyceae
+  9.30	4788	0	G	388331	            Micromonas
+  9.30	4788	4788	S	38833	              Micromonas pusilla (Green alga)
+  2.34	1205	0	G	418751	            Bathycoccus
+  2.34	1205	1205	S	41875	              Bathycoccus prasinos (Green alga)

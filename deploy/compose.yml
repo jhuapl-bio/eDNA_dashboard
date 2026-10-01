@@ -1,0 +1,45 @@
+# Local development database (+ optional Metabase).
+#   POSTGRES_PASSWORD=... docker compose -f deploy/compose.yml up -d
+# Then put the same password in .env / api/.env as PGPASSWORD.
+services:
+  postgres:
+    image: postgres:16
+    container_name: mbon-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - mbon-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      retries: 5
+    networks: [mbon]
+
+  metabase:
+    image: metabase/metabase:latest
+    container_name: mbon-metabase
+    profiles: ["metabase"]          # start with: --profile metabase
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      MB_DB_TYPE: postgres
+      MB_DB_DBNAME: ${POSTGRES_DB:-postgres}
+      MB_DB_PORT: 5432
+      MB_DB_USER: ${POSTGRES_USER:-postgres}
+      MB_DB_PASS: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      MB_DB_HOST: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [mbon]
+
+volumes:
+  mbon-pgdata:
+
+networks:
+  mbon:
+    driver: bridge

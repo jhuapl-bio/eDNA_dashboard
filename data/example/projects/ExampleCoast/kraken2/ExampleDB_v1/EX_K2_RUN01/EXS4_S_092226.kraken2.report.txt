@@ -1,0 +1,34 @@
+  0.86	376	376	U	0	unclassified
+ 99.14	43568	0	R	1	root
+ 99.14	43568	0	R1	131567	  cellular organisms
+ 99.14	43568	0	D	2759	    Eukaryota
+ 97.00	42624	0	K	33208	      Metazoa
+ 68.97	30307	0	P	6656	        Arthropoda
+ 63.37	27846	0	C	72037	          Hexanauplia
+ 63.37	27846	0	G	1361801	            Acartia
+ 63.37	27846	27846	S	136180	              Acartia tonsa (Copepod)
+  5.60	2461	0	C	6658	          Branchiopoda
+  5.60	2461	0	G	1241401	            Penilia
+  5.60	2461	2461	S	124140	              Penilia avirostris (Water flea)
+ 23.25	10217	0	P	7711	        Chordata
+ 22.80	10020	0	C	186623	          Actinopteri
+ 12.38	5441	0	G	551181	            Brevoortia
+ 12.38	5441	5441	S	55118	              Brevoortia tyrannus (Atlantic menhaden)
+  5.68	2494	0	G	2247181	            Anchoa
+  5.68	2494	2494	S	224718	              Anchoa mitchilli (Bay anchovy)
+  3.95	1737	0	G	80961	            Menidia
+  3.95	1737	1737	S	8096	              Menidia menidia (Atlantic silverside)
+  0.79	348	0	G	82571	            Paralichthys
+  0.79	348	348	S	8257	              Paralichthys dentatus (Summer flounder)
+  0.45	197	0	C	40674	          Mammalia
+  0.45	197	0	G	97731	            Megaptera
+  0.45	197	197	S	9773	              Megaptera novaeangliae (Humpback whale)
+  4.78	2100	0	P	10197	        Ctenophora
+  4.78	2100	0	C	10198	          Tentaculata
+  4.78	2100	0	G	279231	            Mnemiopsis
+  4.78	2100	2100	S	27923	              Mnemiopsis leidyi (American comb jelly)
+  2.15	944	0	K	33090	      Viridiplantae
+  2.15	944	0	P	3041	        Chlorophyta
+  2.15	944	0	C	1035538	          Mamiellophyceae
+  2.15	944	0	G	418751	            Bathycoccus
+  2.15	944	944	S	41875	              Bathycoccus prasinos (Green alga)

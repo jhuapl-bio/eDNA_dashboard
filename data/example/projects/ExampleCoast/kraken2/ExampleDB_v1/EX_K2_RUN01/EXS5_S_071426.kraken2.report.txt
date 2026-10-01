@@ -1,0 +1,37 @@
+  2.38	817	817	U	0	unclassified
+ 97.62	33491	0	R	1	root
+ 97.62	33491	0	R1	131567	  cellular organisms
+ 97.62	33491	0	D	2759	    Eukaryota
+ 76.79	26344	0	K	33208	      Metazoa
+ 68.49	23498	0	P	6656	        Arthropoda
+ 53.56	18377	0	C	72037	          Hexanauplia
+ 38.12	13077	0	G	1361801	            Acartia
+ 38.12	13077	13077	S	136180	              Acartia tonsa (Copepod)
+ 15.45	5300	0	G	4631891	            Centropages
+ 15.45	5300	5300	S	463189	              Centropages typicus (Copepod)
+ 14.93	5121	0	C	6658	          Branchiopoda
+ 14.93	5121	0	G	1241401	            Penilia
+ 14.93	5121	5121	S	124140	              Penilia avirostris (Water flea)
+  4.18	1433	0	P	10197	        Ctenophora
+  4.18	1433	0	C	10198	          Tentaculata
+  4.18	1433	0	G	279231	            Mnemiopsis
+  4.18	1433	1433	S	27923	              Mnemiopsis leidyi (American comb jelly)
+  3.67	1259	0	P	6447	        Mollusca
+  3.67	1259	0	C	6544	          Bivalvia
+  3.67	1259	0	G	65651	            Crassostrea
+  3.67	1259	1259	S	6565	              Crassostrea virginica (Eastern oyster)
+  0.45	154	0	P	7711	        Chordata
+  0.45	154	0	C	186623	          Actinopteri
+  0.45	154	0	G	348161	            Morone
+  0.45	154	154	S	34816	              Morone saxatilis (Striped bass)
+ 15.26	5235	0	K	33090	      Viridiplantae
+ 15.26	5235	0	P	3041	        Chlorophyta
+ 15.26	5235	0	C	1035538	          Mamiellophyceae
+ 15.26	5235	0	G	388331	            Micromonas
+ 15.26	5235	5235	S	38833	              Micromonas pusilla (Green alga)
+  5.57	1912	0	P	2836	      Bacillariophyta
+  5.57	1912	0	C	33849	        Mediophyceae
+  2.87	986	0	G	28431	          Skeletonema
+  2.87	986	986	S	2843	            Skeletonema costatum (Diatom)
+  2.70	926	0	G	351281	          Thalassiosira
+  2.70	926	926	S	35128	            Thalassiosira pseudonana (Diatom)

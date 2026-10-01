@@ -1,0 +1,24 @@
+  5.13	1726	1726	U	0	unclassified
+ 94.87	31897	0	R	1	root
+ 94.87	31897	0	R1	131567	  cellular organisms
+ 94.87	31897	0	D	2759	    Eukaryota
+ 87.59	29449	0	K	33208	      Metazoa
+ 59.75	20091	0	P	6656	        Arthropoda
+ 59.75	20091	0	C	72037	          Hexanauplia
+ 49.79	16740	0	G	1361801	            Acartia
+ 49.79	16740	16740	S	136180	              Acartia tonsa (Copepod)
+  9.97	3351	0	G	4631891	            Centropages
+  9.97	3351	3351	S	463189	              Centropages typicus (Copepod)
+ 27.83	9358	0	P	7711	        Chordata
+ 27.83	9358	0	C	186623	          Actinopteri
+ 18.55	6238	0	G	2247181	            Anchoa
+ 18.55	6238	6238	S	224718	              Anchoa mitchilli (Bay anchovy)
+  6.11	2053	0	G	80961	            Menidia
+  6.11	2053	2053	S	8096	              Menidia menidia (Atlantic silverside)
+  3.17	1067	0	G	81671	            Pomatomus
+  3.17	1067	1067	S	8167	              Pomatomus saltatrix (Bluefish)
+  7.28	2448	0	K	33090	      Viridiplantae
+  7.28	2448	0	P	3041	        Chlorophyta
+  7.28	2448	0	C	1035538	          Mamiellophyceae
+  7.28	2448	0	G	388331	            Micromonas
+  7.28	2448	2448	S	38833	              Micromonas pusilla (Green alga)

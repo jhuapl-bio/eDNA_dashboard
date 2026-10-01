@@ -1,0 +1,15 @@
+# systemd unit serving the static dashboard. Replace REPO_DIR and USER.
+[Unit]
+Description=MBON Dashboard Frontend (static HTTP server)
+After=network.target
+
+[Service]
+Type=simple
+User=USER
+WorkingDirectory=REPO_DIR/frontend
+ExecStart=/usr/bin/python3 -m http.server 8280 --bind 127.0.0.1
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

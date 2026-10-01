@@ -1,0 +1,29 @@
+ 11.09	856	856	U	0	unclassified
+ 88.91	6860	0	R	1	root
+ 88.91	6860	0	R1	131567	  cellular organisms
+ 88.91	6860	0	D	2759	    Eukaryota
+ 76.94	5937	0	K	33208	      Metazoa
+ 70.80	5463	0	P	7711	        Chordata
+ 65.68	5068	0	C	186623	          Actinopteri
+ 33.81	2609	0	G	551181	            Brevoortia
+ 33.81	2609	2609	S	55118	              Brevoortia tyrannus (Atlantic menhaden)
+ 11.99	925	0	G	82571	            Paralichthys
+ 11.99	925	925	S	8257	              Paralichthys dentatus (Summer flounder)
+ 11.46	884	0	G	2247181	            Anchoa
+ 11.46	884	884	S	224718	              Anchoa mitchilli (Bay anchovy)
+  8.42	650	0	G	291541	            Micropogonias
+  8.42	650	650	S	29154	              Micropogonias undulatus (Atlantic croaker)
+  5.12	395	0	C	40674	          Mammalia
+  3.19	246	0	G	97421	            Phocoena
+  3.19	246	246	S	9742	              Phocoena phocoena (Harbor porpoise)
+  1.93	149	0	G	97391	            Tursiops
+  1.93	149	149	S	9739	              Tursiops truncatus (Common bottlenose dolphin)
+  6.14	474	0	P	6447	        Mollusca
+  6.14	474	0	C	6544	          Bivalvia
+  6.14	474	0	G	65501	            Mytilus
+  6.14	474	474	S	6550	              Mytilus edulis (Blue mussel)
+ 11.96	923	0	K	33090	      Viridiplantae
+ 11.96	923	0	P	3041	        Chlorophyta
+ 11.96	923	0	C	1035538	          Mamiellophyceae
+ 11.96	923	0	G	418751	            Bathycoccus
+ 11.96	923	923	S	41875	              Bathycoccus prasinos (Green alga)

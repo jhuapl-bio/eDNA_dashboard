@@ -1,0 +1,28 @@
+ 14.90	1084	1084	U	0	unclassified
+ 85.10	6190	0	R	1	root
+ 85.10	6190	0	R1	131567	  cellular organisms
+ 85.10	6190	0	D	2759	    Eukaryota
+ 63.76	4638	0	K	33208	      Metazoa
+ 43.99	3200	0	P	7711	        Chordata
+ 36.73	2672	0	C	186623	          Actinopteri
+ 22.37	1627	0	G	2247181	            Anchoa
+ 22.37	1627	1627	S	224718	              Anchoa mitchilli (Bay anchovy)
+ 14.37	1045	0	G	81671	            Pomatomus
+ 14.37	1045	1045	S	8167	              Pomatomus saltatrix (Bluefish)
+  7.26	528	0	C	40674	          Mammalia
+  5.49	399	0	G	97421	            Phocoena
+  5.49	399	399	S	9742	              Phocoena phocoena (Harbor porpoise)
+  1.77	129	0	G	97391	            Tursiops
+  1.77	129	129	S	9739	              Tursiops truncatus (Common bottlenose dolphin)
+ 12.70	924	0	P	10197	        Ctenophora
+ 12.70	924	0	C	10198	          Tentaculata
+ 12.70	924	0	G	279231	            Mnemiopsis
+ 12.70	924	924	S	27923	              Mnemiopsis leidyi (American comb jelly)
+  7.07	514	0	P	6073	        Cnidaria
+  7.07	514	0	C	6142	          Scyphozoa
+  7.07	514	0	G	61451	            Aurelia
+  7.07	514	514	S	6145	              Aurelia aurita (Moon jelly)
+ 21.34	1552	0	P	2836	      Bacillariophyta
+ 21.34	1552	0	C	33849	        Mediophyceae
+ 21.34	1552	0	G	351281	          Thalassiosira
+ 21.34	1552	1552	S	35128	            Thalassiosira pseudonana (Diatom)

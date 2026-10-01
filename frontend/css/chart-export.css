@@ -1,0 +1,284 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   chart-export.css — styling for the export buttons and the export overlay.
+   Paired with js/chart-export.js.
+   ──────────────────────────────────────────────────────────────────────────── */
+
+/* Applied by the script to any container it gave its own button strip. */
+.ce-host { position: relative; }
+
+/* Reserved strip above the chart/table — height is real, so the button never
+   covers the content. Sticky so it stays put when the box scrolls. */
+.chart-export-slot {
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 6;
+  height: 26px;
+  width: 100%;
+  overflow: visible;
+  pointer-events: none;
+  text-align: right;
+}
+
+.chart-export-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  height: 22px;
+  padding: 0 .45rem;
+  border: 1px solid var(--border, #dee2e6);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, .9);
+  color: var(--muted, #6c757d);
+  font: inherit;
+  font-size: .72rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color .15s, border-color .15s, background .15s;
+}
+.chart-export-slot > .chart-export-btn {
+  position: absolute;
+  top: 0;
+  right: 2px;
+  pointer-events: auto;
+}
+/* When it rides in an existing toolbar row, push it to the far right. */
+.chart-export-btn--inline { margin-left: .35rem; }
+.chart-export-btn:hover,
+.chart-export-btn:focus-visible {
+  color: var(--ocean, #0077b6);
+  border-color: var(--ocean, #0077b6);
+  background: #fff;
+}
+.chart-export-btn-txt { font-weight: 600; letter-spacing: .01em; }
+@media (max-width: 640px) {
+  .chart-export-btn-txt { display: none; }
+}
+
+/* ── Overlay ─────────────────────────────────────────────────────────────── */
+.chart-export-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 4000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(15, 30, 45, .45);
+  backdrop-filter: blur(2px);
+}
+.chart-export-overlay.is-open { display: flex; }
+
+.chart-export-modal {
+  background: #fff;
+  border-radius: var(--radius, 8px);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .32);
+  width: min(880px, 100%);
+  max-height: min(90vh, 760px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-size: .82rem;
+  color: var(--text, #1b2631);
+}
+
+.chart-export-head {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .9rem 1.1rem .5rem;
+}
+.chart-export-head h3 { font-size: .95rem; font-weight: 700; margin-right: auto; }
+.chart-export-close {
+  border: none;
+  background: transparent;
+  font-size: 1.35rem;
+  line-height: 1;
+  color: var(--muted, #6c757d);
+  cursor: pointer;
+  padding: 0 .2rem;
+}
+.chart-export-close:hover { color: var(--text, #1b2631); }
+
+.chart-export-sub {
+  padding: 0 1.1rem .75rem;
+  color: var(--muted, #6c757d);
+  font-size: .78rem;
+  border-bottom: 1px solid var(--border, #dee2e6);
+}
+
+.chart-export-body {
+  display: grid;
+  grid-template-columns: minmax(280px, 340px) 1fr;
+  gap: 1.1rem;
+  padding: 1rem 1.1rem;
+  overflow: auto;
+}
+.chart-export-body[hidden] { display: none; }
+@media (max-width: 720px) {
+  .chart-export-body { grid-template-columns: 1fr; }
+}
+
+.chart-export-controls { display: flex; flex-direction: column; gap: .7rem; }
+
+.chart-export-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .5rem .7rem;
+}
+.chart-export-label {
+  font-size: .7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--muted, #6c757d);
+  min-width: 4.6rem;
+}
+.chart-export-row > label {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  font-size: .78rem;
+}
+.chart-export-row input[type="number"] {
+  width: 84px;
+  padding: .3rem .4rem;
+  border: 1px solid var(--border, #dee2e6);
+  border-radius: 6px;
+  font: inherit;
+}
+.chart-export-row > label > span { color: var(--muted, #6c757d); font-size: .72rem; }
+
+.chart-export-check {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  font-size: .78rem;
+  cursor: pointer;
+}
+.chart-export-check.is-disabled { opacity: .45; cursor: not-allowed; }
+
+.chart-export-presets button {
+  border: 1px solid var(--border, #dee2e6);
+  background: #fff;
+  border-radius: 6px;
+  padding: .22rem .55rem;
+  font: inherit;
+  font-size: .75rem;
+  cursor: pointer;
+  color: var(--text, #1b2631);
+}
+.chart-export-presets button:hover {
+  border-color: var(--ocean, #0077b6);
+  color: var(--ocean, #0077b6);
+}
+
+.chart-export-hint { font-size: .72rem; color: var(--muted, #6c757d); line-height: 1.5; }
+
+.chart-export-preview { display: flex; flex-direction: column; gap: .35rem; min-width: 0; }
+.chart-export-preview-box {
+  flex: 1;
+  min-height: 240px;
+  border: 1px solid var(--border, #dee2e6);
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+}
+.chart-export-preview-box.is-transparent {
+  /* Checkerboard so a transparent background reads as transparent. */
+  background-color: #fff;
+  background-image:
+    linear-gradient(45deg, #eceff1 25%, transparent 25%, transparent 75%, #eceff1 75%),
+    linear-gradient(45deg, #eceff1 25%, transparent 25%, transparent 75%, #eceff1 75%);
+  background-size: 16px 16px;
+  background-position: 0 0, 8px 8px;
+}
+.chart-export-preview-box svg { max-width: 100%; max-height: 100%; }
+
+/* ── Table mode ──────────────────────────────────────────────────────────── */
+.chart-export-tablebody {
+  padding: 1rem 1.1rem;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+}
+.chart-export-tablebody[hidden] { display: none; }
+.chart-export-tablepreview {
+  border: 1px solid var(--border, #dee2e6);
+  border-radius: 6px;
+  overflow: auto;
+  max-height: 300px;
+}
+.chart-export-tablepreview table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: .74rem;
+}
+.chart-export-tablepreview th,
+.chart-export-tablepreview td {
+  border-bottom: 1px solid var(--border, #dee2e6);
+  padding: .3rem .5rem;
+  text-align: left;
+  white-space: nowrap;
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.chart-export-tablepreview thead th {
+  position: sticky;
+  top: 0;
+  background: var(--sand, #f8f9fa);
+  font-weight: 700;
+  z-index: 1;
+}
+.chart-export-tablepreview tbody tr:last-child td { color: var(--muted, #6c757d); font-style: italic; }
+
+/* ── Footer ──────────────────────────────────────────────────────────────── */
+.chart-export-foot {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .75rem 1.1rem;
+  border-top: 1px solid var(--border, #dee2e6);
+  background: var(--sand, #f8f9fa);
+}
+.chart-export-status { font-size: .76rem; color: var(--muted, #6c757d); margin-right: auto; }
+.chart-export-actions { display: flex; gap: .4rem; }
+.chart-export-actions[hidden] { display: none; }
+
+.ce-btn {
+  border: 1px solid var(--border, #dee2e6);
+  background: #fff;
+  color: var(--text, #1b2631);
+  border-radius: 6px;
+  padding: .4rem .85rem;
+  font: inherit;
+  font-size: .78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.ce-btn:hover:not(:disabled) {
+  border-color: var(--ocean, #0077b6);
+  color: var(--ocean, #0077b6);
+}
+.ce-btn-primary {
+  background: var(--ocean, #0077b6);
+  border-color: var(--ocean, #0077b6);
+  color: #fff;
+}
+.ce-btn-primary:hover:not(:disabled) {
+  background: var(--ocean-dk, #023e8a);
+  border-color: var(--ocean-dk, #023e8a);
+  color: #fff;
+}
+.ce-btn:disabled { opacity: .55; cursor: not-allowed; }
+
+@media print {
+  .chart-export-slot, .chart-export-btn, .chart-export-overlay { display: none !important; }
+}

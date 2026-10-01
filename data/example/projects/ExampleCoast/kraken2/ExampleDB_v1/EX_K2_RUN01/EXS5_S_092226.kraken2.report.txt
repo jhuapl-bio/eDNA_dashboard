@@ -1,0 +1,28 @@
+  5.01	929	929	U	0	unclassified
+ 94.99	17603	0	R	1	root
+ 94.99	17603	0	R1	131567	  cellular organisms
+ 94.99	17603	0	D	2759	    Eukaryota
+ 52.40	9710	0	K	33208	      Metazoa
+ 52.40	9710	0	P	7711	        Chordata
+ 52.40	9710	0	C	186623	          Actinopteri
+ 38.79	7188	0	G	551181	            Brevoortia
+ 38.79	7188	7188	S	55118	              Brevoortia tyrannus (Atlantic menhaden)
+  8.71	1614	0	G	80961	            Menidia
+  8.71	1614	1614	S	8096	              Menidia menidia (Atlantic silverside)
+  3.51	651	0	G	82571	            Paralichthys
+  3.51	651	651	S	8257	              Paralichthys dentatus (Summer flounder)
+  1.39	257	0	G	348161	            Morone
+  1.39	257	257	S	34816	              Morone saxatilis (Striped bass)
+ 23.70	4392	0	P	2836	      Bacillariophyta
+ 23.70	4392	0	C	33849	        Mediophyceae
+ 17.36	3217	0	G	28431	          Skeletonema
+ 17.36	3217	3217	S	2843	            Skeletonema costatum (Diatom)
+  6.34	1175	0	G	351281	          Thalassiosira
+  6.34	1175	1175	S	35128	            Thalassiosira pseudonana (Diatom)
+ 18.89	3501	0	K	33090	      Viridiplantae
+ 18.89	3501	0	P	3041	        Chlorophyta
+ 18.89	3501	0	C	1035538	          Mamiellophyceae
+ 10.77	1996	0	G	418751	            Bathycoccus
+ 10.77	1996	1996	S	41875	              Bathycoccus prasinos (Green alga)
+  8.12	1505	0	G	388331	            Micromonas
+  8.12	1505	1505	S	38833	              Micromonas pusilla (Green alga)

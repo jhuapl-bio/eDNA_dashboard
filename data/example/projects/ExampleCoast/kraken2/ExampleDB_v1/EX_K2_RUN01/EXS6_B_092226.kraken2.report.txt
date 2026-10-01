@@ -1,0 +1,26 @@
+  6.35	1648	1648	U	0	unclassified
+ 93.65	24297	0	R	1	root
+ 93.65	24297	0	R1	131567	  cellular organisms
+ 93.65	24297	0	D	2759	    Eukaryota
+ 83.85	21754	0	K	33208	      Metazoa
+ 66.27	17194	0	P	6656	        Arthropoda
+ 66.27	17194	0	C	72037	          Hexanauplia
+ 66.27	17194	0	G	4631891	            Centropages
+ 66.27	17194	17194	S	463189	              Centropages typicus (Copepod)
+ 16.74	4342	0	P	7711	        Chordata
+ 15.79	4098	0	C	186623	          Actinopteri
+ 11.51	2987	0	G	81671	            Pomatomus
+ 11.51	2987	2987	S	8167	              Pomatomus saltatrix (Bluefish)
+  4.28	1111	0	G	291541	            Micropogonias
+  4.28	1111	1111	S	29154	              Micropogonias undulatus (Atlantic croaker)
+  0.94	244	0	C	40674	          Mammalia
+  0.94	244	0	G	97731	            Megaptera
+  0.94	244	244	S	9773	              Megaptera novaeangliae (Humpback whale)
+  0.84	218	0	P	6073	        Cnidaria
+  0.84	218	0	C	6142	          Scyphozoa
+  0.84	218	0	G	61451	            Aurelia
+  0.84	218	218	S	6145	              Aurelia aurita (Moon jelly)
+  9.80	2543	0	P	2836	      Bacillariophyta
+  9.80	2543	0	C	33849	        Mediophyceae
+  9.80	2543	0	G	351281	          Thalassiosira
+  9.80	2543	2543	S	35128	            Thalassiosira pseudonana (Diatom)

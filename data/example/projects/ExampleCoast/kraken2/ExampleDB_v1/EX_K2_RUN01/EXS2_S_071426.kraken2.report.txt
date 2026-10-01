@@ -1,0 +1,30 @@
+  0.34	237	237	U	0	unclassified
+ 99.66	69226	0	R	1	root
+ 99.66	69226	0	R1	131567	  cellular organisms
+ 99.66	69226	0	D	2759	    Eukaryota
+ 93.98	65279	0	K	33208	      Metazoa
+ 90.09	62582	0	P	7711	        Chordata
+ 90.09	62582	0	C	186623	          Actinopteri
+ 70.35	48869	0	G	2247181	            Anchoa
+ 70.35	48869	48869	S	224718	              Anchoa mitchilli (Bay anchovy)
+ 15.96	11083	0	G	551181	            Brevoortia
+ 15.96	11083	11083	S	55118	              Brevoortia tyrannus (Atlantic menhaden)
+  2.84	1973	0	G	81671	            Pomatomus
+  2.84	1973	1973	S	8167	              Pomatomus saltatrix (Bluefish)
+  0.95	657	0	G	82571	            Paralichthys
+  0.95	657	657	S	8257	              Paralichthys dentatus (Summer flounder)
+  2.15	1495	0	P	6656	        Arthropoda
+  2.15	1495	0	C	6681	          Malacostraca
+  2.15	1495	0	G	67631	            Callinectes
+  2.15	1495	1495	S	6763	              Callinectes sapidus (Blue crab)
+  1.73	1202	0	P	6447	        Mollusca
+  1.73	1202	0	C	6544	          Bivalvia
+  1.73	1202	0	G	65501	            Mytilus
+  1.73	1202	1202	S	6550	              Mytilus edulis (Blue mussel)
+  5.68	3947	0	K	33090	      Viridiplantae
+  5.68	3947	0	P	3041	        Chlorophyta
+  5.68	3947	0	C	1035538	          Mamiellophyceae
+  3.33	2311	0	G	418751	            Bathycoccus
+  3.33	2311	2311	S	41875	              Bathycoccus prasinos (Green alga)
+  2.36	1636	0	G	388331	            Micromonas
+  2.36	1636	1636	S	38833	              Micromonas pusilla (Green alga)

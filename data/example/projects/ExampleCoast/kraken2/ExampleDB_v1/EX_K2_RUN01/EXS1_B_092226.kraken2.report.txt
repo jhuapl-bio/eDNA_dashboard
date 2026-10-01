@@ -1,0 +1,42 @@
+  3.78	985	985	U	0	unclassified
+ 96.22	25097	0	R	1	root
+ 96.22	25097	0	R1	131567	  cellular organisms
+ 94.73	24708	0	D	2759	    Eukaryota
+ 75.01	19565	0	K	33208	      Metazoa
+ 41.89	10925	0	P	7711	        Chordata
+ 37.98	9905	0	C	186623	          Actinopteri
+ 26.91	7018	0	G	80961	            Menidia
+ 26.91	7018	7018	S	8096	              Menidia menidia (Atlantic silverside)
+  9.04	2357	0	G	551181	            Brevoortia
+  9.04	2357	2357	S	55118	              Brevoortia tyrannus (Atlantic menhaden)
+  2.03	530	0	G	82571	            Paralichthys
+  2.03	530	530	S	8257	              Paralichthys dentatus (Summer flounder)
+  3.91	1020	0	C	40674	          Mammalia
+  3.91	1020	0	G	97391	            Tursiops
+  3.91	1020	1020	S	9739	              Tursiops truncatus (Common bottlenose dolphin)
+ 33.13	8640	0	P	6656	        Arthropoda
+ 16.95	4420	0	C	72037	          Hexanauplia
+ 16.95	4420	0	G	1361801	            Acartia
+ 16.95	4420	4420	S	136180	              Acartia tonsa (Copepod)
+ 14.11	3680	0	C	6681	          Malacostraca
+ 14.11	3680	0	G	67631	            Callinectes
+ 14.11	3680	3680	S	6763	              Callinectes sapidus (Blue crab)
+  2.07	540	0	C	6658	          Branchiopoda
+  2.07	540	0	G	1241401	            Penilia
+  2.07	540	540	S	124140	              Penilia avirostris (Water flea)
+ 10.44	2722	0	P	2836	      Bacillariophyta
+ 10.44	2722	0	C	33849	        Mediophyceae
+ 10.44	2722	0	G	28431	          Skeletonema
+ 10.44	2722	2722	S	2843	            Skeletonema costatum (Diatom)
+  9.28	2421	0	K	33090	      Viridiplantae
+  9.28	2421	0	P	3041	        Chlorophyta
+  9.28	2421	0	C	1035538	          Mamiellophyceae
+  6.42	1674	0	G	418751	            Bathycoccus
+  6.42	1674	1674	S	41875	              Bathycoccus prasinos (Green alga)
+  2.86	747	0	G	388331	            Micromonas
+  2.86	747	747	S	38833	              Micromonas pusilla (Green alga)
+  1.49	389	0	D	2	    Bacteria
+  1.49	389	0	P	1224	      Pseudomonadota
+  1.49	389	0	C	1236	        Gammaproteobacteria
+  1.49	389	0	G	6721	          Vibrio
+  1.49	389	389	S	672	            Vibrio vulnificus

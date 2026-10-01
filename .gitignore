@@ -1,0 +1,41 @@
+# --- data: only the synthetic example data is committed ---
+data/*
+!data/README.md
+!data/example/
+data/example/**/~$*
+
+# generated output
+reports/
+logs/
+*.log
+
+# secrets / local config
+.env
+api/.env
+api/connections.json
+api/connections.json.tmp
+api/imports.json
+api/imports.json.tmp
+frontend/config.js
+
+# NCBI taxonomy dump (large; download separately)
+taxdump/
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+api/venv/
+.pytest_cache/
+pytest-cache-files-*/
+*.egg-info/
+.ipynb_checkpoints/
+
+# editors / OS / office
+.DS_Store
+.vscode/
+.idea/
+~$*
+*.bak
+*.tmp

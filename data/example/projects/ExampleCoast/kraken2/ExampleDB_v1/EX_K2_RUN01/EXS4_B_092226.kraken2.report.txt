@@ -1,0 +1,31 @@
+  3.08	928	928	U	0	unclassified
+ 96.92	29181	0	R	1	root
+ 96.92	29181	0	R1	131567	  cellular organisms
+ 95.61	28788	0	D	2759	    Eukaryota
+ 83.29	25077	0	K	33208	      Metazoa
+ 58.78	17698	0	P	6656	        Arthropoda
+ 58.78	17698	0	C	72037	          Hexanauplia
+ 58.78	17698	0	G	1361801	            Acartia
+ 58.78	17698	17698	S	136180	              Acartia tonsa (Copepod)
+ 19.96	6010	0	P	7711	        Chordata
+ 19.96	6010	0	C	186623	          Actinopteri
+ 15.51	4671	0	G	2247181	            Anchoa
+ 15.51	4671	4671	S	224718	              Anchoa mitchilli (Bay anchovy)
+  2.56	771	0	G	81671	            Pomatomus
+  2.56	771	771	S	8167	              Pomatomus saltatrix (Bluefish)
+  1.89	568	0	G	291541	            Micropogonias
+  1.89	568	568	S	29154	              Micropogonias undulatus (Atlantic croaker)
+  4.55	1369	0	P	6447	        Mollusca
+  4.55	1369	0	C	6544	          Bivalvia
+  4.55	1369	0	G	65651	            Crassostrea
+  4.55	1369	1369	S	6565	              Crassostrea virginica (Eastern oyster)
+ 12.33	3711	0	K	33090	      Viridiplantae
+ 12.33	3711	0	P	3041	        Chlorophyta
+ 12.33	3711	0	C	1035538	          Mamiellophyceae
+ 12.33	3711	0	G	418751	            Bathycoccus
+ 12.33	3711	3711	S	41875	              Bathycoccus prasinos (Green alga)
+  1.31	393	0	D	2	    Bacteria
+  1.31	393	0	P	1224	      Pseudomonadota
+  1.31	393	0	C	1236	        Gammaproteobacteria
+  1.31	393	0	G	6721	          Vibrio
+  1.31	393	393	S	672	            Vibrio vulnificus

@@ -1,0 +1,1950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MBON Dashboard</title>
+  <script src="config.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.prod.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.8/axios.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+  <!-- Marker clustering: collapse nearby station dots into one numbered bubble when zoomed out -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+  <!-- export libraries: SheetJS (xlsx) + jsPDF (pdf) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link rel="stylesheet" href="css/app.css?v=20260902b"/>
+  <link rel="stylesheet" href="css/enhance.css?v=20260902b"/>
+  <link rel="stylesheet" href="css/table-tools.css?v=20260902b"/>
+  <link rel="stylesheet" href="css/chart-export.css?v=20260902b"/>
+  <link rel="stylesheet" href="css/import-panel.css"/>
+</head>
+<body>
+<div id="app">
+  <div class="d3-tip" ref="tooltip"></div>
+
+  <header>
+    <div>
+      <h1>🌊 MBON Dashboard</h1>
+      <div class="tagline">Marine Biodiversity Observation Network · Metagenomics</div>
+    </div>
+    <nav>
+      <button :class="{active:view==='dashboard'}"   @click="nav('dashboard')">Dashboard</button>
+      <button :class="{active:view==='collections'}" @click="nav('collections')">Collections</button>
+      <button :class="{active:view==='runs'}"        @click="nav('runs')">Runs</button>
+      <button :class="{active:view==='samples'}"     @click="nav('samples')">Samples</button>
+      <button :class="{active:view==='kraken2'}"     @click="nav('kraken2')">Kraken2</button>
+      <button :class="{active:view==='mbon'}"        @click="nav('mbon')">MBON Meta</button>
+      <button :class="{active:view==='wilder'}"      @click="nav('wilder')">Wilderlab</button>
+      <button :class="{active:view==='explore'}"     @click="nav('explore')">🗺 Explore &amp; Map</button>
+      <button :class="{active:view==='sql'}"         @click="nav('sql')" title="Custom SQL">🛢 SQL</button>
+      <button :class="{active:view==='imports'}"     @click="nav('imports')" title="Imported files">📥 Imports</button>
+      <button :class="{active:view==='connections'}" @click="nav('connections')" title="Data sources">⚙ Sources</button>
+    </nav>
+  </header>
+
+  <main>
+    <div v-if="dbError" class="alert alert-error">
+      ⚠️ Cannot reach API at <strong>http://127.0.0.1:5050</strong>. Make sure Flask is running.
+    </div>
+
+    <!-- DASHBOARD -->
+    <div v-if="view==='dashboard'">
+      <div class="section-header"><h2>Overview</h2></div>
+      <div v-if="statsLoading" class="loading"><div class="spinner"></div> Connecting…</div>
+      <template v-else-if="stats">
+        <div class="stat-grid">
+          <div class="card"><div class="card-title">Projects</div><div class="card-value">{{ stats.project_count??'–' }}</div></div>
+          <div class="card"><div class="card-title">Collections</div><div class="card-value">{{ stats.collection_count??'–' }}</div></div>
+          <div class="card"><div class="card-title">Samples</div><div class="card-value">{{ stats.sample_count??'–' }}</div></div>
+          <div class="card"><div class="card-title">Runs</div><div class="card-value">{{ stats.run_count??'–' }}</div></div>
+          <div class="card"><div class="card-title">MBON Samples</div><div class="card-value">{{ stats.mbon_sample_count??'–' }}</div></div>
+          <div class="card"><div class="card-title">Kraken2 Reports</div><div class="card-value">{{ stats.kraken2_report_count??'–' }}</div></div>
+          <div class="card"><div class="card-title">Kraken2 LCAs</div><div class="card-value">{{ fmt(stats.kraken2_lca_count) }}</div></div>
+          <div class="card"><div class="card-title">Wilder Results</div><div class="card-value">{{ fmt(stats.wilder_result_count) }}</div></div>
+          <div class="card"><div class="card-title">Wilder Species</div><div class="card-value">{{ fmt(stats.wilder_species_count) }}</div></div>
+        </div>
+        <div class="two-col">
+          <div>
+            <div class="card">
+              <div class="chart-header">
+                <h3>Wilderlab — Reads by Organism Group</h3>
+                <span class="text-muted" style="font-size:.75rem">Click a slice or legend item to explore</span>
+              </div>
+              <div style="padding:.25rem .25rem .1rem;display:flex;align-items:center;gap:.4rem">
+                <input v-model="dashDonutSearch" @input="redrawDashDonut()"
+                  type="text" placeholder="Regex search groups…" spellcheck="false"
+                  style="flex:1;font-size:.78rem;padding:.25rem .5rem;border:1px solid #ccc;border-radius:4px;font-family:monospace">
+                <button v-if="dashDonutSearch" @click="dashDonutSearch='';redrawDashDonut()" class="btn btn-ghost btn-xs" title="Clear search">✕</button>
+              </div>
+              <div class="d3-wrap" ref="dashDonutWrap"><svg ref="dashDonutSvg"></svg></div>
+              <div class="legend" ref="dashDonutLegend"></div>
+            </div>
+            <!-- Donut drill-down panel -->
+            <div v-if="dashDonutSelected" class="card" style="margin-top:.5rem;border:1.5px solid var(--iris)">
+              <div class="chart-header">
+                <h3 style="font-size:.9rem">
+                  <span class="legend-swatch" :style="{background:groupColor(dashDonutSelected),display:'inline-block',width:'10px',height:'10px',borderRadius:'2px',marginRight:'5px'}"></span>
+                  {{ dashDonutSelected }}
+                </h3>
+                <div style="display:flex;gap:.5rem;align-items:center">
+                  <button class="btn btn-ghost btn-sm" style="font-size:.75rem" @click="dashDonutNavGroup(dashDonutSelected)">🔗 View in Profiles →</button>
+                  <button class="btn btn-ghost btn-sm" @click="dashDonutSelected=null;dashDonutDrillData=[]">✕</button>
+                </div>
+              </div>
+              <div v-if="dashDonutDrillLoading" class="loading" style="padding:.75rem"><div class="spinner"></div></div>
+              <div v-else-if="dashDonutDrillData.length" class="table-wrap" style="max-height:220px;overflow-y:auto">
+                <table style="font-size:.78rem">
+                  <thead><tr><th>Species</th><th>Total Reads</th><th>Samples</th></tr></thead>
+                  <tbody>
+                    <tr v-for="t in dashDonutDrillData" :key="t.scientific_name">
+                      <td><em>{{ t.scientific_name }}</em></td>
+                      <td>{{ fmt(t.total_reads) }}</td>
+                      <td>{{ t.sample_count }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div v-else class="no-data" style="font-size:.8rem">No taxa found for this group</div>
+            </div>
+          </div>
+          <div>
+            <div class="card">
+              <div class="chart-header">
+                <h3>Kraken2 — Top Species Avg Abundance</h3>
+                <input v-model="dashK2Search" @input="drawDashK2Chart()" placeholder="🔍 Search…" style="height:26px;font-size:.78rem;padding:0 .5rem;border:1px solid var(--border);border-radius:var(--radius);width:150px;background:var(--bg)"/>
+                <button class="btn btn-ghost btn-sm" :class="{active:barOrient.dashK2}" @click="toggleBarOrient('dashK2');drawDashK2Chart()" title="Toggle orientation">{{ barOrient.dashK2 ? '↔ H' : '↕ V' }}</button>
+                <button class="btn btn-ghost btn-sm" @click="resetBarZoom('dashK2')" title="Reset zoom">⟳</button>
+              </div>
+              <div class="d3-wrap" ref="dashK2Wrap"><svg ref="dashK2Svg"></svg></div>
+            </div>
+            <!-- K2 drill-down panel -->
+            <div v-if="dashK2DrillName" class="card" style="margin-top:.5rem;border:1.5px solid var(--pine)">
+              <div class="chart-header">
+                <h3 style="font-size:.9rem">Cross-report: <em>{{ dashK2DrillName }}</em></h3>
+                <div style="display:flex;gap:.5rem;align-items:center">
+                  <button class="btn btn-ghost btn-sm" style="font-size:.75rem" @click="dashK2NavToK2(dashK2DrillName)">🔗 View in K2 →</button>
+                  <button class="btn btn-ghost btn-sm" @click="dashK2DrillName='';dashK2DrillData=null">✕</button>
+                </div>
+              </div>
+              <div v-if="dashK2DrillLoading" class="loading" style="padding:.75rem"><div class="spinner"></div></div>
+              <div v-else-if="dashK2DrillData && dashK2DrillData.length" class="table-wrap" style="max-height:220px;overflow-y:auto">
+                <table style="font-size:.78rem">
+                  <thead><tr><th>Report</th><th>Sample</th><th>Abundance %</th><th>Count</th></tr></thead>
+                  <tbody>
+                    <tr v-for="row in dashK2DrillData" :key="row.report_id">
+                      <td>#{{ row.report_id }}</td>
+                      <td class="text-muted">{{ row.mbon_samp_alias || row.database || '–' }}</td>
+                      <td>{{ Number(row.abundance).toFixed(3) }}%</td>
+                      <td>{{ fmt(row.count) }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div v-else-if="dashK2DrillData" class="no-data" style="font-size:.8rem">Not found in any report</div>
+            </div>
+          </div>
+        </div>
+      </template>
+    </div>
+
+    <!-- COLLECTIONS -->
+    <div v-if="view==='collections'">
+      <div class="section-header"><h2>Collections</h2><span class="badge">{{ collections.length }}</span></div>
+      <div class="filter-bar">
+        <input v-model="collectionSearch" placeholder="Filter name…" style="min-width:220px"/>
+        <select v-model="collectionProjectFilter">
+          <option value="">All projects</option>
+          <option v-for="p in projects" :key="p.project_id" :value="p.project_id">{{ p.project_name }}</option>
+        </select>
+        <button class="btn btn-primary" @click="loadCollections">Refresh</button>
+      </div>
+      <div v-if="collectionsLoading" class="loading"><div class="spinner"></div></div>
+      <div v-else class="card table-wrap">
+        <table>
+          <thead><tr>
+            <th @click="sortTable('collections','collection_id')">ID {{ sortArrow('collections','collection_id') }}</th>
+            <th @click="sortTable('collections','collection_name')">Name {{ sortArrow('collections','collection_name') }}</th>
+            <th>Type</th>
+            <th @click="sortTable('collections','project_name')">Project {{ sortArrow('collections','project_name') }}</th>
+            <th @click="sortTable('collections','sample_count')">Samples {{ sortArrow('collections','sample_count') }}</th>
+            <th @click="sortTable('collections','run_count')">Runs {{ sortArrow('collections','run_count') }}</th>
+            <th @click="sortTable('collections','created_at')">Created {{ sortArrow('collections','created_at') }}</th>
+            <th></th>
+          </tr></thead>
+          <tbody>
+            <tr v-if="!filteredCollections.length"><td colspan="8" class="no-data">No collections found</td></tr>
+            <tr v-for="c in filteredCollections" :key="c.collection_id">
+              <td><strong>#{{ c.collection_id }}</strong></td>
+              <td>{{ c.collection_name||'–' }}</td>
+              <td><span class="pill pill-other">{{ c.collection_type||'–' }}</span></td>
+              <td>{{ c.project_name||'–' }}</td>
+              <td>{{ c.sample_count }}</td>
+              <td>{{ c.run_count }}</td>
+              <td class="text-muted">{{ fmtDate(c.created_at) }}</td>
+              <td><button class="btn btn-outline btn-sm" @click="selectedCollection=c">View</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="detail-panel" v-if="selectedCollection">
+        <div class="detail-panel-header"><h3>{{ selectedCollection.collection_name||'Collection #'+selectedCollection.collection_id }}</h3><button class="btn btn-sm btn-outline" @click="selectedCollection=null">✕</button></div>
+        <div class="detail-panel-body">
+          <div class="kv-grid">
+            <span class="kv-key">Project</span><span class="kv-val">{{ selectedCollection.project_name }}</span>
+            <span class="kv-key">Type</span><span class="kv-val">{{ selectedCollection.collection_type||'–' }}</span>
+            <span class="kv-key">Samples</span><span class="kv-val">{{ selectedCollection.sample_count }}</span>
+            <span class="kv-key">Runs</span><span class="kv-val">{{ selectedCollection.run_count }}</span>
+            <span class="kv-key">Collected</span><span class="kv-val">{{ fmtDate(selectedCollection.collected_at) }}</span>
+            <span class="kv-key">Created</span><span class="kv-val">{{ fmtDate(selectedCollection.created_at) }}</span>
+            <span class="kv-key">Description</span><span class="kv-val">{{ selectedCollection.description||'–' }}</span>
+            <span class="kv-key">Comments</span><span class="kv-val">{{ selectedCollection.comments||'–' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RUNS -->
+    <div v-if="view==='runs'">
+      <div class="section-header"><h2>Sequencing Runs</h2><span class="badge">{{ runs.length }}</span></div>
+      <div class="filter-bar">
+        <input v-model="runSearch" placeholder="Filter directory or comments…" style="min-width:220px"/>
+        <select v-model="runCollectionFilter">
+          <option value="">All collections</option>
+          <option v-for="c in collections" :key="c.collection_id" :value="c.collection_id">{{ c.collection_name||'Collection #'+c.collection_id }}</option>
+        </select>
+        <button class="btn btn-primary" @click="loadRuns">Refresh</button>
+      </div>
+      <div v-if="runsLoading" class="loading"><div class="spinner"></div></div>
+      <div v-else class="card table-wrap">
+        <table>
+          <thead><tr>
+            <th @click="sortTable('runs','run_id')">ID {{ sortArrow('runs','run_id') }}</th>
+            <th @click="sortTable('runs','sample_name')">Sample {{ sortArrow('runs','sample_name') }}</th>
+            <th @click="sortTable('runs','collection_name')">Collection {{ sortArrow('runs','collection_name') }}</th>
+            <th>Directory</th>
+            <th>Assay</th>
+            <th>Instrument</th>
+            <th @click="sortTable('runs','created_at')">Created {{ sortArrow('runs','created_at') }}</th>
+            <th></th>
+          </tr></thead>
+          <tbody>
+            <tr v-if="!filteredRuns.length"><td colspan="8" class="no-data">No runs found</td></tr>
+            <tr v-for="r in filteredRuns" :key="r.run_id">
+              <td><strong>#{{ r.run_id }}</strong></td>
+              <td>{{ r.sample_name||'–' }}</td>
+              <td>{{ r.collection_name||'–' }}</td>
+              <td class="text-muted" style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" :title="r.directory">{{ r.directory }}</td>
+              <td><span class="pill pill-other">{{ r.assay_type||'–' }}</span></td>
+              <td>{{ r.instrument_name||r.instrument_platform||'–' }}</td>
+              <td class="text-muted">{{ fmtDate(r.created_at) }}</td>
+              <td><button class="btn btn-outline btn-sm" @click="selectedRun=r">View</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="detail-panel" v-if="selectedRun">
+        <div class="detail-panel-header"><h3>Run #{{ selectedRun.run_id }}</h3><button class="btn btn-sm btn-outline" @click="selectedRun=null">✕</button></div>
+        <div class="detail-panel-body">
+          <div class="kv-grid">
+            <span class="kv-key">Sample</span><span class="kv-val">{{ selectedRun.sample_name||'#'+selectedRun.sample_id }}</span>
+            <span class="kv-key">Collection</span><span class="kv-val">{{ selectedRun.collection_name||'#'+selectedRun.collection_id }}</span>
+            <span class="kv-key">Project</span><span class="kv-val">{{ selectedRun.project_name||'–' }}</span>
+            <span class="kv-key">Assay</span><span class="kv-val">{{ selectedRun.assay_type||'–' }}</span>
+            <span class="kv-key">Instrument</span><span class="kv-val">{{ selectedRun.instrument_name||selectedRun.instrument_platform||'–' }}</span>
+            <span class="kv-key">Directory</span><span class="kv-val">{{ selectedRun.directory }}</span>
+            <span class="kv-key">Entered by</span><span class="kv-val">{{ selectedRun.entered_by_username||selectedRun.entered_by||'–' }}</span>
+            <span class="kv-key">Created</span><span class="kv-val">{{ fmtDate(selectedRun.created_at) }}</span>
+            <span class="kv-key">Comments</span><span class="kv-val">{{ selectedRun.comments||'–' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAMPLES -->
+    <div v-if="view==='samples'">
+      <div class="section-header"><h2>Samples</h2><span class="badge">{{ samples.length }}</span></div>
+      <div class="filter-bar">
+        <input v-model="sampleSearch" placeholder="Search name…" @keyup.enter="loadSamples" style="min-width:200px"/>
+        <select v-model="sampleTypeFilter">
+          <option value="">All types</option>
+          <option>SAMPLE</option><option>POSITIVE_CONTROL</option><option>NEGATIVE_CONTROL</option><option>OTHER</option>
+        </select>
+        <select v-model="sampleCollectionFilter">
+          <option value="">All collections</option>
+          <option v-for="c in collections" :key="c.collection_id" :value="c.collection_id">{{ c.collection_name||'Collection #'+c.collection_id }}</option>
+        </select>
+        <button class="btn btn-primary" @click="loadSamples">Search</button>
+      </div>
+      <div v-if="samplesLoading" class="loading"><div class="spinner"></div></div>
+      <div v-else class="card table-wrap">
+        <table>
+          <thead><tr>
+            <th @click="sortTable('samples','sample_id')">ID {{ sortArrow('samples','sample_id') }}</th>
+            <th @click="sortTable('samples','sample_name')">Name {{ sortArrow('samples','sample_name') }}</th>
+            <th>Type</th>
+            <th @click="sortTable('samples','collection_name')">Collection {{ sortArrow('samples','collection_name') }}</th>
+            <th @click="sortTable('samples','project_name')">Project {{ sortArrow('samples','project_name') }}</th>
+            <th>Location</th>
+            <th @click="sortTable('samples','collected_at')">Collected {{ sortArrow('samples','collected_at') }}</th>
+            <th></th>
+          </tr></thead>
+          <tbody>
+            <tr v-if="!samples.length"><td colspan="8" class="no-data">No samples found</td></tr>
+            <tr v-for="s in sortedSamples" :key="s.sample_id">
+              <td><strong>#{{ s.sample_id }}</strong></td>
+              <td>{{ s.sample_name }}</td>
+              <td><span class="pill" :class="sampleTypePill(s.sample_type)">{{ s.sample_type }}</span></td>
+              <td>{{ s.collection_name||'–' }}</td>
+              <td>{{ s.project_name||'–' }}</td>
+              <td>{{ s.location_alias||'–' }}</td>
+              <td class="text-muted">{{ fmtDate(s.collected_at) }}</td>
+              <td><button class="btn btn-outline btn-sm" @click="openSampleDetail(s)">View</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="detail-panel" v-if="selectedSample">
+        <div class="detail-panel-header"><h3>{{ selectedSample.sample_name||'Sample #'+selectedSample.sample_id }}</h3><button class="btn btn-sm btn-outline" @click="selectedSample=null">✕</button></div>
+        <div class="detail-panel-body">
+          <div class="kv-grid">
+            <span class="kv-key">Type</span><span class="kv-val"><span class="pill" :class="sampleTypePill(selectedSample.sample_type)">{{ selectedSample.sample_type }}</span></span>
+            <span class="kv-key">Collection</span><span class="kv-val">{{ selectedSample.collection_name||'#'+selectedSample.collection_id }}</span>
+            <span class="kv-key">Project</span><span class="kv-val">{{ selectedSample.project_name||'–' }}</span>
+            <span class="kv-key">Runs</span><span class="kv-val">{{ selectedSample.run_count??'–' }}</span>
+            <span class="kv-key">Location</span><span class="kv-val">{{ selectedSample.location_alias||'–' }}</span>
+            <span class="kv-key">Lat/Lon</span><span class="kv-val">{{ selectedSample.latitude??'–' }} / {{ selectedSample.longitude??'–' }}</span>
+            <span class="kv-key">Collected</span><span class="kv-val">{{ fmtDate(selectedSample.collected_at) }}</span>
+            <span class="kv-key">Filepath</span><span class="kv-val">{{ selectedSample.filepath||'–' }}</span>
+          </div>
+          <template v-if="selectedSampleSummary">
+            <hr class="divider">
+            <div class="kv-grid">
+              <span class="kv-key">Total reads</span><span class="kv-val">{{ fmt(selectedSampleSummary.total_reads) }}</span>
+              <span class="kv-key">Passed</span><span class="kv-val">{{ fmt(selectedSampleSummary.passed_reads) }}</span>
+              <span class="kv-key">Failed</span><span class="kv-val">{{ fmt(selectedSampleSummary.failed_reads) }}</span>
+              <span class="kv-key">Total taxa</span><span class="kv-val">{{ fmt(selectedSampleSummary.total_taxa) }}</span>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+
+    <!-- KRAKEN2 -->
+    <div v-if="view==='kraken2'">
+      <div class="section-header"><h2>Kraken2 Reports</h2></div>
+      <div class="tab-bar">
+        <button class="tab-btn" :class="{active:k2Tab==='reports'}" @click="k2Tab='reports'">Reports</button>
+        <button class="tab-btn" :class="{active:k2Tab==='browser'}" @click="k2Tab='browser'">LCA Abundance Profile</button>
+        <button class="tab-btn" :class="{active:k2Tab==='toptaxa'}" @click="k2Tab='toptaxa'">Top Taxa (All Reports)</button>
+        <button class="tab-btn" :class="{active:k2Tab==='sunburst'}" @click="k2Tab='sunburst'">☀ Sunburst</button>
+        <button class="tab-btn" :class="{active:k2Tab==='compare'}" @click="k2Tab='compare'">⚖ Compare</button>
+      </div>
+
+      <div v-if="k2Tab==='reports'">
+        <div class="filter-bar">
+          <input v-model="k2ReportSearch" placeholder="Search database or location…" style="min-width:260px" @keyup.enter="loadK2Reports"/>
+          <button class="btn btn-primary" @click="loadK2Reports">Search</button>
+        </div>
+        <div v-if="k2Loading" class="loading"><div class="spinner"></div></div>
+        <div v-else class="card table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Database</th><th>Report Date</th><th>Pipeline</th><th>Location</th><th></th></tr></thead>
+            <tbody>
+              <tr v-if="!k2Reports.length"><td colspan="6" class="no-data">No Kraken2 reports found</td></tr>
+              <tr v-for="r in k2Reports" :key="r.id">
+                <td><strong>#{{ r.id }}</strong></td>
+                <td>{{ r.database }}</td>
+                <td class="text-muted">{{ fmtDate(r.report_date) }}</td>
+                <td class="text-muted">{{ r.sop_bioinformatics||'–' }}</td>
+                <td class="text-muted" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.report_location }}</td>
+                <td><button class="btn btn-outline btn-sm" @click="selectK2Report(r)">Visualise →</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div v-if="k2Tab==='browser'">
+        <div class="filter-bar">
+          <input v-model="k2ReportPickerSearch" placeholder="🔍 Search reports…" style="min-width:160px"/>
+          <select v-model="k2SelectedReport" style="min-width:200px">
+            <option value="">Select a report…</option>
+            <option v-for="r in filteredK2ReportsForPicker" :key="r.id" :value="r.id">Report #{{ r.id }} – {{ fmtDate(r.report_date) }}{{ r.mbon_samp_alias ? ' · '+r.mbon_samp_alias : '' }}{{ r.database ? ' ('+r.database+')' : '' }}</option>
+          </select>
+          <select v-model="k2RankFilter">
+            <option value="">All ranks</option>
+            <option v-for="r in k2RankSelectOptions" :key="r" :value="r">{{ rankLabel(r) }} ({{ r }})</option>
+          </select>
+          <input v-model="k2MinAbundance" type="number" step="0.1" min="0" placeholder="Min abundance %" style="width:160px"/>
+          <div class="tag-input-wrap" title="Type a name and press Enter to add a filter">
+            <span v-for="tag in k2NameTags" :key="tag" class="tag-chip">{{ tag }}<button @click="removeK2Tag(tag)">✕</button></span>
+            <input list="k2lca-suggestions" v-model="k2NameFilter" placeholder="Filter names…" @keydown="onK2NameKey($event)" autocomplete="off"/>
+          </div>
+          <datalist id="k2lca-suggestions">
+            <option v-for="l in k2Lcas.slice(0,200)" :key="l.name" :value="l.name"/>
+          </datalist>
+          <button v-if="k2NameTags.length" class="btn btn-ghost btn-sm" @click="clearK2Tags">✕ Clear filter</button>
+          <button class="btn btn-primary" @click="loadK2LCAs">Load</button>
+        </div>
+        <div v-if="k2LcaLoading" class="loading"><div class="spinner"></div> Loading LCAs…</div>
+        <template v-else-if="k2Lcas.length">
+          <!-- Rank filter row + chart search -->
+          <div style="display:flex;align-items:flex-start;flex-wrap:wrap;gap:.6rem;margin-bottom:.5rem;padding:.5rem .75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius)">
+            <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;flex:1;min-width:200px">
+              <span style="font-size:.78rem;font-weight:700;color:var(--text);white-space:nowrap">Ranks shown:</span>
+              <label v-for="r in k2LoadedRanks" :key="r" style="display:inline-flex;align-items:center;gap:.22rem;font-size:.76rem;cursor:pointer;white-space:nowrap">
+                <input type="checkbox" :checked="k2AllowedRanks.has(r)" @change="toggleK2AllowedRank(r)" style="cursor:pointer"/>
+                <span :style="{color:rankColor(r),fontWeight:600}">{{rankLabel(r)}}</span>
+                <span style="color:#aaa;font-size:.7rem">({{r}})</span>
+                <span v-if="!MAIN_RANKS.has(r)" style="color:#b45309;background:#fef3c7;border-radius:3px;padding:0 3px;font-size:.67rem;font-weight:600">non-std</span>
+              </label>
+              <button class="btn btn-ghost btn-sm" @click="k2ShowStdRanks" title="Show standard ranks only">Std only</button>
+              <button class="btn btn-ghost btn-sm" @click="k2ShowAllRanks" title="Show all ranks">All</button>
+            </div>
+            <input v-model="k2ChartSearch" @input="drawK2Chart()" placeholder="🔍 Search chart…" style="height:28px;font-size:.8rem;padding:0 .5rem;border:1px solid var(--border);border-radius:var(--radius);min-width:160px;background:var(--bg)"/>
+          </div>
+          <div class="card">
+            <div class="chart-header">
+              <h3>Abundance Profile — {{ k2Lcas.length }} taxa loaded</h3>
+              <div class="sort-group">
+                <label>Sort:</label>
+                <button class="btn btn-ghost btn-sm" :class="{active:k2Sort==='abundance-desc'}" @click="k2Sort='abundance-desc'; drawK2Chart()">Abundance ↓</button>
+                <button class="btn btn-ghost btn-sm" :class="{active:k2Sort==='abundance-asc'}"  @click="k2Sort='abundance-asc';  drawK2Chart()">Abundance ↑</button>
+                <button class="btn btn-ghost btn-sm" :class="{active:k2Sort==='count-desc'}"     @click="k2Sort='count-desc';     drawK2Chart()">Count ↓</button>
+                <button class="btn btn-ghost btn-sm" :class="{active:k2Sort==='name'}"           @click="k2Sort='name';           drawK2Chart()">A–Z</button>
+              </div>
+              <div class="sort-group">
+                <label>Show:</label>
+                <button class="btn btn-ghost btn-sm" :class="{active:k2TopN===20}" @click="k2TopN=20; drawK2Chart()">20</button>
+                <button class="btn btn-ghost btn-sm" :class="{active:k2TopN===40}" @click="k2TopN=40; drawK2Chart()">40</button>
+                <button class="btn btn-ghost btn-sm" :class="{active:k2TopN===80}" @click="k2TopN=80; drawK2Chart()">80</button>
+              </div>
+              <button class="btn btn-ghost btn-sm" :class="{active:barOrient.k2lca}" @click="toggleBarOrient('k2lca');drawK2Chart()" title="Toggle orientation">{{ barOrient.k2lca ? '↔ H' : '↕ V' }}</button>
+              <button class="btn btn-ghost btn-sm" @click="resetBarZoom('k2lca')" title="Reset zoom">⟳</button>
+            </div>
+            <div class="d3-wrap" ref="k2ChartWrap"><svg ref="k2ChartSvg"></svg></div>
+            <div class="legend" ref="k2Legend"></div>
+          </div>
+          <!-- Cross-report compare panel (shown when a taxon is clicked) -->
+          <div v-if="k2CrossName" class="card" style="border:1.5px solid var(--pine);margin-bottom:.5rem">
+            <div class="chart-header">
+              <h3 style="font-size:.9rem">Cross-report: <em>{{ k2CrossName }}</em></h3>
+              <div style="display:flex;gap:.5rem;align-items:center">
+                <span class="text-muted" style="font-size:.75rem">{{ k2CrossData?.length||0 }} reports</span>
+                <button class="btn btn-ghost btn-sm" :class="{active:barOrient.k2cross}" @click="toggleBarOrient('k2cross');drawK2CrossChart()" title="Toggle orientation">{{ barOrient.k2cross ? '↔ H' : '↕ V' }}</button>
+                <button class="btn btn-ghost btn-sm" @click="resetBarZoom('k2cross')" title="Reset zoom">⟳</button>
+                <button class="btn btn-ghost btn-sm" @click="closeK2Cross">✕ Close</button>
+              </div>
+            </div>
+            <div v-if="k2CrossLoading" class="loading"><div class="spinner"></div> Loading…</div>
+            <div v-else-if="!k2CrossData?.length" class="no-data">Not found in any other report</div>
+            <div v-else class="d3-wrap" ref="k2CrossWrap" style="min-height:120px"><svg ref="k2CrossSvg"></svg></div>
+          </div>
+          <div class="card table-wrap">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem;flex-wrap:wrap;gap:.5rem">
+              <span class="text-muted" style="font-size:.8rem">Click a row to highlight it in the chart · Click again to deselect · Right-click to compare across all reports</span>
+              <button v-if="k2LcaHighlighted.size>0" class="btn btn-ghost btn-sm" @click="clearK2LcaHighlights">✕ Clear {{ k2LcaHighlighted.size }} selected</button>
+            </div>
+            <table>
+              <thead><tr>
+                <th @click="sortTable('k2lcas','name')">Name {{ sortArrow('k2lcas','name') }}</th>
+                <th @click="sortTable('k2lcas','rank')">Rank {{ sortArrow('k2lcas','rank') }}</th>
+                <th @click="sortTable('k2lcas','abundance')">Abundance % {{ sortArrow('k2lcas','abundance') }}</th>
+                <th @click="sortTable('k2lcas','count')">Count {{ sortArrow('k2lcas','count') }}</th>
+              </tr></thead>
+              <tbody>
+                <tr v-for="l in sortedK2LCAs" :key="l.kraken2_lcas_id"
+                    @click="toggleK2LcaHighlight(l.name)"
+                    @contextmenu.prevent="loadK2CrossCompare(l.name)"
+                    style="cursor:pointer"
+                    :style="k2LcaHighlighted.has(l.name)?{background:'var(--foam)',fontWeight:600}:{}">
+                  <td>
+                    <span v-if="k2LcaHighlighted.has(l.name)" style="color:var(--pine);margin-right:.3rem">✔</span>
+                    {{ l.name }}
+                  </td>
+                  <td><span class="pill" :style="{background: rankColor(l.rank)+'22', color: rankColor(l.rank)}">{{ rankLabel(l.rank) }}</span></td>
+                  <td>
+                    <div style="display:flex;align-items:center;gap:.5rem">
+                      <div class="inline-bar-bg"><div class="inline-bar-fill" :style="{width: Math.min(100,Number(l.abundance))+'%'}"></div></div>
+                      {{ Number(l.abundance).toFixed(2) }}%
+                    </div>
+                  </td>
+                  <td>{{ fmt(l.count) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </template>
+        <div v-else class="card no-data">Select a report and click Load</div>
+      </div>
+
+      <div v-if="k2Tab==='toptaxa'">
+        <div class="filter-bar">
+          <select v-model="k2TopRank" @change="loadK2TopTaxa">
+            <option value="">All ranks</option>
+            <option v-for="r in k2TopRankOptions" :key="r" :value="r">{{ rankLabel(r) }} ({{ r }})</option>
+          </select>
+          <div class="tag-input-wrap" title="Type a name and press Enter to add a filter">
+            <span v-for="tag in k2TopNameTags" :key="tag" class="tag-chip">{{ tag }}<button @click="removeK2TopTag(tag)">✕</button></span>
+            <input list="k2top-suggestions" v-model="k2TopNameFilter" placeholder="Filter names…" @keydown="onK2TopNameKey($event)" autocomplete="off"/>
+          </div>
+          <datalist id="k2top-suggestions">
+            <option v-for="t in k2TopTaxa.slice(0,200)" :key="t.name" :value="t.name"/>
+          </datalist>
+          <button v-if="k2TopNameTags.length" class="btn btn-ghost btn-sm" @click="clearK2TopTags">✕ Clear filter</button>
+          <button class="btn btn-primary" @click="loadK2TopTaxa">Reload</button>
+        </div>
+        <div v-if="k2TopLoading" class="loading"><div class="spinner"></div></div>
+        <template v-else-if="k2TopTaxa.length">
+          <div class="card">
+            <div class="chart-header">
+              <h3>Avg Abundance Across All Reports</h3>
+              <div class="sort-group">
+                <label>Sort:</label>
+                <button class="btn btn-ghost btn-sm" :class="{active:k2TopSort==='avg-desc'}"   @click="k2TopSort='avg-desc';   drawK2TopChart()">Avg ↓</button>
+                <button class="btn btn-ghost btn-sm" :class="{active:k2TopSort==='count-desc'}" @click="k2TopSort='count-desc'; drawK2TopChart()">Count ↓</button>
+                <button class="btn btn-ghost btn-sm" :class="{active:k2TopSort==='name'}"       @click="k2TopSort='name';       drawK2TopChart()">A–Z</button>
+              </div>
+              <button class="btn btn-ghost btn-sm" :class="{active:barOrient.k2top}" @click="toggleBarOrient('k2top');drawK2TopChart()" title="Toggle orientation">{{ barOrient.k2top ? '↔ H' : '↕ V' }}</button>
+              <button class="btn btn-ghost btn-sm" @click="resetBarZoom('k2top')" title="Reset zoom">⟳</button>
+            </div>
+            <div class="d3-wrap" ref="k2TopWrap"><svg ref="k2TopSvg"></svg></div>
+            <div class="legend" ref="k2TopLegend"></div>
+          </div>
+          <div class="card table-wrap">
+            <table>
+              <thead><tr>
+                <th @click="sortTable('k2top','name')">Name {{ sortArrow('k2top','name') }}</th>
+                <th @click="sortTable('k2top','rank')">Rank {{ sortArrow('k2top','rank') }}</th>
+                <th @click="sortTable('k2top','avg_abundance')">Avg Abundance {{ sortArrow('k2top','avg_abundance') }}</th>
+                <th @click="sortTable('k2top','total_count')">Total Count {{ sortArrow('k2top','total_count') }}</th>
+              </tr></thead>
+              <tbody>
+                <tr v-for="t in sortedK2TopTaxa" :key="t.name+t.rank">
+                  <td><em>{{ t.name }}</em></td>
+                  <td><span class="pill" :style="{background: rankColor(t.rank)+'22', color: rankColor(t.rank)}">{{ rankLabel(t.rank) }}</span></td>
+                  <td>{{ Number(t.avg_abundance).toFixed(3) }}%</td>
+                  <td>{{ fmt(t.total_count) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </template>
+        <div v-else class="card no-data">Click Reload</div>
+      </div>
+
+      <!-- Sunburst — infinite panels -->
+      <div v-if="k2Tab==='sunburst'">
+        <!-- Header row -->
+        <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.6rem;flex-wrap:wrap">
+          <button class="btn btn-ghost btn-sm" @click="addSbPanel" title="Add another sunburst panel">＋ Add panel</button>
+          <span class="text-muted" style="font-size:.75rem">Click arc to zoom · center ring = up one level · ↺ = reset to root · all panels sync on click &amp; search</span>
+        </div>
+        <!-- Panel grid — auto-flow, min 360px per panel -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:.75rem;align-items:start">
+          <div v-for="panel in k2SbPanels" :key="panel.id" class="card" style="padding:.6rem">
+            <!-- Per-panel filter bar -->
+            <div style="display:flex;align-items:center;gap:.35rem;flex-wrap:wrap;margin-bottom:.4rem">
+              <input v-model="panel.reportSearch" placeholder="🔍 Search…" style="min-width:80px;max-width:110px;font-size:.82rem"/>
+              <select v-model="panel.report" style="min-width:140px;flex:1;font-size:.82rem">
+                <option value="">Select a report…</option>
+                <option v-for="r in filteredK2ReportsForPanel(panel)" :key="r.id" :value="r.id">{{ r.mbon_samp_alias||('Report #'+r.id) }} — {{ fmtDate(r.report_date) }}</option>
+              </select>
+              <button class="btn btn-primary btn-sm" @click="loadSbPanel(panel)" :disabled="!panel.report">Load</button>
+              <template v-if="panel.data.length">
+                <button class="btn btn-ghost btn-sm" @click="resetSbPanel(panel.id)" title="Reset to root">↺</button>
+                <button class="btn btn-ghost btn-sm" :class="{active:panel.mainRanks}" @click="panel.mainRanks=!panel.mainRanks; applySbFilters(panel)">{{ panel.mainRanks ? '✔ Main' : 'Main' }}</button>
+                <input v-model="panel.search" @input="applySbFilters(panel)" placeholder="🔍 Search…" style="min-width:90px;font-size:.82rem;flex:1"/>
+                <span class="badge">{{ panel.data.length }}</span>
+              </template>
+              <button v-if="k2SbPanels.length>1" class="btn btn-ghost btn-sm" style="color:#ef4444;margin-left:auto" @click="removeSbPanel(panel.id)" title="Remove panel">✕</button>
+            </div>
+            <!-- Loading -->
+            <div v-if="panel.loading" class="loading"><div class="spinner"></div> Building…</div>
+            <!-- Chart -->
+            <template v-else-if="panel.data.length">
+              <div class="chart-header" style="margin-bottom:.15rem">
+                <h3 style="font-size:.85rem;margin:0">{{ k2Reports.find(r=>r.id===panel.report)?.mbon_samp_alias || ('Report #'+panel.report) }}</h3>
+              </div>
+              <!-- SVG wrap — function ref populates sbWrapEls/sbSvgEls keyed by panel.id -->
+              <div :ref="el => { if(el) sbWrapEls[panel.id]=el }" class="d3-exportable" style="overflow:visible">
+                <svg :ref="el => { if(el) sbSvgEls[panel.id]=el }"></svg>
+              </div>
+              <!-- Legend + unclassified count -->
+              <div :ref="el => { if(el) sbLegendEls[panel.id]=el }" class="legend" style="flex-direction:column;gap:.3rem;margin-top:.4rem;font-size:.78rem;padding:0 .2rem"></div>
+              <!-- Scrollable focused-node children list -->
+              <div :ref="el => { if(el) sbListEls[panel.id]=el }" style="margin-top:.6rem;max-height:240px;overflow-y:auto;border:1px solid var(--border,#e5e7eb);border-radius:6px"></div>
+            </template>
+            <div v-else-if="!panel.report" class="card no-data" style="font-size:.82rem;margin:0">Select a report above</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Compare -->
+      <div v-if="k2Tab==='compare'">
+        <div class="filter-bar">
+          <select v-model="k2CompareRank" style="min-width:140px">
+            <option v-for="r in k2TopRankOptions" :key="r" :value="r">{{ rankLabel(r) }} ({{ r }})</option>
+          </select>
+          <input v-model.number="k2CompareTop" type="number" min="5" max="50" style="width:72px" title="Top N taxa"/>
+          <button class="btn btn-primary" :disabled="k2CompareSelected.length<2" @click="loadK2Compare">Compare {{ k2CompareSelected.length }} reports</button>
+          <button v-if="k2CompareSelected.length" class="btn btn-ghost btn-sm" @click="k2CompareSelected=[]">✕ Clear</button>
+        </div>
+        <!-- Chart card FIRST -->
+        <div v-if="k2CompareLoading" class="loading"><div class="spinner"></div> Comparing…</div>
+        <template v-else-if="k2CompareData && k2CompareData.matrix && k2CompareData.matrix.length">
+          <div class="card" style="margin-bottom:.75rem">
+            <div class="chart-header">
+              <h3>Cross-Report Comparison — {{ rankLabel(k2CompareRank) }} level</h3>
+              <div style="display:flex;align-items:center;gap:.5rem">
+                <input v-model="k2ComparePlotFilter" @input="drawK2CompareChart" placeholder="Filter taxa in chart…" style="min-width:180px"/>
+                <span class="text-muted" style="font-size:.75rem;white-space:nowrap">{{ k2CompareSelected.length }} reports · top {{ k2CompareTop }} taxa</span>
+              </div>
+            </div>
+            <div class="chart-scrollbox d3-wrap" ref="k2CompareWrap"><svg ref="k2CompareSvg"></svg></div>
+            <div class="legend compare-legend-sticky chart-legend-pinned" ref="k2CompareLegend"></div>
+          </div>
+        </template>
+        <div v-else-if="!k2CompareData && !k2CompareLoading && k2CompareSelected.length>=2" class="card no-data">
+          Click "Compare" to load the cross-report chart
+        </div>
+        <!-- Selection table SECOND -->
+        <div class="card" style="margin-bottom:.75rem">
+          <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem;flex-wrap:wrap">
+            <span class="card-title" style="margin:0">Select reports to compare (check 2+)</span>
+            <input v-model="k2CompareTableSearch" placeholder="Search database / location…" style="flex:1;min-width:180px;max-width:320px"/>
+            <span class="text-muted" style="font-size:.8rem;white-space:nowrap">{{ filteredK2ReportsForCompare.length }} of {{ k2Reports.length }}</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th style="width:36px"></th><th>ID</th><th>Sample</th><th>Station</th><th>Database</th><th>Date</th></tr></thead>
+              <tbody>
+                <tr v-if="!k2Reports.length"><td colspan="6" class="no-data">No reports loaded</td></tr>
+                <tr v-if="k2Reports.length && !filteredK2ReportsForCompare.length"><td colspan="6" class="no-data">No reports match "{{ k2CompareTableSearch }}"</td></tr>
+                <tr v-for="r in k2CompareTableShowAll ? filteredK2ReportsForCompare : filteredK2ReportsForCompare.slice(0,12)" :key="r.id" :style="k2CompareSelected.includes(r.id)?{background:'var(--foam)'}:{}">
+                  <td><input type="checkbox" :value="r.id" v-model="k2CompareSelected"/></td>
+                  <td><strong>#{{ r.id }}</strong></td>
+                  <td class="text-muted" style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" :title="r.mbon_samp_alias">{{ r.mbon_samp_alias||'–' }}</td>
+                  <td class="text-muted">{{ r.station||'–' }}</td>
+                  <td class="text-muted">{{ r.database||'–' }}</td>
+                  <td class="text-muted">{{ fmtDate(r.report_date) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div v-if="filteredK2ReportsForCompare.length > 8" style="text-align:center;margin-top:.5rem">
+            <button class="btn btn-ghost btn-sm" @click="k2CompareTableShowAll=!k2CompareTableShowAll">
+              {{ k2CompareTableShowAll ? '▲ Show less' : '▼ Show all '+filteredK2ReportsForCompare.length+' reports' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MBON -->
+    <div v-if="view==='mbon'">
+      <div class="section-header"><h2>MBON Sample Metadata</h2><span class="badge">{{ mbonSamples.length }}</span></div>
+      <div class="filter-bar">
+        <input v-model="mbonSearch" placeholder="Search alias…" style="min-width:200px"/>
+        <select v-model="mbonCruiseFilter">
+          <option value="">All cruises</option>
+          <option v-for="c in mbonCruises" :key="c.cruise_number" :value="c.cruise_number">{{ c.cruise_number }}</option>
+        </select>
+        <select v-model="mbonStationFilter">
+          <option value="">All stations</option>
+          <option v-for="s in mbonStations" :key="s.station" :value="s.station">{{ s.station }}</option>
+        </select>
+        <button class="btn btn-primary" @click="loadMbon">Search</button>
+      </div>
+      <div v-if="mbonLoading" class="loading"><div class="spinner"></div></div>
+      <div v-else class="card table-wrap">
+        <table>
+          <thead><tr>
+            <th @click="sortTable('mbon','mbon_data_id')">ID {{ sortArrow('mbon','mbon_data_id') }}</th>
+            <th @click="sortTable('mbon','mbon_samp_alias')">Alias {{ sortArrow('mbon','mbon_samp_alias') }}</th>
+            <th @click="sortTable('mbon','cruise_number')">Cruise {{ sortArrow('mbon','cruise_number') }}</th>
+            <th @click="sortTable('mbon','station')">Station {{ sortArrow('mbon','station') }}</th>
+            <th @click="sortTable('mbon','latitude')">Lat {{ sortArrow('mbon','latitude') }}</th>
+            <th @click="sortTable('mbon','longitude')">Lon {{ sortArrow('mbon','longitude') }}</th>
+            <th @click="sortTable('mbon','sample_depth')">Depth {{ sortArrow('mbon','sample_depth') }}</th>
+            <th @click="sortTable('mbon','temp')">Temp {{ sortArrow('mbon','temp') }}</th>
+            <th @click="sortTable('mbon','salinity')">Salinity {{ sortArrow('mbon','salinity') }}</th>
+            <th></th>
+          </tr></thead>
+          <tbody>
+            <tr v-if="!sortedMbon.length"><td colspan="10" class="no-data">No MBON samples</td></tr>
+            <tr v-for="m in sortedMbon" :key="m.mbon_data_id">
+              <td><strong>#{{ m.mbon_data_id }}</strong></td>
+              <td>{{ m.mbon_samp_alias||'–' }}</td>
+              <td>{{ m.cruise_number||'–' }}</td>
+              <td>{{ m.station||'–' }}</td>
+              <td>{{ m.latitude?.toFixed(4)??'–' }}</td>
+              <td>{{ m.longitude?.toFixed(4)??'–' }}</td>
+              <td>{{ m.sample_depth||'–' }}</td>
+              <td>{{ m.temp??m.sea_surface_temperature??'–' }}</td>
+              <td>{{ m.salinity??'–' }}</td>
+              <td><button class="btn btn-outline btn-sm" @click="selectedMbon=m">View</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="detail-panel" v-if="selectedMbon">
+        <div class="detail-panel-header"><h3>{{ selectedMbon.mbon_samp_alias||'MBON #'+selectedMbon.mbon_data_id }}</h3><button class="btn btn-sm btn-outline" @click="selectedMbon=null">✕</button></div>
+        <div class="detail-panel-body">
+          <h4 class="text-muted" style="margin-bottom:.5rem">📍 Location</h4>
+          <div class="kv-grid">
+            <span class="kv-key">Geo loc</span><span class="kv-val">{{ selectedMbon.geo_loc_name||'–' }}</span>
+            <span class="kv-key">Station</span><span class="kv-val">{{ selectedMbon.station||'–' }}</span>
+            <span class="kv-key">Lat/Lon</span><span class="kv-val">{{ selectedMbon.latitude??'–' }} / {{ selectedMbon.longitude??'–' }}</span>
+            <span class="kv-key">Depth</span><span class="kv-val">{{ selectedMbon.sample_depth||'–' }} m</span>
+          </div>
+          <hr class="divider">
+          <h4 class="text-muted" style="margin-bottom:.5rem">🌡️ Environmental</h4>
+          <div class="kv-grid">
+            <span class="kv-key">SST</span><span class="kv-val">{{ selectedMbon.sea_surface_temperature??'–' }} °C</span>
+            <span class="kv-key">Temp</span><span class="kv-val">{{ selectedMbon.temp??'–' }} °C</span>
+            <span class="kv-key">Salinity</span><span class="kv-val">{{ selectedMbon.salinity??'–' }}</span>
+            <span class="kv-key">Broad scale</span><span class="kv-val">{{ selectedMbon.env_broad_scale||'–' }}</span>
+          </div>
+          <hr class="divider">
+          <h4 class="text-muted" style="margin-bottom:.5rem">🧪 Collection</h4>
+          <div class="kv-grid">
+            <span class="kv-key">Cruise</span><span class="kv-val">{{ selectedMbon.cruise_number||'–' }}</span>
+            <span class="kv-key">Volume</span><span class="kv-val">{{ selectedMbon.water_volume_filtered||'–' }}</span>
+            <span class="kv-key">Filter pore</span><span class="kv-val">{{ selectedMbon.filter_pore_size??'–' }} µm</span>
+            <span class="kv-key">Extraction</span><span class="kv-val">{{ selectedMbon.extraction_method||'–' }}</span>
+            <span class="kv-key">Storage</span><span class="kv-val">{{ selectedMbon.sample_storage||'–' }}</span>
+            <span class="kv-key">Neg ctrl</span><span class="kv-val">{{ selectedMbon.neg_cont_type||'–' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WILDERLAB -->
+    <div v-if="view==='wilder'">
+      <div class="section-header"><h2>Wilderlab eDNA Results</h2></div>
+      <div class="tab-bar">
+        <button class="tab-btn" :class="{active:wilderTab==='profiles'}" @click="wilderTab='profiles'">Abundance Profiles</button>
+        <button class="tab-btn" :class="{active:wilderTab==='results'}"  @click="wilderTab='results'">Results Table</button>
+        <button class="tab-btn" :class="{active:wilderTab==='jobs'}"     @click="wilderTab='jobs'">Jobs</button>
+        <button class="tab-btn" :class="{active:wilderTab==='groups'}"   @click="wilderTab='groups'">Organism Groups</button>
+        <button class="tab-btn" :class="{active:wilderTab==='compare'}"  @click="wilderTab='compare'">⚖ Compare</button>
+        <button class="tab-btn" :class="{active:wilderTab==='sunburst'}" @click="wilderTab='sunburst'">☀ Sunburst</button>
+      </div>
+
+      <!-- Abundance Profiles -->
+      <div v-if="wilderTab==='profiles'">
+        <div class="filter-bar">
+          <select v-model="wilderTopGroup" style="min-width:170px">
+            <option value="">All groups</option>
+            <option v-for="g in wilderGroups" :key="g.organism_group" :value="g.organism_group">{{ g.organism_group }}</option>
+          </select>
+          <select v-model="wilderTopJob" style="min-width:150px">
+            <option value="">All jobs</option>
+            <option v-for="j in wilderJobs" :key="j.wilder_job_id" :value="j.wilder_job_id">{{ j.wilder_job_id }}</option>
+          </select>
+          <input v-model="wilderProfileSampleSearch" placeholder="🔍 Search samples…" style="min-width:140px"/>
+          <select v-model="wilderTopSample" style="min-width:160px">
+            <option value="">All samples</option>
+            <option v-for="s in filteredWilderSbSamplesForProfile" :key="s.mbon_data_id" :value="s.mbon_data_id">{{ s.mbon_samp_alias || ('ID '+s.mbon_data_id) }}</option>
+          </select>
+          <div class="tag-input-wrap" title="Type a name and press Enter to add a filter">
+            <span v-for="tag in wNameTags" :key="tag" class="tag-chip">{{ tag }}<button @click="removeWTag(tag)">✕</button></span>
+            <input list="wilder-profile-suggestions" v-model="wNameFilter" placeholder="Filter names…" @keydown="onWNameKey($event)" autocomplete="off"/>
+          </div>
+          <datalist id="wilder-profile-suggestions">
+            <option v-for="t in wilderTopTaxa.slice(0,200)" :key="t.scientific_name" :value="t.scientific_name"/>
+          </datalist>
+          <button v-if="wNameTags.length" class="btn btn-ghost btn-sm" @click="clearWTags">✕ Clear filter</button>
+          <button class="btn btn-primary" @click="loadWilderTopTaxa">Load</button>
+        </div>
+        <div v-if="wilderTopLoading" class="loading"><div class="spinner"></div></div>
+        <template v-else-if="wilderTopTaxa.length">
+          <!-- Rank filter row + chart search -->
+          <div style="display:flex;align-items:flex-start;flex-wrap:wrap;gap:.6rem;margin-bottom:.5rem;padding:.5rem .75rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius)">
+            <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;flex:1;min-width:200px">
+              <span style="font-size:.78rem;font-weight:700;color:var(--text);white-space:nowrap">Ranks shown:</span>
+              <label v-for="r in wLoadedRanks" :key="r" style="display:inline-flex;align-items:center;gap:.22rem;font-size:.76rem;cursor:pointer;white-space:nowrap">
+                <input type="checkbox" :checked="wAllowedRanks.has(r)" @change="toggleWAllowedRank(r)" style="cursor:pointer"/>
+                <span style="font-weight:600;text-transform:capitalize">{{r}}</span>
+                <span v-if="!WILDER_STD_RANKS.has(r)" style="color:#b45309;background:#fef3c7;border-radius:3px;padding:0 3px;font-size:.67rem;font-weight:600">non-std</span>
+              </label>
+              <button class="btn btn-ghost btn-sm" @click="wShowStdRanks" title="Show standard ranks only">Std only</button>
+              <button class="btn btn-ghost btn-sm" @click="wShowAllRanks" title="Show all ranks">All</button>
+            </div>
+            <input v-model="wChartSearch" @input="drawWilderChart();drawWilderLolli()" placeholder="🔍 Search chart…" style="height:28px;font-size:.8rem;padding:0 .5rem;border:1px solid var(--border);border-radius:var(--radius);min-width:160px;background:var(--bg)"/>
+          </div>
+          <!-- Per-sample comparison panel (shown when ≥1 taxon selected) -->
+          <div v-if="wilderTopHighlighted.size" class="card" style="margin-bottom:.5rem;border:1.5px solid var(--iris)">
+            <div class="chart-header">
+              <h3 style="font-size:.9rem">Selected taxa by sample / run</h3>
+              <div style="display:flex;gap:.5rem;align-items:center">
+                <span class="text-muted" style="font-size:.75rem">{{ wilderTopHighlighted.size }} taxa selected — click bars or table rows to toggle</span>
+                <button class="btn btn-ghost btn-sm" @click="clearWilderTopHighlights">✕ Clear</button>
+              </div>
+            </div>
+            <div v-if="wilderTopCompareLoading" class="loading"><div class="spinner"></div></div>
+            <div v-else class="d3-wrap" ref="wilderTopCompareWrap" style="min-height:140px"><svg ref="wilderTopCompareSvg"></svg></div>
+          </div>
+
+          <!-- Read count bar chart -->
+          <div class="card">
+            <div class="chart-header">
+              <h3>Top Taxa by Read Count</h3>
+              <div class="sort-group">
+                <label>Sort:</label>
+                <button class="btn btn-ghost btn-sm" :class="{active:wSort==='reads-desc'}"   @click="wSort='reads-desc';   drawWilderChart()">Reads ↓</button>
+                <button class="btn btn-ghost btn-sm" :class="{active:wSort==='reads-asc'}"    @click="wSort='reads-asc';    drawWilderChart()">Reads ↑</button>
+                <button class="btn btn-ghost btn-sm" :class="{active:wSort==='samples-desc'}" @click="wSort='samples-desc'; drawWilderChart()">Samples ↓</button>
+                <button class="btn btn-ghost btn-sm" :class="{active:wSort==='name'}"         @click="wSort='name';         drawWilderChart()">A–Z</button>
+              </div>
+              <div class="sort-group">
+                <label>Top:</label>
+                <button class="btn btn-ghost btn-sm" :class="{active:wTopN===20}" @click="wTopN=20; drawWilderChart(); drawWilderLolli()">20</button>
+                <button class="btn btn-ghost btn-sm" :class="{active:wTopN===40}" @click="wTopN=40; drawWilderChart(); drawWilderLolli()">40</button>
+                <button class="btn btn-ghost btn-sm" :class="{active:wTopN===60}" @click="wTopN=60; drawWilderChart(); drawWilderLolli()">60</button>
+              </div>
+              <button class="btn btn-ghost btn-sm" :class="{active:barOrient.wilderTop}" @click="toggleBarOrient('wilderTop');drawWilderChart()" title="Toggle orientation">{{ barOrient.wilderTop ? '↔ H' : '↕ V' }}</button>
+              <button class="btn btn-ghost btn-sm" @click="resetBarZoom('wilderTop')" title="Reset zoom">⟳</button>
+            </div>
+            <div style="margin-bottom:.25rem;font-size:.78rem" class="text-muted" v-if="!wilderTopHighlighted.size">Click a bar or row to select taxa and compare across samples</div>
+            <div class="d3-wrap" ref="wilderChartWrap"><svg ref="wilderChartSvg"></svg></div>
+            <div class="legend" ref="wilderLegend"></div>
+          </div>
+
+          <!-- Lollipop — detection breadth -->
+          <div class="card">
+            <div class="chart-header"><h3>Detection Breadth — Samples Detected In</h3><span class="text-muted" style="font-size:.72rem">(same top-N, sorted by sample count)</span></div>
+            <div class="d3-wrap" ref="wilderLolliWrap"><svg ref="wilderLolliSvg"></svg></div>
+          </div>
+
+          <!-- Table -->
+          <div class="card table-wrap">
+            <div style="margin-bottom:.35rem">
+              <span class="text-muted" style="font-size:.8rem">Click rows to select taxa · click again to deselect</span>
+              <button v-if="wilderTopHighlighted.size>0" class="btn btn-ghost btn-sm" style="margin-left:.5rem" @click="clearWilderTopHighlights">✕ Clear {{ wilderTopHighlighted.size }}</button>
+            </div>
+            <table>
+              <thead><tr>
+                <th @click="sortTable('wtaxa','scientific_name')">Scientific Name {{ sortArrow('wtaxa','scientific_name') }}</th>
+                <th @click="sortTable('wtaxa','common_name')">Common Name {{ sortArrow('wtaxa','common_name') }}</th>
+                <th @click="sortTable('wtaxa','organism_group')">Group {{ sortArrow('wtaxa','organism_group') }}</th>
+                <th @click="sortTable('wtaxa','taxonomic_rank')">Rank {{ sortArrow('wtaxa','taxonomic_rank') }}</th>
+                <th @click="sortTable('wtaxa','total_reads')">Total Reads {{ sortArrow('wtaxa','total_reads') }}</th>
+                <th @click="sortTable('wtaxa','sample_count')">Samples {{ sortArrow('wtaxa','sample_count') }}</th>
+              </tr></thead>
+              <tbody>
+                <tr v-for="t in sortedWilderTopTaxa" :key="t.scientific_name"
+                    @click="toggleWilderTopHighlight(t.scientific_name)"
+                    style="cursor:pointer"
+                    :style="wilderTopHighlighted.has(t.scientific_name)?{background:'var(--foam)',fontWeight:600}:{}">
+                  <td>
+                    <span v-if="wilderTopHighlighted.has(t.scientific_name)" style="color:var(--iris);margin-right:.3rem">✔</span>
+                    <em>{{ t.scientific_name }}</em>
+                  </td>
+                  <td class="text-muted">{{ t.common_name||'–' }}</td>
+                  <td><span class="pill" :style="{background: groupColor(t.organism_group)+'22', color: groupColor(t.organism_group)}">{{ t.organism_group||'–' }}</span></td>
+                  <td class="text-muted">{{ t.taxonomic_rank }}</td>
+                  <td><strong>{{ fmt(t.total_reads) }}</strong></td>
+                  <td>{{ t.sample_count }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </template>
+        <div v-else class="card no-data">Select filters and click Load to visualize abundance data</div>
+      </div>
+
+      <!-- Results -->
+      <div v-if="wilderTab==='results'">
+        <div class="filter-bar">
+          <select v-model="wilderJobFilter" style="min-width:150px">
+            <option value="">All jobs</option>
+            <option v-for="j in wilderJobs" :key="j.wilder_job_id" :value="j.wilder_job_id">{{ j.wilder_job_id }}</option>
+          </select>
+          <select v-model="wilderGroupFilter" style="min-width:150px">
+            <option value="">All groups</option>
+            <option v-for="g in wilderGroups" :key="g.organism_group" :value="g.organism_group">{{ g.organism_group }}</option>
+          </select>
+          <input v-model="wilderResultsSampleSearch" placeholder="🔍 Search samples…" style="min-width:140px"/>
+          <select v-model="wilderSampleFilter" style="min-width:160px">
+            <option value="">All samples</option>
+            <option v-for="s in filteredWilderSbSamplesForResults" :key="s.mbon_data_id" :value="s.mbon_data_id">{{ s.mbon_samp_alias || ('ID '+s.mbon_data_id) }}</option>
+          </select>
+          <input v-model="wilderResSearch" placeholder="🔍 Search name…" style="min-width:150px" @keyup.enter="loadWilderResults"/>
+          <input v-model="wilderMinReads" type="number" placeholder="Min reads" style="width:110px" @keyup.enter="loadWilderResults"/>
+          <button class="btn btn-primary" @click="loadWilderResults">Search</button>
+        </div>
+        <!-- Per-sample comparison chart (shown when ≥2 species selected) -->
+        <div v-if="wilderResCompareData" class="card" style="margin-bottom:.5rem;border:1.5px solid var(--iris)">
+          <div class="chart-header">
+            <h3 style="font-size:.9rem">Selected taxa by sample / run</h3>
+            <div style="display:flex;gap:.5rem;align-items:center">
+              <span class="text-muted" style="font-size:.75rem">{{ wilderResHighlighted.size }} taxa selected</span>
+              <button class="btn btn-ghost btn-sm" @click="clearWilderResHighlights">✕ Clear</button>
+            </div>
+          </div>
+          <div class="d3-wrap" ref="wilderResCompareWrap" style="min-height:140px"><svg ref="wilderResCompareSvg"></svg></div>
+        </div>
+        <div v-if="wilderLoading" class="loading"><div class="spinner"></div></div>
+        <div v-else class="card table-wrap">
+          <div style="margin-bottom:.35rem">
+            <span class="text-muted" style="font-size:.8rem">Click rows to select taxa and compare across samples · click again to deselect</span>
+            <button v-if="wilderResHighlighted.size>0" class="btn btn-ghost btn-sm" style="margin-left:.5rem" @click="clearWilderResHighlights">✕ Clear {{ wilderResHighlighted.size }}</button>
+          </div>
+          <table>
+            <thead><tr>
+              <th @click="sortTable('wres','wilder_job_id')">Job {{ sortArrow('wres','wilder_job_id') }}</th>
+              <th @click="sortTable('wres','mbon_samp_alias')">Sample {{ sortArrow('wres','mbon_samp_alias') }}</th>
+              <th @click="sortTable('wres','scientific_name')">Scientific Name {{ sortArrow('wres','scientific_name') }}</th>
+              <th @click="sortTable('wres','common_name')">Common Name {{ sortArrow('wres','common_name') }}</th>
+              <th @click="sortTable('wres','organism_group')">Group {{ sortArrow('wres','organism_group') }}</th>
+              <th @click="sortTable('wres','taxonomic_rank')">Rank {{ sortArrow('wres','taxonomic_rank') }}</th>
+              <th @click="sortTable('wres','read_count')">Reads {{ sortArrow('wres','read_count') }}</th>
+            </tr></thead>
+            <tbody>
+              <tr v-if="!sortedWilderResults.length"><td colspan="7" class="no-data">No results</td></tr>
+              <tr v-for="r in sortedWilderResults" :key="r.wilder_result_id"
+                  @click="toggleWilderResHighlight(r.scientific_name)"
+                  style="cursor:pointer"
+                  :style="wilderResHighlighted.has(r.scientific_name)?{background:'var(--foam)',fontWeight:600}:{}">
+                <td class="text-muted">{{ r.wilder_job_id }}</td>
+                <td>{{ r.mbon_samp_alias||r.wilder_uid }}</td>
+                <td>
+                  <span v-if="wilderResHighlighted.has(r.scientific_name)" style="color:var(--iris);margin-right:.3rem">✔</span>
+                  <em>{{ r.scientific_name }}</em>
+                </td>
+                <td class="text-muted">{{ r.common_name||'–' }}</td>
+                <td><span class="pill" :style="{background: groupColor(r.organism_group)+'22', color: groupColor(r.organism_group)}">{{ r.organism_group||'–' }}</span></td>
+                <td class="text-muted">{{ r.taxonomic_rank }}</td>
+                <td><strong>{{ fmt(r.read_count) }}</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Jobs -->
+      <div v-if="wilderTab==='jobs'">
+        <div v-if="wilderJobsLoading" class="loading"><div class="spinner"></div></div>
+        <div v-else class="card table-wrap">
+          <table>
+            <thead><tr>
+              <th @click="sortTable('wjobs','wilder_job_id')">Job ID {{ sortArrow('wjobs','wilder_job_id') }}</th>
+              <th @click="sortTable('wjobs','sample_count')">Samples {{ sortArrow('wjobs','sample_count') }}</th>
+              <th @click="sortTable('wjobs','result_count')">Results {{ sortArrow('wjobs','result_count') }}</th>
+              <th @click="sortTable('wjobs','total_reads')">Total Reads {{ sortArrow('wjobs','total_reads') }}</th>
+              <th @click="sortTable('wjobs','first_created')">Created {{ sortArrow('wjobs','first_created') }}</th>
+            </tr></thead>
+            <tbody>
+              <tr v-if="!sortedWilderJobs.length"><td colspan="5" class="no-data">No jobs</td></tr>
+              <tr v-for="j in sortedWilderJobs" :key="j.wilder_job_id">
+                <td><strong>{{ j.wilder_job_id }}</strong></td>
+                <td>{{ j.sample_count }}</td>
+                <td>{{ fmt(j.result_count) }}</td>
+                <td>{{ fmt(j.total_reads) }}</td>
+                <td class="text-muted">{{ fmtDate(j.first_created) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Organism Groups -->
+      <div v-if="wilderTab==='groups'">
+        <div class="filter-bar" style="margin-bottom:.5rem">
+          <select v-model="wilderGroupsJobFilter" style="min-width:160px">
+            <option value="">All jobs / labs</option>
+            <option v-for="j in wilderJobs" :key="j.wilder_job_id" :value="j.wilder_job_id">{{ j.wilder_job_id }}</option>
+          </select>
+          <button class="btn btn-primary" @click="loadWilderGroups">Apply</button>
+        </div>
+        <div v-if="wilderGroupsLoading" class="loading"><div class="spinner"></div></div>
+        <template v-else-if="wilderGroups.length">
+          <div class="two-col">
+            <div class="card">
+              <div class="chart-header">
+                <h3>Total Reads by Group</h3>
+                <div class="sort-group">
+                  <label>Sort:</label>
+                  <button class="btn btn-ghost btn-sm" :class="{active:groupSort==='reads'}"   @click="groupSort='reads';   drawGroupChart()">Reads ↓</button>
+                  <button class="btn btn-ghost btn-sm" :class="{active:groupSort==='species'}" @click="groupSort='species'; drawGroupChart()">Species ↓</button>
+                  <button class="btn btn-ghost btn-sm" :class="{active:groupSort==='name'}"    @click="groupSort='name';    drawGroupChart()">A–Z</button>
+                </div>
+                <button class="btn btn-ghost btn-sm" :class="{active:barOrient.groupBar}" @click="toggleBarOrient('groupBar');drawGroupChart()" title="Toggle orientation">{{ barOrient.groupBar ? '↔ H' : '↕ V' }}</button>
+                <button class="btn btn-ghost btn-sm" @click="resetBarZoom('groupBar')" title="Reset zoom">⟳</button>
+              </div>
+              <div class="d3-wrap" ref="groupBarWrap"><svg ref="groupBarSvg"></svg></div>
+              <div class="legend" ref="groupBarLegend"></div>
+            </div>
+            <div class="card">
+              <div class="chart-header"><h3>Proportion of Total Reads</h3></div>
+              <div class="d3-wrap" ref="groupDonutWrap" style="min-height:300px"><svg ref="groupDonutSvg"></svg></div>
+              <div class="legend" ref="groupDonutLegend"></div>
+            </div>
+          </div>
+          <div class="card table-wrap">
+            <table>
+              <thead><tr>
+                <th @click="sortTable('wgroups','organism_group')">Organism Group {{ sortArrow('wgroups','organism_group') }}</th>
+                <th @click="sortTable('wgroups','species_count')">Species {{ sortArrow('wgroups','species_count') }}</th>
+                <th @click="sortTable('wgroups','total_reads')">Total Reads {{ sortArrow('wgroups','total_reads') }}</th>
+              </tr></thead>
+              <tbody>
+                <tr v-for="g in sortedWilderGroups" :key="g.organism_group">
+                  <td><span class="legend-swatch" :style="{background:groupColor(g.organism_group),display:'inline-block',marginRight:'.4rem'}"></span>{{ g.organism_group }}</td>
+                  <td>{{ g.species_count }}</td>
+                  <td><strong>{{ fmt(g.total_reads) }}</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </template>
+        <div v-else class="card no-data">No organism group data</div>
+      </div>
+
+      <!-- Wilder Compare -->
+      <div v-if="wilderTab==='compare'">
+        <div class="filter-bar">
+          <select v-model="wilderCompareGroup" @change="drawWilderCompareChart" style="min-width:150px">
+            <option value="">All groups</option>
+            <option v-for="g in wilderGroups" :key="g.organism_group" :value="g.organism_group">{{ g.organism_group }}</option>
+          </select>
+          <input v-model.number="wilderCompareTop" type="number" min="5" max="50" style="width:72px" title="Top N taxa"/>
+          <button class="btn btn-primary" :disabled="wilderCompareSelected.length<2" @click="loadWilderCompare">Compare {{ wilderCompareSelected.length }} samples</button>
+          <button v-if="wilderCompareSelected.length" class="btn btn-ghost btn-sm" @click="wilderCompareSelected=[]">✕ Clear</button>
+        </div>
+        <!-- Chart card FIRST -->
+        <div v-if="wilderCompareLoading" class="loading"><div class="spinner"></div> Comparing…</div>
+        <template v-else-if="wilderCompareData && wilderCompareData.matrix && wilderCompareData.matrix.length">
+          <div class="card" style="margin-bottom:.75rem">
+            <div class="chart-header">
+              <h3>Cross-Sample Comparison{{ wilderCompareGroup ? ' — '+wilderCompareGroup : '' }}</h3>
+              <div style="display:flex;align-items:center;gap:.5rem">
+                <input v-model="wilderComparePlotFilter" @input="drawWilderCompareChart" placeholder="Filter taxa in chart…" style="min-width:180px"/>
+                <span class="text-muted" style="font-size:.75rem;white-space:nowrap">{{ wilderCompareSelected.length }} samples · top {{ wilderCompareTop }} taxa</span>
+              </div>
+            </div>
+            <div class="chart-scrollbox d3-wrap" ref="wilderCompareWrap"><svg ref="wilderCompareSvg"></svg></div>
+            <div class="legend compare-legend-sticky chart-legend-pinned" ref="wilderCompareLegend"></div>
+          </div>
+        </template>
+        <!-- Selection table SECOND -->
+        <div class="card" style="margin-bottom:.75rem">
+          <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.5rem;flex-wrap:wrap">
+            <span class="card-title" style="margin:0">Select MBON samples (check 2+)</span>
+            <button class="btn btn-outline btn-sm" @click="loadWilderCompareSamples">{{ wilderCompareSamples.length?'Reload':'Load Samples' }}</button>
+            <input v-if="wilderCompareSamples.length" v-model="wilderCompareTableSearch" placeholder="Search alias / cruise / station…" style="flex:1;min-width:180px;max-width:300px"/>
+            <span v-if="wilderCompareSamples.length" class="text-muted" style="font-size:.8rem;white-space:nowrap">{{ filteredWilderCompareSamples.length }} shown · {{ wilderCompareSelected.length }} selected</span>
+            <button v-if="wilderCompareSamples.length" class="btn btn-ghost btn-sm" @click="wilderSelectAll">☑ Select all shown</button>
+            <button v-if="wilderCompareSelected.length" class="btn btn-ghost btn-sm" @click="wilderCompareSelected=[]">✕ Clear all</button>
+          </div>
+          <!-- Quick-select by cruise / station -->
+          <div v-if="wilderCompareCruises.length||wilderCompareStationList.length" style="margin-bottom:.5rem;display:flex;flex-wrap:wrap;gap:.3rem;align-items:center">
+            <span style="font-size:.73rem;font-weight:600;color:var(--muted);white-space:nowrap">Quick-select by cruise:</span>
+            <button v-for="c in wilderCompareCruises" :key="c" class="btn btn-ghost btn-sm" style="font-size:.72rem;padding:1px 6px"
+              @click="toggleWilderByCruise(c)"
+              :style="wilderCompareSamples.filter(s=>s.cruise_number===c).every(s=>wilderCompareSelected.includes(s.mbon_data_id))?{background:'var(--foam)',fontWeight:600}:{}">
+              {{ c }}
+            </button>
+            <span v-if="wilderCompareStationList.length" style="font-size:.73rem;font-weight:600;color:var(--muted);white-space:nowrap;margin-left:.5rem">Station:</span>
+            <button v-for="s in wilderCompareStationList" :key="s" class="btn btn-ghost btn-sm" style="font-size:.72rem;padding:1px 6px"
+              @click="toggleWilderByStation(s)"
+              :style="wilderCompareSamples.filter(m=>m.station===s).every(m=>wilderCompareSelected.includes(m.mbon_data_id))?{background:'var(--foam)',fontWeight:600}:{}">
+              {{ s }}
+            </button>
+          </div>
+          <div v-if="!wilderCompareSamples.length" class="no-data" style="padding:1rem">Click "Load Samples" to populate the list</div>
+          <div v-else class="table-wrap">
+            <table>
+              <thead><tr><th style="width:36px"></th><th>ID</th><th>Alias</th><th>Cruise</th><th>Station</th></tr></thead>
+              <tbody>
+                <tr v-if="!filteredWilderCompareSamples.length"><td colspan="5" class="no-data">No samples match "{{ wilderCompareTableSearch }}"</td></tr>
+                <tr v-for="m in wilderCompareTableShowAll ? filteredWilderCompareSamples : filteredWilderCompareSamples.slice(0,12)" :key="m.mbon_data_id"
+                    @click="wilderCompareSelected.includes(m.mbon_data_id)?wilderCompareSelected=wilderCompareSelected.filter(x=>x!==m.mbon_data_id):wilderCompareSelected.push(m.mbon_data_id)"
+                    style="cursor:pointer"
+                    :style="wilderCompareSelected.includes(m.mbon_data_id)?{background:'var(--foam)'}:{}">
+                  <td><input type="checkbox" :checked="wilderCompareSelected.includes(m.mbon_data_id)" @click.stop="wilderCompareSelected.includes(m.mbon_data_id)?wilderCompareSelected=wilderCompareSelected.filter(x=>x!==m.mbon_data_id):wilderCompareSelected.push(m.mbon_data_id)"/></td>
+                  <td><strong>#{{ m.mbon_data_id }}</strong></td>
+                  <td>{{ m.mbon_samp_alias||'–' }}</td>
+                  <td>{{ m.cruise_number||'–' }}</td>
+                  <td>{{ m.station||'–' }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div v-if="filteredWilderCompareSamples.length > 12" style="text-align:center;margin-top:.5rem">
+            <button class="btn btn-ghost btn-sm" @click="wilderCompareTableShowAll=!wilderCompareTableShowAll">
+              {{ wilderCompareTableShowAll ? '▲ Show less' : '▼ Show all '+filteredWilderCompareSamples.length+' samples' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Wilder Sunburst — multi-panel system -->
+      <div v-if="wilderTab==='sunburst'">
+        <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem;flex-wrap:wrap">
+          <span class="text-muted" style="font-size:.75rem">Click arc to zoom · center ring = up one level · ↺ = reset to root · list below each chart shows items at current zoom level</span>
+          <button class="btn btn-outline btn-sm" style="margin-left:auto" @click="addWilderSbPanel()">+ Add panel</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:.75rem;align-items:start">
+          <div v-for="panel in wilderSbPanels" :key="panel.id" class="card" style="padding:.6rem">
+            <!-- Per-panel filter bar -->
+            <div style="display:flex;align-items:center;gap:.35rem;flex-wrap:wrap;margin-bottom:.4rem">
+              <input v-model="panel.sampleSearch" placeholder="🔍 Search…" style="min-width:80px;max-width:110px;font-size:.82rem"/>
+              <select v-model="panel.sample" style="min-width:140px;flex:1;font-size:.82rem">
+                <option value="">All samples</option>
+                <option v-for="s in filteredWilderSbSamplesForPanel(panel)" :key="s.mbon_data_id" :value="s.mbon_data_id">{{ s.mbon_samp_alias || ('ID '+s.mbon_data_id) }}</option>
+              </select>
+              <select v-model="panel.group" style="min-width:120px;font-size:.82rem">
+                <option value="">All groups</option>
+                <option v-for="g in wilderGroups" :key="g.organism_group" :value="g.organism_group">{{ g.organism_group }}</option>
+              </select>
+              <button class="btn btn-primary btn-sm" @click="loadWilderSbPanel(panel)">Load</button>
+              <template v-if="panel.data.length">
+                <button class="btn btn-ghost btn-sm" @click="resetWilderSbPanel(panel.id)" title="Reset to root">↺</button>
+                <input v-model="panel.search" @input="applyWilderSbFilters(panel)" placeholder="🔍 Search…" style="min-width:80px;font-size:.82rem;flex:1"/>
+                <span class="badge">{{ panel.data.length }}</span>
+              </template>
+              <button v-if="wilderSbPanels.length>1" class="btn btn-ghost btn-sm" style="color:#ef4444;margin-left:auto" @click="removeWilderSbPanel(panel.id)" title="Remove panel">✕</button>
+            </div>
+            <!-- Loading -->
+            <div v-if="panel.loading" class="loading"><div class="spinner"></div> Building…</div>
+            <!-- Chart -->
+            <template v-else-if="panel.data.length">
+              <div :ref="el => { if(el) wSbWrapEls[panel.id]=el }" class="d3-exportable" style="overflow:visible">
+                <svg :ref="el => { if(el) wSbSvgEls[panel.id]=el }"></svg>
+              </div>
+              <!-- Group color legend -->
+              <div :ref="el => { if(el) wSbLegendEls[panel.id]=el }" class="legend" style="flex-direction:column;gap:.3rem;margin-top:.4rem;font-size:.78rem;padding:0 .2rem"></div>
+              <!-- Scrollable focused-node children list -->
+              <div :ref="el => { if(el) wSbListEls[panel.id]=el }" style="margin-top:.6rem;max-height:240px;overflow-y:auto;border:1px solid var(--border,#e5e7eb);border-radius:6px"></div>
+            </template>
+            <div v-else class="no-data" style="font-size:.82rem;margin:0;padding:.75rem">Select a sample/group above and click Load</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXPLORE & MAP (merged) -->
+    <div v-if="view==='explore'">
+      <!-- TOP ROW: filters (left) + map (right), equal height -->
+      <div class="explore-top" :class="{'ex-filters-collapsed':exFiltersCollapsed}">
+      <!-- MAP PANE -->
+      <div class="explore-map">
+
+      <!-- Type toggles + searchable filters (restyled toolbar) -->
+      <div class="map-toolbar">
+        <button v-if="exFiltersCollapsed" class="btn btn-ghost btn-sm map-tool-btn" @click="exFiltersCollapsed=false" title="Show filter panel">☰ Filters</button>
+        <div class="map-toggle-group">
+          <span v-for="t in mapAvailableTypes" :key="t"
+                :class="['map-type-toggle', t, {active: mapActiveTypes.includes(t)}]"
+                @click="toggleMapType(t)">
+            {{ t === 'wilder' ? '🌊 Wilderlab' : '🧬 Kraken2' }}
+          </span>
+          <span v-if="!mapAvailableTypes.length" class="text-muted" style="font-size:.8rem">Loading types…</span>
+        </div>
+
+        <!-- Wilder filters (searchable) -->
+        <template v-if="mapActiveTypes.includes('wilder')">
+          <input class="map-search-input" list="map-job-list" v-model="mapWilderJob" placeholder="🔍 All jobs" autocomplete="off"/>
+          <datalist id="map-job-list"><option v-for="j in wilderJobs" :key="j.wilder_job_id" :value="j.wilder_job_id"/></datalist>
+          <input class="map-search-input" list="map-group-list" v-model="mapWilderGroup" placeholder="🔍 All groups" autocomplete="off"/>
+          <datalist id="map-group-list"><option v-for="g in wilderGroups" :key="g.organism_group" :value="g.organism_group"/></datalist>
+          <div class="tag-input-wrap" style="min-width:150px;max-width:220px">
+            <span v-for="tag in mapWilderNameTags" :key="tag" class="tag-chip">{{ tag }}<button @click="removeMapWilderTag(tag)">✕</button></span>
+            <input list="map-wilder-suggestions" v-model="mapWilderNameFilter" placeholder="Filter species…" @keydown="onMapWilderNameKey($event)" @input="refreshMapWilderSuggestions" autocomplete="off"/>
+          </div>
+          <datalist id="map-wilder-suggestions"><option v-for="s in mapWilderSuggestions" :key="s" :value="s"/></datalist>
+          <button v-if="mapWilderNameTags.length" class="btn btn-ghost btn-sm" @click="clearMapWilderTags">✕</button>
+        </template>
+
+        <!-- Kraken2 filters (searchable) -->
+        <template v-if="mapActiveTypes.includes('kraken2')">
+          <input class="map-search-input" list="map-k2rank-list" v-model="mapK2Rank" placeholder="🔍 All ranks" autocomplete="off"/>
+          <datalist id="map-k2rank-list"><option v-for="r in mapK2RankOptions" :key="r" :value="r">{{ rankLabel(r) }}</option></datalist>
+          <input class="map-search-input" list="map-k2group-list" v-model="mapK2Group" placeholder="🔍 All groups" autocomplete="off" title="Organism group (Class→Phylum→Kingdom→Domain). Click Load Map to apply."/>
+          <datalist id="map-k2group-list"><option v-for="g in mapK2Groups" :key="g.organism_group" :value="g.organism_group">{{ g.taxa_count }} taxa</option></datalist>
+          <div class="tag-input-wrap" style="min-width:150px;max-width:220px">
+            <span v-for="tag in mapK2NameTags" :key="tag" class="tag-chip">{{ tag }}<button @click="removeMapK2Tag(tag)">✕</button></span>
+            <input list="map-k2-suggestions" v-model="mapK2NameFilter" placeholder="Filter taxa…" @keydown="onMapK2NameKey($event)" @input="refreshMapK2Suggestions" autocomplete="off"/>
+          </div>
+          <datalist id="map-k2-suggestions"><option v-for="s in mapK2Suggestions" :key="s" :value="s"/></datalist>
+          <button v-if="mapK2NameTags.length" class="btn btn-ghost btn-sm" @click="clearMapK2Tags">✕</button>
+        </template>
+
+        <button class="btn btn-primary btn-sm" @click="loadMapStations" :disabled="!mapActiveTypes.length">Load Map</button>
+        <span v-if="mapLoading" class="text-muted" style="font-size:.8rem">Loading…</span>
+        <span v-if="!mapLoading && mapStations.length" class="badge">{{ filteredMapStations.length }}/{{ mapStations.length }}</span>
+        <span class="text-muted map-hint" style="margin-left:auto">Ctrl/Cmd+click to compare stations</span>
+      </div>
+      <!-- Selection action bar (only when stations are selected) -->
+      <div v-if="mapSelectedStations.size" style="display:flex;align-items:center;gap:.6rem;padding:.4rem .6rem;background:#8b5cf611;border:1px solid #8b5cf644;border-radius:var(--radius);margin-bottom:.4rem;flex-wrap:wrap">
+        <span style="font-size:.82rem;font-weight:700;color:#7c3aed">{{ mapSelectedStations.size }} station(s) selected</span>
+        <span class="text-muted" style="font-size:.75rem">Ctrl/Cmd+click to add more</span>
+        <button class="btn btn-primary btn-sm" @click="toggleMapCompare">📊 Compare stations</button>
+        <button class="btn btn-ghost btn-sm" @click="mapClearSelection">✕ Clear</button>
+      </div>
+
+      <!-- Compact summary boxes (query result counts) sit right above the map -->
+      <div v-if="exResult" class="ex-stat-row">
+        <div class="ex-stat"><span class="ex-stat-k">Samples</span><span class="ex-stat-v">{{ fmt(exResult.counts.samples) }}</span></div>
+        <div class="ex-stat"><span class="ex-stat-k">Species</span><span class="ex-stat-v">{{ fmt(exResult.counts.species) }}</span></div>
+        <div class="ex-stat"><span class="ex-stat-k">Detections</span><span class="ex-stat-v">{{ fmt(exResult.counts.observations) }}</span></div>
+        <div class="ex-stat"><span class="ex-stat-k">Total reads</span><span class="ex-stat-v" :title="fmt(exResult.counts.total_reads)">{{ fmtCompact(exResult.counts.total_reads) }}</span></div>
+      </div>
+
+      <!-- Map container — relative positioning host for popup overlay -->
+      <div class="explore-map-canvas" style="height:70vh;min-height:420px;position:relative;" @click.self="mapBgClick">
+        <!-- Leaflet map fills parent -->
+        <div id="mbon-leaflet-map" style="width:100%;height:100%;border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;">
+          <div v-if="!mapStations.length && !mapLoading" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:500;text-align:center;color:var(--muted);pointer-events:none;">
+            <div style="font-size:2.5rem;margin-bottom:.5rem">🗺</div>
+            <div>Toggle a type above and click <strong>Load Map</strong></div>
+          </div>
+        </div>
+
+        <!-- Floating draggable/resizable popup overlay -->
+        <div v-if="mapActiveStation"
+             class="map-popup-panel"
+             :style="mapPopupStyle">
+
+          <!-- Drag handle = header -->
+          <div class="map-popup-header" @mousedown="mapPopupDragStart">
+            <div style="min-width:0">
+              <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap">
+                <strong style="font-size:.9rem">{{ mapActiveStation.station || 'Unknown Station' }}</strong>
+                <span class="pill" style="font-size:.68rem;padding:.1rem .4rem"
+                      :style="mapActiveStation._type==='wilder'?{background:'#0077b622',color:'#0077b6'}:{background:'#e07b3922',color:'#e07b39'}">
+                  {{ mapActiveStation._type==='wilder' ? 'Wilderlab' : 'Kraken2' }}
+                </span>
+              </div>
+              <div class="text-muted" style="font-size:.7rem">{{ mapActiveStation.geo_loc_name || '' }}</div>
+            </div>
+            <button class="btn btn-sm btn-ghost" @click.stop="mapActiveStation=null; mapClearActive()" style="flex-shrink:0">✕</button>
+          </div>
+
+          <!-- Meta row -->
+          <div class="map-popup-meta" style="position:relative">
+            <span class="badge">{{ fmt(mapActiveStation.total_reads) }} reads</span>
+            <span class="text-muted" style="font-size:.75rem">{{ mapActiveStation.species_count }} taxa</span>
+            <!-- Samples count — click to open popover -->
+            <span style="font-size:.75rem;cursor:pointer;text-decoration:underline dotted;color:var(--ocean)"
+                  @click.stop="mapSamplesOpen=!mapSamplesOpen">
+              {{ mapActiveStation.sample_count }} sample(s) ▾
+            </span>
+            <span class="text-muted" style="font-size:.7rem;margin-left:auto">{{ (mapActiveStation.latitude||0).toFixed(4) }}, {{ (mapActiveStation.longitude||0).toFixed(4) }}</span>
+
+            <!-- Samples popover -->
+            <div v-if="mapSamplesOpen" class="map-samples-popover map-samples-drawer" @click.stop>
+              <div style="padding:.3rem .75rem .2rem;font-size:.72rem;font-weight:700;color:var(--ocean-dk);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+                <span>Samples · tick to merge</span>
+                <button class="btn btn-ghost btn-sm" style="padding:0 .3rem" @click="mapSamplesOpen=false">✕</button>
+              </div>
+              <div v-for="s in (mapActiveStation.samples||[])" :key="s.mbon_data_id"
+                   class="map-samples-popover-item"
+                   style="display:flex;align-items:center;gap:.4rem">
+                <input type="checkbox" :checked="mapMergeSelected && mapMergeSelected.has(s.mbon_data_id)"
+                       @change.stop="mapToggleMergeSample(s)" style="flex-shrink:0;cursor:pointer"/>
+                <span style="flex:1;min-width:0" @click="mapToggleMergeSample(s)">
+                  <strong>#{{ s.mbon_data_id }}</strong>
+                  <span class="text-muted" style="margin-left:.35rem">{{ s.alias }}</span>
+                  <span v-if="s.job_id" class="text-muted" style="margin-left:.35rem;font-size:.72rem">{{ s.job_id }}</span>
+                  <span v-if="s.total_reads!=null" class="text-muted" style="margin-left:.35rem;font-size:.72rem">· {{ fmt(s.total_reads) }} reads</span>
+                </span>
+                <span class="text-muted" style="cursor:pointer;font-size:.72rem" title="Open this sample in detail view"
+                      @click.stop="mapFilterBySample(s)">↗</span>
+              </div>
+              <div v-if="!(mapActiveStation.samples||[]).length" class="no-data" style="padding:.5rem .75rem;font-size:.8rem">No sample detail available</div>
+              <div v-if="(mapActiveStation.samples||[]).length"
+                   style="padding:.4rem .75rem;border-top:1px solid var(--border);display:flex;flex-wrap:wrap;gap:.4rem;align-items:center">
+                <button class="btn btn-ghost btn-sm" style="font-size:.72rem" @click="mapMergeSelectAll()">☑ All</button>
+                <button class="btn btn-ghost btn-sm" style="font-size:.72rem" @click="mapClearMerge()">✕ Clear</button>
+                <button class="btn btn-primary btn-sm" style="font-size:.72rem;margin-left:auto"
+                        :disabled="!mapMergeSelected.size || mapMergeLoading"
+                        @click="mapMergeSamples()">
+                  {{ mapMergeLoading ? 'Merging…' : ('Merge '+mapMergeSelected.size+' sample'+(mapMergeSelected.size===1?'':'s')) }}
+                </button>
+              </div>
+              <div v-if="mapMergeError" class="text-muted" style="padding:0 .75rem .4rem;color:#c0392b;font-size:.72rem">{{ mapMergeError }}</div>
+            </div>
+          </div>
+
+          <!-- Body (scrollable) -->
+          <div class="map-popup-body">
+            <!-- Chart area -->
+            <div class="map-popup-chart-wrap">
+              <div class="map-popup-tabs">
+                <button class="map-popup-tab" :class="{active:mapPopupTab==='distribution'}" @click="mapSetPopupTab('distribution')">Sample Distribution</button>
+                <button class="map-popup-tab" :class="{active:mapPopupTab==='compare'}" @click="mapSetPopupTab('compare')">Station Compare</button>
+                <button class="map-popup-tab" :class="{active:mapPopupTab==='depth'}" @click="mapSetPopupTab('depth')">Sample Depth</button>
+              </div>
+              <div class="chart-header" style="margin-bottom:.3rem">
+                <h3 style="font-size:.82rem">{{ mapPopupTitle }}</h3>
+                <button class="btn btn-ghost btn-sm" :class="{active:barOrient.mapPopup}" @click="toggleBarOrient('mapPopup');drawMapPopupChart()" title="Toggle orientation" style="font-size:.7rem;padding:.15rem .4rem">{{ barOrient.mapPopup ? '↔ H' : '↕ V' }}</button>
+                <button class="btn btn-ghost btn-sm" @click="resetBarZoom('mapPopup')" title="Reset zoom" style="font-size:.7rem;padding:.15rem .4rem">⟳</button>
+                <div class="sort-group">
+                  <label>Top:</label>
+                  <button class="btn btn-ghost btn-sm" :class="{active:mapTopN===10}" @click="mapTopN=10;drawMapPopupChart()">10</button>
+                  <button class="btn btn-ghost btn-sm" :class="{active:mapTopN===20}" @click="mapTopN=20;drawMapPopupChart()">20</button>
+                  <button class="btn btn-ghost btn-sm" :class="{active:mapTopN===40}" @click="mapTopN=40;drawMapPopupChart()">40</button>
+                </div>
+                <!-- Rank filter: Kraken2 -->
+                <template v-if="mapActiveStation._type==='kraken2'">
+                  <select v-model="mapPopupK2Rank" class="sel-sm" @change="drawMapPopupChart()">
+                    <option value="">All ranks</option>
+                    <option v-for="r in mapPopupK2RankOptions" :key="r" :value="r">{{ rankLabel(r) }} ({{ r }})</option>
+                  </select>
+                </template>
+                <!-- View toggle: Wilder -->
+                <template v-if="mapActiveStation._type==='wilder'">
+                  <select v-model="mapPopupWilderView" class="sel-sm" @change="mapStnHighlighted=new Set();drawMapPopupChart()">
+                    <option value="species">Species</option>
+                    <option value="groups">Groups</option>
+                    <option value="samples">Samples</option>
+                  </select>
+                </template>
+                <!-- Kraken2: link to Kraken2 tab -->
+                <template v-if="mapActiveStation._type==='kraken2'">
+                  <button class="btn btn-ghost btn-sm" style="font-size:.72rem" @click="mapOpenInK2('lca')">Open LCA ↗</button>
+                  <button class="btn btn-ghost btn-sm" style="font-size:.72rem" @click="mapOpenInK2('sunburst')">Sunburst ↗</button>
+                </template>
+                <!-- Wilder: link to Wilder tab -->
+                <template v-if="mapActiveStation._type==='wilder'">
+                  <button class="btn btn-ghost btn-sm" style="font-size:.72rem" @click="mapOpenInWilder()">Open in Wilder ↗</button>
+                </template>
+              </div>
+              <!-- Merged (cross-sample) status banner + sub-view switch -->
+              <div v-if="mapMergeResult" style="margin:.1rem 0 .35rem;padding:.28rem .5rem;background:var(--foam,#eef6fb);border:1px solid var(--border);border-radius:6px;font-size:.74rem">
+                <div style="display:flex;flex-wrap:wrap;align-items:center;gap:.4rem">
+                  <span style="font-weight:700;color:var(--ocean-dk)">⛬ Merged {{ mapMergeResult.sample_count }} sample{{ mapMergeResult.sample_count===1?'':'s' }}</span>
+                  <span class="text-muted">{{ fmt(mapMergeResult.total_reads) }} combined reads · {{ (mapMergeResult.taxa||[]).length }} taxa</span>
+                  <button class="btn btn-ghost btn-sm" style="font-size:.7rem;margin-left:auto" @click="mapClearMerge()">✕ Exit merge</button>
+                </div>
+                <div style="display:flex;gap:.3rem;margin-top:.3rem">
+                  <button class="btn btn-ghost btn-sm" style="font-size:.68rem;padding:.1rem .4rem" :class="{active:mapMergeView==='combined'}" @click="mapSetMergeView('combined')">Combined</button>
+                  <button class="btn btn-ghost btn-sm" style="font-size:.68rem;padding:.1rem .4rem" :class="{active:mapMergeView==='occupancy'}" @click="mapSetMergeView('occupancy')" title="Taxa by number of samples detected in (core → unique)">Occupancy</button>
+                  <button class="btn btn-ghost btn-sm" style="font-size:.68rem;padding:.1rem .4rem" :class="{active:mapMergeView==='heatmap'}" @click="mapSetMergeView('heatmap')" title="Organism × sample read heatmap">Heatmap</button>
+                </div>
+              </div>
+              <div class="d3-wrap" ref="mapPopupChartWrap"><svg ref="mapPopupChartSvg"></svg></div>
+            </div>
+
+            <!-- Species/Taxa table -->
+            <div class="map-popup-table-wrap">
+              <div style="padding:.25rem .4rem .1rem">
+                <input v-model="mapStnSearch"
+                       :placeholder="mapActiveStation._type==='wilder' ? 'Search species / group…' : 'Search taxon / rank…'"
+                       style="width:100%;font-size:.78rem;padding:.22rem .4rem;border:1px solid var(--border);border-radius:4px;background:var(--surface)"/>
+              </div>
+
+              <!-- Clear selection button -->
+              <div v-if="mapStnHighlighted.size>0" style="padding:.2rem .4rem;display:flex;align-items:center;gap:.4rem">
+                <button class="btn btn-ghost btn-sm" style="font-size:.72rem" @click="clearMapStnHighlights()">✕ Clear {{ mapStnHighlighted.size }} selected</button>
+                <span class="text-muted" style="font-size:.7rem">Showing selected in chart</span>
+              </div>
+
+              <!-- Merged (cross-sample) taxa table with core/shared/unique occupancy tags -->
+              <template v-if="mapMergeResult">
+                <div style="padding:.15rem .4rem;font-size:.7rem" class="text-muted">
+                  Combined across {{ mapMergeResult.sample_count }} merged sample(s). "Smpl" = detected in N of them.
+                </div>
+                <table style="font-size:.78rem">
+                  <thead><tr>
+                    <th @click="sortTable('mapmerge', mapMergeResult.type==='wilder' ? 'scientific_name' : 'name')">Taxon</th>
+                    <th v-if="mapMergeResult.type==='wilder'" @click="sortTable('mapmerge','organism_group')">Group</th>
+                    <th v-else @click="sortTable('mapmerge','rank')">Rank</th>
+                    <th @click="sortTable('mapmerge','total_reads')">Reads {{ sortArrow('mapmerge','total_reads') }}</th>
+                    <th @click="sortTable('mapmerge','abundance')">% {{ sortArrow('mapmerge','abundance') }}</th>
+                    <th @click="sortTable('mapmerge','sample_count')">Smpl {{ sortArrow('mapmerge','sample_count') }}</th>
+                  </tr></thead>
+                  <tbody>
+                    <tr v-if="!mapMergedTableRows.length"><td colspan="5" class="no-data">{{ mapStnSearch ? 'No matches' : 'No data' }}</td></tr>
+                    <tr v-for="t in mapMergedTableRows" :key="(t.scientific_name||t.name)">
+                      <td><em>{{ t.scientific_name || t.name }}</em>
+                        <span v-if="mapMergeTagFor(t.sample_count)" class="pill"
+                              :style="{marginLeft:'.3rem',fontSize:'.62rem',background:mapMergeTagFor(t.sample_count).cls==='core'?'#d6f5e0':mapMergeTagFor(t.sample_count).cls==='shared'?'#fff0d6':'#ffd9d9',color:mapMergeTagFor(t.sample_count).cls==='core'?'#1b7a43':mapMergeTagFor(t.sample_count).cls==='shared'?'#9a6b16':'#a23030'}">{{ mapMergeTagFor(t.sample_count).label }}</span>
+                      </td>
+                      <td v-if="mapMergeResult.type==='wilder'"><span class="pill" :style="{background:groupColor(t.organism_group)+'22',color:groupColor(t.organism_group)}">{{ t.organism_group||'–' }}</span></td>
+                      <td v-else><span class="pill" :style="{background:rankColor(t.rank)+'22',color:rankColor(t.rank)}">{{ rankLabel(t.rank) }}</span></td>
+                      <td><strong>{{ fmt(t.total_reads) }}</strong></td>
+                      <td>{{ Number(t.abundance||0).toFixed(2) }}%</td>
+                      <td>{{ t.sample_count }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </template>
+
+              <!-- Wilder – species view table -->
+              <template v-if="!mapMergeResult && mapActiveStation._type==='wilder' && mapPopupWilderView==='species'">
+                <table style="font-size:.78rem;cursor:pointer">
+                  <thead><tr>
+                    <th @click="sortTable('mapstn','scientific_name')">Species {{ sortArrow('mapstn','scientific_name') }}</th>
+                    <th @click="sortTable('mapstn','organism_group')">Group {{ sortArrow('mapstn','organism_group') }}</th>
+                    <th @click="sortTable('mapstn','total_reads')">Reads {{ sortArrow('mapstn','total_reads') }}</th>
+                    <th @click="sortTable('mapstn','sample_count')">Smpl {{ sortArrow('mapstn','sample_count') }}</th>
+                  </tr></thead>
+                  <tbody>
+                    <tr v-if="!filteredSortedMapSpecies.length"><td colspan="4" class="no-data">{{ mapStnSearch ? 'No matches' : 'No data' }}</td></tr>
+                    <tr v-for="s in filteredSortedMapSpecies" :key="s.scientific_name"
+                        @click="toggleMapStnHighlight(s.scientific_name)"
+                        :style="mapStnHighlighted.size>0&&mapStnHighlighted&&mapStnHighlighted.has(s.scientific_name)?{background:'var(--foam)',fontWeight:600}:{}">
+                      <td><span v-if="mapStnHighlighted&&mapStnHighlighted.has(s.scientific_name)" style="color:var(--pine);margin-right:.25rem">✔</span><em>{{ s.scientific_name }}</em></td>
+                      <td><span class="pill" :style="{background:groupColor(s.organism_group)+'22',color:groupColor(s.organism_group)}">{{ s.organism_group||'–' }}</span></td>
+                      <td><strong>{{ fmt(s.total_reads) }}</strong></td>
+                      <td>{{ s.sample_count }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </template>
+
+              <!-- Wilder – samples view table -->
+              <template v-if="!mapMergeResult && mapActiveStation._type==='wilder' && mapPopupWilderView==='samples'">
+                <table style="font-size:.78rem;cursor:pointer">
+                  <thead><tr>
+                    <th>Sample</th>
+                    <th>Job</th>
+                    <th>Reads</th>
+                  </tr></thead>
+                  <tbody>
+                    <tr v-if="!(mapActiveStation.samples||[]).length"><td colspan="3" class="no-data">No sample data</td></tr>
+                    <tr v-for="s in (mapActiveStation.samples||[])" :key="s.mbon_data_id"
+                        @click="toggleMapStnHighlight(s.alias)"
+                        :style="mapStnHighlighted.size>0&&mapStnHighlighted&&mapStnHighlighted.has(s.alias)?{background:'var(--foam)',fontWeight:600}:{}">
+                      <td><span v-if="mapStnHighlighted&&mapStnHighlighted.has(s.alias)" style="color:var(--pine);margin-right:.25rem">✔</span>{{ s.alias }}</td>
+                      <td class="text-muted" style="font-size:.72rem">{{ s.job_id||'–' }}</td>
+                      <td><strong>{{ fmt(s.total_reads) }}</strong></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </template>
+
+              <!-- Wilder – groups view table -->
+              <template v-if="!mapMergeResult && mapActiveStation._type==='wilder' && mapPopupWilderView==='groups'">
+                <table style="font-size:.78rem;cursor:pointer">
+                  <thead><tr>
+                    <th>Group</th>
+                    <th>Reads</th>
+                    <th>Species</th>
+                  </tr></thead>
+                  <tbody>
+                    <tr v-if="!mapPopupGroupedData.length"><td colspan="3" class="no-data">No data</td></tr>
+                    <tr v-for="g in mapPopupGroupedData" :key="g.organism_group"
+                        @click="toggleMapStnHighlight(g.organism_group)"
+                        :style="mapStnHighlighted.size>0&&mapStnHighlighted&&mapStnHighlighted.has(g.organism_group)?{background:'var(--foam)',fontWeight:600}:{}">
+                      <td><span v-if="mapStnHighlighted&&mapStnHighlighted.has(g.organism_group)" style="color:var(--pine);margin-right:.25rem">✔</span><span class="pill" :style="{background:groupColor(g.organism_group)+'22',color:groupColor(g.organism_group)}">{{ g.organism_group }}</span></td>
+                      <td><strong>{{ fmt(g.total_reads) }}</strong></td>
+                      <td>{{ g.species_count }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </template>
+
+              <!-- Kraken2 table -->
+              <template v-if="!mapMergeResult && mapActiveStation._type==='kraken2'">
+                <table style="font-size:.78rem;cursor:pointer">
+                  <thead><tr>
+                    <th @click="sortTable('mapstn','name')">Taxon {{ sortArrow('mapstn','name') }}</th>
+                    <th @click="sortTable('mapstn','rank')">Rank {{ sortArrow('mapstn','rank') }}</th>
+                    <th @click="sortTable('mapstn','total_reads')">Reads {{ sortArrow('mapstn','total_reads') }}</th>
+                    <th @click="sortTable('mapstn','avg_abundance')">Abun% {{ sortArrow('mapstn','avg_abundance') }}</th>
+                  </tr></thead>
+                  <tbody>
+                    <tr v-if="!filteredSortedMapTaxa.length"><td colspan="4" class="no-data">{{ mapStnSearch ? 'No matches' : 'No data' }}</td></tr>
+                    <tr v-for="t in filteredSortedMapTaxa" :key="t.name"
+                        @click="toggleMapStnHighlight(t.name)"
+                        :style="mapStnHighlighted.size>0&&mapStnHighlighted&&mapStnHighlighted.has(t.name)?{background:'var(--foam)',fontWeight:600}:{}"
+                        title="Click to highlight in chart">
+                      <td><span v-if="mapStnHighlighted&&mapStnHighlighted.has(t.name)" style="color:var(--pine);margin-right:.25rem">✔</span><em>{{ t.name }}</em></td>
+                      <td><span class="pill" :style="{background:rankColor(t.rank)+'22',color:rankColor(t.rank)}">{{ rankLabel(t.rank) }}</span></td>
+                      <td><strong>{{ fmt(t.total_reads) }}</strong></td>
+                      <td>{{ Number(t.avg_abundance||0).toFixed(2) }}%</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </template>
+            </div>
+          </div>
+
+          <!-- Resize handle (bottom-right corner) -->
+          <div class="map-popup-resize-handle" @mousedown.stop="mapPopupResizeStart"></div>
+        </div>
+      </div>
+
+      <!-- Station Compare Panel -->
+      <div v-if="mapCompareOpen && selectedStationObjects.length" class="card" style="flex:0 0 auto;margin-top:.75rem;padding:.9rem">
+        <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:.6rem">
+          <span class="card-title" style="margin:0">Station Comparison</span>
+          <!-- view toggle -->
+          <button class="btn btn-ghost btn-sm" :class="{active:mapCompareView==='perstation'}" @click="mapCompareView='perstation'; drawMapCompare()">Per-Station</button>
+          <button class="btn btn-ghost btn-sm" :class="{active:mapCompareView==='aggregate'}" @click="mapCompareView='aggregate'; drawMapCompare()">Aggregate</button>
+          <button class="btn btn-ghost btn-sm" :class="{active:mapCompareView==='persample'}" @click="mapCompareView='persample'; drawMapCompare()">Per-Sample</button>
+          <!-- top N -->
+          <div class="sort-group">
+            <label>Top:</label>
+            <button v-for="n in [10,20,40]" :key="n" class="btn btn-ghost btn-sm" :class="{active:mapCompareTopN===n}" @click="mapCompareTopN=n; drawMapCompare()">{{ n }}</button>
+          </div>
+          <!-- k2 rank filter (only when kraken2 stations) -->
+          <template v-if="selectedStationObjects[0]?._type==='kraken2'">
+            <select v-model="mapCompareK2Rank" @change="drawMapCompare()" class="sel-sm">
+              <option value="">All ranks</option>
+              <option v-for="r in mapCompareK2RankOptions" :key="r" :value="r">{{ rankLabel(r) }} ({{ r }})</option>
+            </select>
+          </template>
+          <!-- wilder group filter -->
+          <template v-if="selectedStationObjects[0]?._type==='wilder'">
+            <select v-model="mapCompareGroup" @change="drawMapCompare()" class="sel-sm">
+              <option value="">All groups</option>
+              <option v-for="g in wilderGroups" :key="g.organism_group" :value="g.organism_group">{{ g.organism_group }}</option>
+            </select>
+          </template>
+          <button class="btn btn-ghost btn-sm" style="margin-left:auto" @click="mapCompareOpen=false">✕</button>
+        </div>
+        <!-- Selected stations chips -->
+        <div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.5rem">
+          <span v-for="(stn,i) in selectedStationObjects" :key="mapStationKey(stn)"
+                class="pill" :style="{background:stnCompareColor(i)+'22',color:stnCompareColor(i),fontWeight:600}">
+            {{ stn.station || '?' }}
+            <span class="text-muted" style="font-weight:normal;margin-left:.2rem">({{ fmt(stn.total_reads) }} reads)</span>
+          </span>
+        </div>
+        <div class="d3-wrap" ref="mapCompareWrap" style="min-height:200px"><svg ref="mapCompareSvg"></svg></div>
+        <div class="legend compare-legend-sticky" ref="mapCompareLegend" style="margin-top:.4rem"></div>
+      </div>
+      </div><!-- /.explore-map -->
+
+      <!-- FILTERS PANE -->
+      <div class="explore-filters">
+      <div class="section-header" style="flex-wrap:wrap;gap:.4rem">
+        <h2 style="font-size:1.05rem">🔎 Query</h2>
+        <span class="badge" v-if="exploreSchema?.source">{{ exploreSchema.source.name }} · {{ exploreSchema.source.kind }}</span>
+        <span class="badge" v-if="exActiveFilterCount">{{ exActiveFilterCount }} filter{{ exActiveFilterCount>1?'s':'' }} active</span>
+        <span style="margin-left:auto"></span>
+        <button class="btn btn-ghost btn-sm" @click="exReset">Reset</button>
+        <button class="btn btn-primary btn-sm" @click="runExplore" :disabled="exQuerying">{{ exQuerying?'Running…':'Run query' }}</button>
+        <button class="btn btn-ghost btn-sm" @click="exFiltersCollapsed=true" title="Collapse filter panel">⟨ Hide</button>
+      </div>
+
+      <div v-if="exploreLoading" class="loading"><div class="spinner"></div> Loading fields…</div>
+      <div v-if="exploreError" class="alert alert-error">{{ exploreError }}</div>
+
+      <template v-if="exploreSchema">
+        <!-- FILTER CARD -->
+        <div class="card">
+          <div class="card-title">Environmental ranges</div>
+          <div class="filter-bar" style="align-items:flex-end">
+            <template v-for="ev in [['depth','Depth (m)','depthMin','depthMax'],['salinity','Salinity','salMin','salMax'],['temp','Temp (°C)','tempMin','tempMax'],['sst','SST (°C)','sstMin','sstMax']]" :key="ev[0]">
+              <div v-if="exEnvAvailable.includes(ev[0])" style="display:flex;flex-direction:column;gap:.15rem">
+                <label style="font-size:.7rem;color:var(--muted);font-weight:600">
+                  {{ ev[1] }}
+                  <span v-if="exploreSchema.ranges[ev[0]]" style="font-weight:400">[{{ exploreSchema.ranges[ev[0]][0] }} – {{ exploreSchema.ranges[ev[0]][1] }}]</span>
+                </label>
+                <div style="display:flex;gap:.25rem">
+                  <input type="number" step="any" v-model="exFilters[ev[2]]" placeholder="min" style="width:78px"/>
+                  <input type="number" step="any" v-model="exFilters[ev[3]]" placeholder="max" style="width:78px"/>
+                </div>
+              </div>
+            </template>
+            <span v-if="!exEnvAvailable.length" class="text-muted" style="font-size:.8rem">No numeric environmental columns detected in this source.</span>
+          </div>
+
+          <div class="card-title" style="margin-top:.6rem">Geographic area (bounding box)</div>
+          <div class="filter-bar" style="align-items:flex-end">
+            <div style="display:flex;flex-direction:column;gap:.15rem"><label style="font-size:.7rem;color:var(--muted);font-weight:600">South lat</label><input type="number" step="any" v-model="exFilters.s" @change="exSyncActiveBboxFromInputs" style="width:90px"/></div>
+            <div style="display:flex;flex-direction:column;gap:.15rem"><label style="font-size:.7rem;color:var(--muted);font-weight:600">North lat</label><input type="number" step="any" v-model="exFilters.n" @change="exSyncActiveBboxFromInputs" style="width:90px"/></div>
+            <div style="display:flex;flex-direction:column;gap:.15rem"><label style="font-size:.7rem;color:var(--muted);font-weight:600">West lon</label><input type="number" step="any" v-model="exFilters.w" @change="exSyncActiveBboxFromInputs" style="width:90px"/></div>
+            <div style="display:flex;flex-direction:column;gap:.15rem"><label style="font-size:.7rem;color:var(--muted);font-weight:600">East lon</label><input type="number" step="any" v-model="exFilters.e" @change="exSyncActiveBboxFromInputs" style="width:90px"/></div>
+            <button class="btn btn-ghost btn-sm" @click="exAddBbox()">Add map box</button>
+            <button class="btn btn-ghost btn-sm" @click="exUseFullBbox" v-if="exploreSchema.bbox">Use full extent</button>
+            <button class="btn btn-ghost btn-sm" @click="exDeleteActiveBbox" :disabled="!exActiveBbox">Delete active</button>
+            <button class="btn btn-ghost btn-sm" @click="exClearBboxes" :disabled="!exBboxes.length">Clear boxes</button>
+          </div>
+          <div v-if="exBboxes.length" style="display:flex;flex-wrap:wrap;gap:.35rem;margin:.1rem 0 .6rem">
+            <button v-for="(box,i) in exBboxes" :key="box.id" class="btn btn-ghost btn-sm" :class="{active:box.id===exActiveBboxId}" @click="exSetActiveBbox(box.id)" :title="exBboxLabel(box)">Box {{ i+1 }}</button>
+            <span class="text-muted" style="font-size:.72rem;align-self:center">drag boxes on the map; resize with corner handles</span>
+          </div>
+
+          <div class="card-title" style="margin-top:.6rem">Taxa filters</div>
+          <div v-if="exploreSchema.groups?.length">
+            <div class="text-muted" style="font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em;margin-bottom:.2rem">Wilderlab groups <span style="font-weight:400;text-transform:none">· filters plots</span></div>
+            <div style="display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.5rem">
+              <button v-for="g in exploreSchema.groups" :key="g" class="btn btn-ghost btn-sm" :class="{active:exGroups.includes(g)}" @click="exToggle(exGroups,g)">{{ g }}</button>
+            </div>
+          </div>
+          <div v-if="mapK2Groups.length">
+            <div class="text-muted" style="font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.03em;margin-bottom:.2rem">Kraken2 groups <span style="font-weight:400;text-transform:none">· filters map markers</span></div>
+            <div style="display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.5rem">
+              <button v-for="g in mapK2Groups" :key="g.organism_group" class="btn btn-ghost btn-sm" :class="{active:exK2Groups.includes(g.organism_group)}" @click="exToggleK2Group(g.organism_group)" :title="g.taxa_count+' taxa'">{{ g.organism_group }}</button>
+            </div>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:.35rem;margin-bottom:.5rem" v-if="exploreSchema.ranks?.length">
+            <button v-for="r in exploreSchema.ranks" :key="r" class="btn btn-ghost btn-sm" :class="{active:exRanks.includes(r)}" @click="exToggle(exRanks,r)">{{ r }}</button>
+          </div>
+          <div class="filter-bar">
+            <input v-model="exSpeciesInput" @keyup.enter="exAddSpecies" placeholder="Add species (exact name) + Enter…" style="min-width:240px"/>
+            <input v-model="exFilters.search" @keyup.enter="runExplore" placeholder="🔍 name / common-name contains…" style="min-width:200px"/>
+            <input type="number" v-model="exFilters.minReads" placeholder="min reads" style="width:110px"/>
+            <label class="text-muted" style="font-size:.75rem">Top
+              <input type="number" v-model="exFilters.top" style="width:70px"/>
+            </label>
+          </div>
+          <div v-if="exSpecies.length" style="display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.4rem">
+            <span v-for="s in exSpecies" :key="s" class="badge" style="cursor:pointer" @click="exRemoveSpecies(s)">{{ s }} ✕</span>
+          </div>
+        </div>
+      </template>
+      </div><!-- /.explore-filters -->
+      </div><!-- /.explore-top -->
+
+      <!-- PLOTS: full width below, same height as top row -->
+      <div class="explore-plots">
+      <template v-if="exploreSchema">
+        <div v-if="exResult" class="explore-chart-grid">
+          <div class="card chart-span-full">
+            <div class="chart-header">
+              <h3>Species by reads</h3>
+              <span class="text-muted" style="font-size:.72rem">click a bar to pin/unpin as a filter</span>
+              <span style="margin-left:auto"></span>
+              <button class="btn btn-ghost btn-sm" :class="{active:barOrient.exSpeciesBar}" @click="toggleBarOrient('exSpeciesBar');drawExploreSpeciesBar()" title="Toggle orientation">{{ barOrient.exSpeciesBar ? '↔ H' : '↕ V' }}</button>
+              <button class="btn btn-ghost btn-sm" @click="resetBarZoom('exSpeciesBar')" title="Reset zoom">⟳</button>
+              <label class="text-muted" style="font-size:.72rem">Top
+                <input class="chart-topn" type="number" min="5" max="100" step="5" v-model.number="exBarTopN"/>
+              </label>
+              <div class="chart-pager" v-if="exBarPages>1">
+                <button type="button" @click="exBarPage--" :disabled="exBarPage<=0">‹</button>
+                <span class="chart-pg-info">{{ exBarRangeLabel }}</span>
+                <button type="button" @click="exBarPage++" :disabled="exBarPage>=exBarPages-1">›</button>
+              </div>
+            </div>
+            <div class="chart-scrollbox d3-wrap" ref="exSpeciesBarWrap"><svg ref="exSpeciesBarSvg"></svg></div>
+            <div class="legend chart-legend-pinned" ref="exSpeciesBarLegend"></div>
+          </div>
+          <div class="card">
+            <div class="chart-header">
+              <h3>Environmental scatter</h3>
+              <label class="text-muted" style="font-size:.75rem">X
+                <select v-model="exScatterX"><option v-for="o in exScatterFields" :key="o" :value="o">{{ o }}</option></select>
+              </label>
+              <label class="text-muted" style="font-size:.75rem">Y
+                <select v-model="exScatterY"><option v-for="o in exScatterFields" :key="o" :value="o">{{ o }}</option></select>
+              </label>
+              <label class="text-muted" style="font-size:.75rem">Size
+                <select v-model="exScatterSize"><option v-for="o in exScatterFields" :key="o" :value="o">{{ o }}</option></select>
+              </label>
+            </div>
+            <div class="d3-wrap" ref="exScatterWrap"><svg ref="exScatterSvg"></svg></div>
+            <span class="text-muted" style="font-size:.7rem">Each point = one detection · color = organism group · size = reads</span>
+          </div>
+          <div class="card">
+            <div class="chart-header">
+              <h3>Environmental envelope</h3>
+              <label class="text-muted" style="font-size:.75rem">Variable
+                <select v-model="exEnvVar"><option v-for="o in exEnvAvailable" :key="o" :value="o">{{ o }}</option></select>
+              </label>
+            </div>
+            <div class="d3-wrap" ref="exEnvWrap"><svg ref="exEnvSvg"></svg></div>
+            <span class="text-muted" style="font-size:.7rem">min–median–max of the selected variable for top species</span>
+          </div>
+        </div>
+
+        <div v-if="exResult && exResult.species.length" class="card">
+          <div class="chart-header"><h3>Matching species</h3><span class="badge">{{ exResult.species.length }}</span></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Species</th><th>Common</th><th>Group</th><th>Rank</th><th>Reads</th><th>Samples</th></tr></thead>
+              <tbody>
+                <tr v-for="s in exResult.species" :key="s.scientific_name" style="cursor:pointer" :class="{'row-active':exSpecies.includes(s.scientific_name)}" @click="exToggleSpeciesFromBar(s.scientific_name)">
+                  <td style="font-style:italic">{{ s.scientific_name }}</td>
+                  <td>{{ s.common_name||'–' }}</td>
+                  <td><span class="badge" :style="{background:'transparent',color:'var(--text)'}">{{ s.organism_group||'–' }}</span></td>
+                  <td>{{ s.taxonomic_rank||'–' }}</td>
+                  <td :title="fmt(s.total_reads)">{{ fmtCompact(s.total_reads) }}</td>
+                  <td>{{ s.sample_count }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </template>
+      </div><!-- /.explore-plots -->
+    </div><!-- /.explore (view) -->
+
+    <!-- CUSTOM SQL -->
+    <div v-if="view==='sql'">
+      <div class="section-header">
+        <h2>🛢 Custom SQL</h2>
+        <span class="badge" v-if="activeConn">{{ activeConn.name }} · {{ activeConn.kind }}</span>
+        <span class="badge" v-if="sqlResult">{{ fmt(sqlResult.row_count) }} rows · {{ sqlResult.elapsed_ms }} ms</span>
+        <span style="margin-left:auto"></span>
+        <span class="text-muted" style="font-size:.75rem">Read-only · SELECT / WITH only</span>
+      </div>
+
+      <div class="alert alert-error" v-if="activeConn && activeConn.kind && activeConn.kind!=='postgres'">
+        Custom SQL is only available for Postgres data sources. The active source is <strong>{{ activeConn.kind }}</strong>.
+      </div>
+
+      <div class="two-col" style="grid-template-columns:1fr 280px">
+        <!-- Editor -->
+        <div class="card">
+          <div class="chart-header">
+            <h3>Query</h3>
+            <button class="btn btn-primary btn-sm" @click="runSql" :disabled="sqlRunning">{{ sqlRunning ? 'Running…' : '▶ Run (Ctrl+Enter)' }}</button>
+            <label class="text-muted" style="font-size:.75rem">Limit
+              <input type="number" v-model.number="sqlLimit" min="1" max="50000" style="width:90px"/>
+            </label>
+            <button class="btn btn-ghost btn-sm" @click="sqlSaveCurrent">💾 Save</button>
+            <button class="btn btn-ghost btn-sm" @click="sqlText=''">Clear</button>
+          </div>
+          <textarea v-model="sqlText" @keydown="onSqlKey($event)" spellcheck="false"
+            placeholder="SELECT * FROM mbon_data LIMIT 100;"
+            style="width:100%;min-height:200px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85rem;line-height:1.5;padding:.6rem .75rem;border:1px solid var(--border);border-radius:var(--radius);resize:vertical;outline:none;background:#fbfdff"></textarea>
+          <div v-if="sqlError" class="alert alert-error" style="margin-top:.6rem">⚠️ {{ sqlError }}</div>
+        </div>
+
+        <!-- Saved queries + schema -->
+        <div>
+          <div class="card">
+            <div class="card-title">Saved queries</div>
+            <div v-if="!sqlSaved.length" class="text-muted" style="font-size:.78rem">None yet — write a query and click 💾 Save.</div>
+            <div v-for="q in sqlSaved" :key="q.id" style="display:flex;align-items:center;gap:.4rem;padding:.3rem 0;border-bottom:1px solid var(--border)">
+              <button class="btn btn-ghost btn-sm" style="flex:1;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" :title="q.sql" @click="sqlLoad(q)">{{ q.name }}</button>
+              <button class="btn btn-ghost btn-sm" style="color:#ef4444" @click="sqlDelete(q.id)" title="Delete">✕</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Tables <button class="btn btn-ghost btn-sm" style="float:right" @click="loadSqlTables">↻</button></div>
+            <input v-model="sqlTableFilter" placeholder="Filter…" style="width:100%;margin-bottom:.4rem;border:1px solid var(--border);border-radius:6px;padding:.3rem .5rem;font-size:.78rem"/>
+            <div style="max-height:260px;overflow-y:auto;font-size:.78rem">
+              <div v-for="t in filteredSqlTables" :key="t.name" style="margin-bottom:.2rem">
+                <div style="display:flex;align-items:center;gap:.3rem">
+                  <button class="btn btn-ghost btn-sm" style="padding:.1rem .35rem" @click="t._open=!t._open">{{ t._open?'▾':'▸' }}</button>
+                  <span style="font-weight:600;cursor:pointer;color:var(--ocean-dk)" @click="sqlInsert(t.name)">{{ t.name }}</span>
+                  <span class="text-muted" style="font-size:.68rem">{{ t.columns.length }}</span>
+                </div>
+                <div v-if="t._open" style="padding-left:1.3rem">
+                  <div v-for="c in t.columns" :key="c.name" style="cursor:pointer;color:var(--muted)" @click="sqlInsert(c.name)">
+                    {{ c.name }} <span style="font-size:.68rem;opacity:.7">{{ c.type }}</span>
+                  </div>
+                </div>
+              </div>
+              <div v-if="!sqlTables.length" class="text-muted">Click ↻ to load schema.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div v-if="sqlRunning" class="loading"><div class="spinner"></div> Running query…</div>
+      <template v-else-if="sqlResult">
+        <div class="tab-bar">
+          <button class="tab-btn" :class="{active:sqlResultTab==='table'}" @click="sqlResultTab='table'">Table</button>
+          <button class="tab-btn" :class="{active:sqlResultTab==='chart'}" @click="sqlResultTab='chart'; $nextTick(drawSqlChart)">Chart</button>
+        </div>
+
+        <div v-show="sqlResultTab==='table'" class="card table-wrap">
+          <div v-if="sqlResult.truncated" class="text-muted" style="font-size:.75rem;margin-bottom:.4rem">⚠️ Showing first {{ fmt(sqlResult.row_count) }} rows (limit reached). Increase the limit to see more.</div>
+          <table>
+            <thead><tr><th v-for="c in sqlResult.columns" :key="c" @click="sortTable('sqlres',c)">{{ c }} {{ sortArrow('sqlres',c) }}</th></tr></thead>
+            <tbody>
+              <tr v-if="!sqlResult.rows.length"><td :colspan="sqlResult.columns.length||1" class="no-data">No rows returned</td></tr>
+              <tr v-for="(row,ri) in sortedSqlRows" :key="ri">
+                <td v-for="c in sqlResult.columns" :key="c">{{ row[c]==null ? '–' : row[c] }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div v-show="sqlResultTab==='chart'" class="card">
+          <div class="chart-header">
+            <h3>Quick chart</h3>
+            <label class="text-muted" style="font-size:.75rem">Type
+              <select v-model="sqlChartType" @change="drawSqlChart">
+                <option value="bar">Bar</option>
+                <option value="scatter">Scatter</option>
+                <option value="line">Line</option>
+              </select>
+            </label>
+            <label class="text-muted" style="font-size:.75rem">X
+              <select v-model="sqlChartX" @change="drawSqlChart"><option v-for="c in sqlResult.columns" :key="c" :value="c">{{ c }}</option></select>
+            </label>
+            <label class="text-muted" style="font-size:.75rem">Y
+              <select v-model="sqlChartY" @change="drawSqlChart"><option v-for="c in sqlNumericColumns" :key="c" :value="c">{{ c }}</option></select>
+            </label>
+            <label class="text-muted" style="font-size:.75rem" v-if="sqlChartType==='scatter'">Size
+              <select v-model="sqlChartSize" @change="drawSqlChart"><option value="">—</option><option v-for="c in sqlNumericColumns" :key="c" :value="c">{{ c }}</option></select>
+            </label>
+          </div>
+          <div class="d3-wrap" ref="sqlChartWrap"><svg ref="sqlChartSvg"></svg></div>
+          <span class="text-muted" style="font-size:.7rem">Pick any result columns for X / Y. Bar/line use the first {{ sqlChartTopN }} rows in current sort order.</span>
+        </div>
+      </template>
+      <div v-else-if="!sqlError" class="card no-data">Write a SELECT query and press Run.</div>
+    </div>
+
+    <!-- CONNECTIONS / DATA SOURCES -->
+    <!-- ══════════════ IMPORTS ══════════════ -->
+    <div v-if="view==='imports'">
+      <div class="section-header">
+        <h2>📥 Imported Files</h2>
+        <span class="badge" v-if="importsData && importsData.sources.length">{{ importsData.sources.length }} source(s)</span>
+        <span style="margin-left:auto"></span>
+        <button class="btn btn-primary btn-sm" @click="importPanelToggle && importPanelToggle()" title="Open the import side-panel">⬆ Open import panel</button>
+        <button class="btn btn-ghost btn-sm" @click="loadImports()">↻ Refresh</button>
+      </div>
+
+      <p class="text-muted" style="font-size:.84rem;margin:-.25rem 0 1rem">
+        Drop or choose <b>.xlsx / .xlsm / .csv / .tsv</b> files in the floating panel on the right.
+        Each file opens a mapping &amp; validation popup; committed sources are saved to the server and listed here.
+        Toggle a source off in the panel to hide its rows.
+      </p>
+
+      <div v-if="importsLoading" class="loading">Loading imported data…</div>
+
+      <div v-else-if="!importsData || !importsData.sources.length" class="no-data" style="padding:2rem;text-align:center">
+        No files imported yet. Click <b>Open import panel</b> and drop a file to begin.
+      </div>
+
+      <template v-else>
+        <!-- source cards -->
+        <div style="display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:1rem">
+          <div v-for="s in importsData.sources" :key="s.id"
+               style="border:1px solid var(--border);border-radius:8px;padding:.6rem .8rem;min-width:220px"
+               :style="{opacity: s.enabled ? 1 : .5}">
+            <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem">
+              <span class="badge">{{ s.kind === 'csv' ? 'CSV' : 'XLSX' }}</span>
+              <b style="font-size:.84rem">{{ s.name }}</b>
+              <span v-if="!s.enabled" class="text-muted" style="font-size:.7rem;margin-left:auto">hidden</span>
+            </div>
+            <div v-for="d in s.datasets" :key="d.role" class="text-muted" style="font-size:.74rem">
+              {{ d.role }} — {{ d.rows }} rows · {{ d.cols }} cols
+            </div>
+            <div v-if="s.csvMeta && s.csvMeta.link" class="text-muted" style="font-size:.72rem;margin-top:.25rem">
+              {{ s.csvMeta.link.mode === 'cruise' ? '🔗 linked → ' + s.csvMeta.link.cruise : '⚲ standalone (no cruise)' }}
+            </div>
+          </div>
+        </div>
+
+        <!-- role selector + regex search -->
+        <div class="toolbar" style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.6rem">
+          <label style="font-size:.8rem">Show:
+            <select v-model="importRole" style="margin-left:.3rem">
+              <option v-for="r in importRolesWithData" :key="r" :value="r">{{ r }} ({{ importsData.counts[r] }})</option>
+            </select>
+          </label>
+          <input v-model="importSearch" placeholder="🔍 regex filter rows…" style="min-width:200px"/>
+          <span class="text-muted" style="font-size:.78rem">{{ importRoleRows.length }} row(s)</span>
+        </div>
+
+        <!-- merged records table -->
+        <div class="table-wrap" v-if="importRoleRows.length">
+          <table class="data-table">
+            <thead><tr><th v-for="c in importRoleCols" :key="c">{{ c }}</th></tr></thead>
+            <tbody>
+              <tr v-for="(row,i) in importRoleRows.slice(0,500)" :key="i">
+                <td v-for="c in importRoleCols" :key="c">{{ row[c] }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <p v-if="importRoleRows.length > 500" class="text-muted" style="font-size:.76rem;margin-top:.4rem">
+            Showing first 500 of {{ importRoleRows.length }} rows.
+          </p>
+        </div>
+        <div v-else class="no-data">No rows for this role match the filter.</div>
+      </template>
+    </div>
+
+    <div v-if="view==='connections'">
+      <div class="section-header">
+        <h2>⚙ Data Sources</h2>
+        <span class="badge" v-if="activeConn">Active: {{ activeConn.name }}</span>
+        <span style="margin-left:auto"></span>
+        <button class="btn btn-ghost btn-sm" @click="connNew('postgres')">+ Postgres</button>
+        <button class="btn btn-ghost btn-sm" @click="connNew('xlsx')">+ Excel</button>
+        <button class="btn btn-ghost btn-sm" @click="connNew('gsheet')">+ Google Sheet</button>
+      </div>
+      <div v-if="connMsg" class="alert alert-error">{{ connMsg }}</div>
+      <div v-if="connLoading" class="loading"><div class="spinner"></div> Loading…</div>
+
+      <!-- ADD / EDIT FORM -->
+      <div v-if="connForm" class="card">
+        <div class="card-title">{{ connForm.id?'Edit':'New' }} {{ connForm.kind }} source</div>
+        <div class="filter-bar">
+          <input v-model="connForm.name" placeholder="Display name" style="min-width:220px"/>
+        </div>
+        <template v-if="connForm.kind==='postgres'">
+          <div class="filter-bar">
+            <input v-model="connForm.config.host" placeholder="host" style="width:160px"/>
+            <input v-model="connForm.config.port" placeholder="port" style="width:90px"/>
+            <input v-model="connForm.config.dbname" placeholder="database" style="width:160px"/>
+            <input v-model="connForm.config.user" placeholder="user" style="width:140px"/>
+            <input v-model="connForm.config.password" type="password" placeholder="password" style="width:160px"/>
+          </div>
+          <span class="text-muted" style="font-size:.72rem">Password is stored server-side and never sent back to the browser (shows as •••••••• once saved).</span>
+        </template>
+        <template v-else-if="connForm.kind==='xlsx'">
+          <div class="filter-bar">
+            <input v-model="connForm.config.path" placeholder="Absolute path to .xlsx on the server" style="min-width:380px"/>
+          </div>
+          <div class="filter-bar">
+            <input v-model="connForm.config.samples_sheet" placeholder="samples sheet (optional — auto-detected)" style="min-width:260px"/>
+            <input v-model="connForm.config.obs_sheet" placeholder="observations sheet (optional)" style="min-width:260px"/>
+          </div>
+        </template>
+        <template v-else-if="connForm.kind==='gsheet'">
+          <div class="filter-bar">
+            <input v-model="connForm.config.url" placeholder="Google Sheet share / publish URL" style="min-width:420px"/>
+          </div>
+          <span class="text-muted" style="font-size:.72rem">The sheet must be link-shared ("anyone with the link can view") or published to the web.</span>
+        </template>
+        <div class="filter-bar" style="margin-top:.6rem">
+          <button class="btn btn-primary btn-sm" @click="connSave" :disabled="connSaving">{{ connSaving?'Saving…':'Save' }}</button>
+          <button class="btn btn-ghost btn-sm" @click="connCancel">Cancel</button>
+        </div>
+      </div>
+
+      <!-- LIST -->
+      <div class="card" v-for="c in connList" :key="c.id" style="display:flex;flex-direction:column;gap:.4rem">
+        <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
+          <strong>{{ c.name }}</strong>
+          <span class="badge">{{ c.kind }}</span>
+          <span v-if="c.active" class="badge" style="background:var(--ocean);color:#fff">ACTIVE</span>
+          <span class="text-muted" style="font-size:.75rem">
+            <template v-if="c.kind==='postgres'">{{ c.config.user }}@{{ c.config.host }}:{{ c.config.port }}/{{ c.config.dbname }}</template>
+            <template v-else-if="c.kind==='xlsx'">{{ c.config.path }}</template>
+            <template v-else-if="c.kind==='gsheet'">{{ c.config.url }}</template>
+          </span>
+          <span style="margin-left:auto"></span>
+          <button class="btn btn-ghost btn-sm" @click="connTest(c.id)">Test</button>
+          <button class="btn btn-ghost btn-sm" v-if="c.kind!=='postgres'" @click="connReload(c.id)">Reload</button>
+          <button class="btn btn-outline btn-sm" v-if="!c.active" @click="connActivate(c.id)">Activate</button>
+          <button class="btn btn-ghost btn-sm" @click="connEdit(c)">Edit</button>
+          <button class="btn btn-ghost btn-sm" @click="connDelete(c.id)">Delete</button>
+        </div>
+        <div v-if="connTests[c.id]" style="font-size:.78rem">
+          <span v-if="connTests[c.id].loading" class="text-muted">testing…</span>
+          <span v-else-if="connTests[c.id].ok" style="color:#2e7d32">
+            ✔ OK
+            <template v-if="connTests[c.id].ms"> · {{ connTests[c.id].ms }} ms</template>
+            <template v-if="connTests[c.id].sample_rows!=null"> · {{ connTests[c.id].sample_rows }} samples / {{ connTests[c.id].obs_rows }} obs
+              <template v-if="connTests[c.id].samples_sheet"> · sheets: {{ connTests[c.id].samples_sheet }} ⋈ {{ connTests[c.id].obs_sheet }}</template>
+            </template>
+          </span>
+          <span v-else style="color:#c62828">✕ {{ connTests[c.id].error }}</span>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="js/import-panel.js?v=20260902b"></script>
+<script src="js/app.js?v=20260902b"></script>
+<script src="js/enhance.js?v=20260902b"></script>
+<script src="js/table-tools.js?v=20260902b"></script>
+<script src="js/chart-export.js?v=20260902b"></script>
+</body>
+</html>

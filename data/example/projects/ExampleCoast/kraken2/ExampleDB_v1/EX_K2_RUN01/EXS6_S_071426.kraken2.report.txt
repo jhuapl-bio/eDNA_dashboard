@@ -1,0 +1,31 @@
+  9.17	2128	2128	U	0	unclassified
+ 90.83	21073	0	R	1	root
+ 90.83	21073	0	R1	131567	  cellular organisms
+ 90.83	21073	0	D	2759	    Eukaryota
+ 71.58	16608	0	K	33208	      Metazoa
+ 41.54	9637	0	P	7711	        Chordata
+ 41.54	9637	0	C	186623	          Actinopteri
+ 20.06	4654	0	G	81671	            Pomatomus
+ 20.06	4654	4654	S	8167	              Pomatomus saltatrix (Bluefish)
+ 17.62	4089	0	G	551181	            Brevoortia
+ 17.62	4089	4089	S	55118	              Brevoortia tyrannus (Atlantic menhaden)
+  3.85	894	0	G	2247181	            Anchoa
+  3.85	894	894	S	224718	              Anchoa mitchilli (Bay anchovy)
+ 30.05	6971	0	P	6656	        Arthropoda
+ 27.65	6414	0	C	72037	          Hexanauplia
+ 14.61	3389	0	G	4631891	            Centropages
+ 14.61	3389	3389	S	463189	              Centropages typicus (Copepod)
+ 13.04	3025	0	G	1361801	            Acartia
+ 13.04	3025	3025	S	136180	              Acartia tonsa (Copepod)
+  2.40	557	0	C	6658	          Branchiopoda
+  2.40	557	0	G	1241401	            Penilia
+  2.40	557	557	S	124140	              Penilia avirostris (Water flea)
+ 10.47	2430	0	P	2836	      Bacillariophyta
+ 10.47	2430	0	C	33849	        Mediophyceae
+ 10.47	2430	0	G	351281	          Thalassiosira
+ 10.47	2430	2430	S	35128	            Thalassiosira pseudonana (Diatom)
+  8.77	2035	0	K	33090	      Viridiplantae
+  8.77	2035	0	P	3041	        Chlorophyta
+  8.77	2035	0	C	1035538	          Mamiellophyceae
+  8.77	2035	0	G	388331	            Micromonas
+  8.77	2035	2035	S	38833	              Micromonas pusilla (Green alga)

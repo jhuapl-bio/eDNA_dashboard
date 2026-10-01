@@ -1,0 +1,28 @@
+  1.01	229	229	U	0	unclassified
+ 98.99	22364	0	R	1	root
+ 98.99	22364	0	R1	131567	  cellular organisms
+ 98.99	22364	0	D	2759	    Eukaryota
+ 77.21	17445	0	K	33208	      Metazoa
+ 45.07	10183	0	P	6656	        Arthropoda
+ 45.07	10183	0	C	72037	          Hexanauplia
+ 30.72	6941	0	G	1361801	            Acartia
+ 30.72	6941	6941	S	136180	              Acartia tonsa (Copepod)
+ 14.35	3242	0	G	4631891	            Centropages
+ 14.35	3242	3242	S	463189	              Centropages typicus (Copepod)
+ 32.14	7262	0	P	7711	        Chordata
+ 32.14	7262	0	C	186623	          Actinopteri
+ 18.51	4182	0	G	551181	            Brevoortia
+ 18.51	4182	4182	S	55118	              Brevoortia tyrannus (Atlantic menhaden)
+  7.14	1613	0	G	81671	            Pomatomus
+  7.14	1613	1613	S	8167	              Pomatomus saltatrix (Bluefish)
+  6.49	1467	0	G	348161	            Morone
+  6.49	1467	1467	S	34816	              Morone saxatilis (Striped bass)
+ 12.72	2873	0	P	2836	      Bacillariophyta
+ 12.72	2873	0	C	33849	        Mediophyceae
+ 12.72	2873	0	G	28431	          Skeletonema
+ 12.72	2873	2873	S	2843	            Skeletonema costatum (Diatom)
+  9.06	2046	0	K	33090	      Viridiplantae
+  9.06	2046	0	P	3041	        Chlorophyta
+  9.06	2046	0	C	1035538	          Mamiellophyceae
+  9.06	2046	0	G	388331	            Micromonas
+  9.06	2046	2046	S	38833	              Micromonas pusilla (Green alga)

@@ -1,0 +1,31 @@
+  3.00	430	430	U	0	unclassified
+ 97.00	13920	0	R	1	root
+ 97.00	13920	0	R1	131567	  cellular organisms
+ 97.00	13920	0	D	2759	    Eukaryota
+ 72.89	10459	0	K	33208	      Metazoa
+ 57.37	8232	0	P	6656	        Arthropoda
+ 51.30	7361	0	C	72037	          Hexanauplia
+ 47.25	6781	0	G	1361801	            Acartia
+ 47.25	6781	6781	S	136180	              Acartia tonsa (Copepod)
+  4.04	580	0	G	4631891	            Centropages
+  4.04	580	580	S	463189	              Centropages typicus (Copepod)
+  6.07	871	0	C	6681	          Malacostraca
+  6.07	871	0	G	67631	            Callinectes
+  6.07	871	871	S	6763	              Callinectes sapidus (Blue crab)
+ 11.54	1656	0	P	6447	        Mollusca
+ 11.54	1656	0	C	6544	          Bivalvia
+ 11.54	1656	0	G	65501	            Mytilus
+ 11.54	1656	1656	S	6550	              Mytilus edulis (Blue mussel)
+  3.98	571	0	P	7711	        Chordata
+  3.98	571	0	C	40674	          Mammalia
+  3.98	571	0	G	97391	            Tursiops
+  3.98	571	571	S	9739	              Tursiops truncatus (Common bottlenose dolphin)
+ 16.43	2357	0	P	2836	      Bacillariophyta
+ 16.43	2357	0	C	33849	        Mediophyceae
+ 16.43	2357	0	G	28431	          Skeletonema
+ 16.43	2357	2357	S	2843	            Skeletonema costatum (Diatom)
+  7.69	1104	0	K	33090	      Viridiplantae
+  7.69	1104	0	P	3041	        Chlorophyta
+  7.69	1104	0	C	1035538	          Mamiellophyceae
+  7.69	1104	0	G	418751	            Bathycoccus
+  7.69	1104	1104	S	41875	              Bathycoccus prasinos (Green alga)
