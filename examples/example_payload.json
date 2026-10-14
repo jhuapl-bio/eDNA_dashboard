@@ -8,7 +8,7 @@
  },
  "title": "MBON eDNA Explorer",
  "isExample": true,
- "generatedAt": "2026-10-14 16:42 UTC",
+ "generatedAt": "2026-10-14 18:15 UTC",
  "generator": "build_mbon_html.py 2.0.0",
  "inputs": {
   "manifest": "report_manifest.xlsx",
@@ -6276,23 +6276,6 @@
        "Collection Device": "Niskin bottle",
        "Storage Solution": "Longmire's buffer"
       },
-      "EX0024": {
-       "Sample Name": "EXS6_S_092226",
-       "Station": "EXS6",
-       "Cruise": "EXC02",
-       "Date": "2026-09-22",
-       "Category": "sample",
-       "Sample Depth": "Surface",
-       "Min Depth (m)": 1,
-       "Max Depth (m)": 1,
-       "Temperature": 20.5,
-       "Salinity": 32.23,
-       "Latitude": 38.38,
-       "Longitude": -74.395,
-       "Location": "Example Coast (synthetic)",
-       "Collection Device": "Niskin bottle",
-       "Storage Solution": "Longmire's buffer"
-      },
       "EX0011": {
        "Sample Name": "EXS6_S_071426",
        "Station": "EXS6",
@@ -6304,6 +6287,23 @@
        "Max Depth (m)": 1,
        "Temperature": 24.2,
        "Salinity": 32.14,
+       "Latitude": 38.38,
+       "Longitude": -74.395,
+       "Location": "Example Coast (synthetic)",
+       "Collection Device": "Niskin bottle",
+       "Storage Solution": "Longmire's buffer"
+      },
+      "EX0024": {
+       "Sample Name": "EXS6_S_092226",
+       "Station": "EXS6",
+       "Cruise": "EXC02",
+       "Date": "2026-09-22",
+       "Category": "sample",
+       "Sample Depth": "Surface",
+       "Min Depth (m)": 1,
+       "Max Depth (m)": 1,
+       "Temperature": 20.5,
+       "Salinity": 32.23,
        "Latitude": 38.38,
        "Longitude": -74.395,
        "Location": "Example Coast (synthetic)",
@@ -6363,8 +6363,8 @@
        "sampleHits": [
         "EX0025",
         "EX0012",
-        "EX0024",
-        "EX0011"
+        "EX0011",
+        "EX0024"
        ],
        "speciesDist": [
         {
@@ -6376,12 +6376,12 @@
          "reads": 1692
         },
         {
-         "sample": "EX0024",
-         "reads": 1361
-        },
-        {
          "sample": "EX0011",
          "reads": 3414
+        },
+        {
+         "sample": "EX0024",
+         "reads": 1361
         }
        ],
        "groupDist": [
@@ -6394,12 +6394,12 @@
          "reads": 3520
         },
         {
-         "sample": "EX0024",
-         "reads": 2530
-        },
-        {
          "sample": "EX0011",
          "reads": 8397
+        },
+        {
+         "sample": "EX0024",
+         "reads": 2530
         }
        ]
       },
@@ -6413,8 +6413,8 @@
        "sampleHits": [
         "EX0025",
         "EX0012",
-        "EX0024",
-        "EX0011"
+        "EX0011",
+        "EX0024"
        ],
        "speciesDist": [
         {
@@ -6426,12 +6426,12 @@
          "reads": 735
         },
         {
-         "sample": "EX0024",
-         "reads": 1188
-        },
-        {
          "sample": "EX0011",
          "reads": 3239
+        },
+        {
+         "sample": "EX0024",
+         "reads": 1188
         }
        ],
        "groupDist": [
@@ -6444,12 +6444,12 @@
          "reads": 735
         },
         {
-         "sample": "EX0024",
-         "reads": 1188
-        },
-        {
          "sample": "EX0011",
          "reads": 3239
+        },
+        {
+         "sample": "EX0024",
+         "reads": 1188
         }
        ]
       },
@@ -6484,12 +6484,12 @@
          "reads": 3520
         },
         {
-         "sample": "EX0024",
-         "reads": 2530
-        },
-        {
          "sample": "EX0011",
          "reads": 8397
+        },
+        {
+         "sample": "EX0024",
+         "reads": 2530
         }
        ]
       },
@@ -6565,8 +6565,8 @@
        "reads": 2841,
        "sampleHits": [
         "EX0012",
-        "EX0024",
-        "EX0011"
+        "EX0011",
+        "EX0024"
        ],
        "speciesDist": [
         {
@@ -6574,12 +6574,12 @@
          "reads": 610
         },
         {
-         "sample": "EX0024",
-         "reads": 1169
-        },
-        {
          "sample": "EX0011",
          "reads": 1062
+        },
+        {
+         "sample": "EX0024",
+         "reads": 1169
         }
        ],
        "groupDist": [
@@ -6592,12 +6592,12 @@
          "reads": 3520
         },
         {
-         "sample": "EX0024",
-         "reads": 2530
-        },
-        {
          "sample": "EX0011",
          "reads": 8397
+        },
+        {
+         "sample": "EX0024",
+         "reads": 2530
         }
        ]
       },
@@ -6686,12 +6686,12 @@
          "reads": 3520
         },
         {
-         "sample": "EX0024",
-         "reads": 2530
-        },
-        {
          "sample": "EX0011",
          "reads": 8397
+        },
+        {
+         "sample": "EX0024",
+         "reads": 2530
         }
        ]
       },
@@ -6807,12 +6807,12 @@
          "reads": 3520
         },
         {
-         "sample": "EX0024",
-         "reads": 2530
-        },
-        {
          "sample": "EX0011",
          "reads": 8397
+        },
+        {
+         "sample": "EX0024",
+         "reads": 2530
         }
        ]
       },
@@ -6867,40 +6867,6 @@
       "COI"
      ],
      "sampleMeta": {
-      "EX0022": {
-       "Sample Name": "EXS5_S_092226",
-       "Station": "EXS5",
-       "Cruise": "EXC02",
-       "Date": "2026-09-22",
-       "Category": "sample",
-       "Sample Depth": "Surface",
-       "Min Depth (m)": 1,
-       "Max Depth (m)": 1,
-       "Temperature": 21.4,
-       "Salinity": 31.44,
-       "Latitude": 38.445,
-       "Longitude": -74.53,
-       "Location": "Example Coast (synthetic)",
-       "Collection Device": "Niskin bottle",
-       "Storage Solution": "Longmire's buffer"
-      },
-      "EX0009": {
-       "Sample Name": "EXS5_S_071426",
-       "Station": "EXS5",
-       "Cruise": "EXC01",
-       "Date": "2026-07-14",
-       "Category": "sample",
-       "Sample Depth": "Surface",
-       "Min Depth (m)": 1,
-       "Max Depth (m)": 1,
-       "Temperature": 24.7,
-       "Salinity": 31.2,
-       "Latitude": 38.445,
-       "Longitude": -74.53,
-       "Location": "Example Coast (synthetic)",
-       "Collection Device": "Niskin bottle",
-       "Storage Solution": "Longmire's buffer"
-      },
       "EX0023": {
        "Sample Name": "EXS5_B_092226",
        "Station": "EXS5",
@@ -6912,6 +6878,23 @@
        "Max Depth (m)": 30,
        "Temperature": 17,
        "Salinity": 32.19,
+       "Latitude": 38.445,
+       "Longitude": -74.53,
+       "Location": "Example Coast (synthetic)",
+       "Collection Device": "Niskin bottle",
+       "Storage Solution": "Longmire's buffer"
+      },
+      "EX0022": {
+       "Sample Name": "EXS5_S_092226",
+       "Station": "EXS5",
+       "Cruise": "EXC02",
+       "Date": "2026-09-22",
+       "Category": "sample",
+       "Sample Depth": "Surface",
+       "Min Depth (m)": 1,
+       "Max Depth (m)": 1,
+       "Temperature": 21.4,
+       "Salinity": 31.44,
        "Latitude": 38.445,
        "Longitude": -74.53,
        "Location": "Example Coast (synthetic)",
@@ -6934,6 +6917,23 @@
        "Location": "Example Coast (synthetic)",
        "Collection Device": "Niskin bottle",
        "Storage Solution": "Longmire's buffer"
+      },
+      "EX0009": {
+       "Sample Name": "EXS5_S_071426",
+       "Station": "EXS5",
+       "Cruise": "EXC01",
+       "Date": "2026-07-14",
+       "Category": "sample",
+       "Sample Depth": "Surface",
+       "Min Depth (m)": 1,
+       "Max Depth (m)": 1,
+       "Temperature": 24.7,
+       "Salinity": 31.2,
+       "Latitude": 38.445,
+       "Longitude": -74.53,
+       "Location": "Example Coast (synthetic)",
+       "Collection Device": "Niskin bottle",
+       "Storage Solution": "Longmire's buffer"
       }
      },
      "rows": [
@@ -6945,15 +6945,11 @@
        "percent": 17.968699011891243,
        "reads": 13766,
        "sampleHits": [
-        "EX0009",
         "EX0023",
-        "EX0010"
+        "EX0010",
+        "EX0009"
        ],
        "speciesDist": [
-        {
-         "sample": "EX0009",
-         "reads": 10331
-        },
         {
          "sample": "EX0023",
          "reads": 1310
@@ -6961,13 +6957,13 @@
         {
          "sample": "EX0010",
          "reads": 2125
+        },
+        {
+         "sample": "EX0009",
+         "reads": 10331
         }
        ],
        "groupDist": [
-        {
-         "sample": "EX0009",
-         "reads": 22790
-        },
         {
          "sample": "EX0023",
          "reads": 4079
@@ -6975,6 +6971,10 @@
         {
          "sample": "EX0010",
          "reads": 4364
+        },
+        {
+         "sample": "EX0009",
+         "reads": 22790
         }
        ]
       },
@@ -6987,8 +6987,8 @@
        "reads": 9671,
        "sampleHits": [
         "EX0022",
-        "EX0009",
-        "EX0010"
+        "EX0010",
+        "EX0009"
        ],
        "speciesDist": [
         {
@@ -6996,12 +6996,12 @@
          "reads": 1262
         },
         {
-         "sample": "EX0009",
-         "reads": 5728
-        },
-        {
          "sample": "EX0010",
          "reads": 2681
+        },
+        {
+         "sample": "EX0009",
+         "reads": 5728
         }
        ],
        "groupDist": [
@@ -7010,12 +7010,12 @@
          "reads": 2972
         },
         {
-         "sample": "EX0009",
-         "reads": 5728
-        },
-        {
          "sample": "EX0010",
          "reads": 8299
+        },
+        {
+         "sample": "EX0009",
+         "reads": 5728
         }
        ]
       },
@@ -7027,15 +7027,11 @@
        "percent": 11.938233412956365,
        "reads": 9146,
        "sampleHits": [
-        "EX0009",
         "EX0023",
-        "EX0010"
+        "EX0010",
+        "EX0009"
        ],
        "speciesDist": [
-        {
-         "sample": "EX0009",
-         "reads": 6101
-        },
         {
          "sample": "EX0023",
          "reads": 806
@@ -7043,13 +7039,13 @@
         {
          "sample": "EX0010",
          "reads": 2239
+        },
+        {
+         "sample": "EX0009",
+         "reads": 6101
         }
        ],
        "groupDist": [
-        {
-         "sample": "EX0009",
-         "reads": 22790
-        },
         {
          "sample": "EX0023",
          "reads": 4079
@@ -7057,6 +7053,10 @@
         {
          "sample": "EX0010",
          "reads": 4364
+        },
+        {
+         "sample": "EX0009",
+         "reads": 22790
         }
        ]
       },
@@ -7068,24 +7068,20 @@
        "percent": 10.339246322329691,
        "reads": 7921,
        "sampleHits": [
-        "EX0009",
-        "EX0023"
+        "EX0023",
+        "EX0009"
        ],
        "speciesDist": [
         {
-         "sample": "EX0009",
-         "reads": 6358
-        },
-        {
          "sample": "EX0023",
          "reads": 1563
+        },
+        {
+         "sample": "EX0009",
+         "reads": 6358
         }
        ],
        "groupDist": [
-        {
-         "sample": "EX0009",
-         "reads": 22790
-        },
         {
          "sample": "EX0023",
          "reads": 4079
@@ -7093,6 +7089,10 @@
         {
          "sample": "EX0010",
          "reads": 4364
+        },
+        {
+         "sample": "EX0009",
+         "reads": 22790
         }
        ]
       },
@@ -7104,35 +7104,35 @@
        "percent": 9.969847672005326,
        "reads": 7638,
        "sampleHits": [
-        "EX0022",
-        "EX0023"
+        "EX0023",
+        "EX0022"
        ],
        "speciesDist": [
         {
-         "sample": "EX0022",
-         "reads": 5963
-        },
-        {
          "sample": "EX0023",
          "reads": 1675
+        },
+        {
+         "sample": "EX0022",
+         "reads": 5963
         }
        ],
        "groupDist": [
-        {
-         "sample": "EX0022",
-         "reads": 8206
-        },
-        {
-         "sample": "EX0009",
-         "reads": 195
-        },
         {
          "sample": "EX0023",
          "reads": 5097
         },
         {
+         "sample": "EX0022",
+         "reads": 8206
+        },
+        {
          "sample": "EX0010",
          "reads": 536
+        },
+        {
+         "sample": "EX0009",
+         "reads": 195
         }
        ]
       },
@@ -7163,12 +7163,12 @@
          "reads": 2972
         },
         {
-         "sample": "EX0009",
-         "reads": 5728
-        },
-        {
          "sample": "EX0010",
          "reads": 8299
+        },
+        {
+         "sample": "EX0009",
+         "reads": 5728
         }
        ]
       },
@@ -7199,12 +7199,12 @@
          "reads": 6082
         },
         {
-         "sample": "EX0009",
-         "reads": 2375
-        },
-        {
          "sample": "EX0010",
          "reads": 221
+        },
+        {
+         "sample": "EX0009",
+         "reads": 2375
         }
        ]
       },
@@ -7216,27 +7216,27 @@
        "percent": 5.7354687969090605,
        "reads": 4394,
        "sampleHits": [
-        "EX0009",
-        "EX0010"
+        "EX0010",
+        "EX0009"
        ],
        "speciesDist": [
         {
-         "sample": "EX0009",
-         "reads": 1425
-        },
-        {
          "sample": "EX0010",
          "reads": 2969
+        },
+        {
+         "sample": "EX0009",
+         "reads": 1425
         }
        ],
        "groupDist": [
         {
-         "sample": "EX0009",
-         "reads": 1425
-        },
-        {
          "sample": "EX0010",
          "reads": 2969
+        },
+        {
+         "sample": "EX0009",
+         "reads": 1425
         }
        ]
       },
@@ -7258,20 +7258,20 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0022",
-         "reads": 8206
-        },
-        {
-         "sample": "EX0009",
-         "reads": 195
-        },
-        {
          "sample": "EX0023",
          "reads": 5097
         },
         {
+         "sample": "EX0022",
+         "reads": 8206
+        },
+        {
          "sample": "EX0010",
          "reads": 536
+        },
+        {
+         "sample": "EX0009",
+         "reads": 195
         }
        ]
       },
@@ -7284,8 +7284,8 @@
        "reads": 2507,
        "sampleHits": [
         "EX0022",
-        "EX0009",
-        "EX0010"
+        "EX0010",
+        "EX0009"
        ],
        "speciesDist": [
         {
@@ -7293,12 +7293,12 @@
          "reads": 1298
         },
         {
-         "sample": "EX0009",
-         "reads": 988
-        },
-        {
          "sample": "EX0010",
          "reads": 221
+        },
+        {
+         "sample": "EX0009",
+         "reads": 988
         }
        ],
        "groupDist": [
@@ -7307,12 +7307,12 @@
          "reads": 6082
         },
         {
-         "sample": "EX0009",
-         "reads": 2375
-        },
-        {
          "sample": "EX0010",
          "reads": 221
+        },
+        {
+         "sample": "EX0009",
+         "reads": 2375
         }
        ]
       },
@@ -7339,20 +7339,20 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0022",
-         "reads": 8206
-        },
-        {
-         "sample": "EX0009",
-         "reads": 195
-        },
-        {
          "sample": "EX0023",
          "reads": 5097
         },
         {
+         "sample": "EX0022",
+         "reads": 8206
+        },
+        {
          "sample": "EX0010",
          "reads": 536
+        },
+        {
+         "sample": "EX0009",
+         "reads": 195
         }
        ]
       },
@@ -7374,20 +7374,20 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0022",
-         "reads": 8206
-        },
-        {
-         "sample": "EX0009",
-         "reads": 195
-        },
-        {
          "sample": "EX0023",
          "reads": 5097
         },
         {
+         "sample": "EX0022",
+         "reads": 8206
+        },
+        {
          "sample": "EX0010",
          "reads": 536
+        },
+        {
+         "sample": "EX0009",
+         "reads": 195
         }
        ]
       },
@@ -7409,12 +7409,12 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0009",
-         "reads": 913
-        },
-        {
          "sample": "EX0010",
          "reads": 360
+        },
+        {
+         "sample": "EX0009",
+         "reads": 913
         }
        ]
       },
@@ -7436,20 +7436,20 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0022",
-         "reads": 8206
-        },
-        {
-         "sample": "EX0009",
-         "reads": 195
-        },
-        {
          "sample": "EX0023",
          "reads": 5097
         },
         {
+         "sample": "EX0022",
+         "reads": 8206
+        },
+        {
          "sample": "EX0010",
          "reads": 536
+        },
+        {
+         "sample": "EX0009",
+         "reads": 195
         }
        ]
       },
@@ -7476,20 +7476,20 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0022",
-         "reads": 8206
-        },
-        {
-         "sample": "EX0009",
-         "reads": 195
-        },
-        {
          "sample": "EX0023",
          "reads": 5097
         },
         {
+         "sample": "EX0022",
+         "reads": 8206
+        },
+        {
          "sample": "EX0010",
          "reads": 536
+        },
+        {
+         "sample": "EX0009",
+         "reads": 195
         }
        ]
       },
@@ -7511,16 +7511,16 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0009",
-         "reads": 22790
-        },
-        {
          "sample": "EX0023",
          "reads": 4079
         },
         {
          "sample": "EX0010",
          "reads": 4364
+        },
+        {
+         "sample": "EX0009",
+         "reads": 22790
         }
        ]
       },
@@ -7542,12 +7542,12 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0009",
-         "reads": 913
-        },
-        {
          "sample": "EX0010",
          "reads": 360
+        },
+        {
+         "sample": "EX0009",
+         "reads": 913
         }
        ]
       }
@@ -7576,23 +7576,6 @@
       "COI"
      ],
      "sampleMeta": {
-      "EX0007": {
-       "Sample Name": "EXS4_S_071426",
-       "Station": "EXS4",
-       "Cruise": "EXC01",
-       "Date": "2026-07-14",
-       "Category": "sample",
-       "Sample Depth": "Surface",
-       "Min Depth (m)": 1,
-       "Max Depth (m)": 1,
-       "Temperature": 24.8,
-       "Salinity": 30.62,
-       "Latitude": 38.51,
-       "Longitude": -74.665,
-       "Location": "Example Coast (synthetic)",
-       "Collection Device": "Niskin bottle",
-       "Storage Solution": "Longmire's buffer"
-      },
       "EX0021": {
        "Sample Name": "EXS4_B_092226",
        "Station": "EXS4",
@@ -7643,6 +7626,23 @@
        "Location": "Example Coast (synthetic)",
        "Collection Device": "Niskin bottle",
        "Storage Solution": "Longmire's buffer"
+      },
+      "EX0007": {
+       "Sample Name": "EXS4_S_071426",
+       "Station": "EXS4",
+       "Cruise": "EXC01",
+       "Date": "2026-07-14",
+       "Category": "sample",
+       "Sample Depth": "Surface",
+       "Min Depth (m)": 1,
+       "Max Depth (m)": 1,
+       "Temperature": 24.8,
+       "Salinity": 30.62,
+       "Latitude": 38.51,
+       "Longitude": -74.665,
+       "Location": "Example Coast (synthetic)",
+       "Collection Device": "Niskin bottle",
+       "Storage Solution": "Longmire's buffer"
       }
      },
      "rows": [
@@ -7674,10 +7674,6 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0007",
-         "reads": 14515
-        },
-        {
          "sample": "EX0021",
          "reads": 14357
         },
@@ -7688,6 +7684,10 @@
         {
          "sample": "EX0008",
          "reads": 5682
+        },
+        {
+         "sample": "EX0007",
+         "reads": 14515
         }
        ]
       },
@@ -7699,15 +7699,11 @@
        "percent": 14.505715242240184,
        "reads": 18198,
        "sampleHits": [
-        "EX0007",
         "EX0021",
-        "EX0020"
+        "EX0020",
+        "EX0007"
        ],
        "speciesDist": [
-        {
-         "sample": "EX0007",
-         "reads": 11354
-        },
         {
          "sample": "EX0021",
          "reads": 3521
@@ -7715,13 +7711,13 @@
         {
          "sample": "EX0020",
          "reads": 3323
+        },
+        {
+         "sample": "EX0007",
+         "reads": 11354
         }
        ],
        "groupDist": [
-        {
-         "sample": "EX0007",
-         "reads": 21285
-        },
         {
          "sample": "EX0021",
          "reads": 5157
@@ -7733,6 +7729,10 @@
         {
          "sample": "EX0008",
          "reads": 6587
+        },
+        {
+         "sample": "EX0007",
+         "reads": 21285
         }
        ]
       },
@@ -7744,15 +7744,11 @@
        "percent": 11.44961499832608,
        "reads": 14364,
        "sampleHits": [
-        "EX0007",
         "EX0020",
-        "EX0008"
+        "EX0008",
+        "EX0007"
        ],
        "speciesDist": [
-        {
-         "sample": "EX0007",
-         "reads": 4630
-        },
         {
          "sample": "EX0020",
          "reads": 4413
@@ -7760,13 +7756,13 @@
         {
          "sample": "EX0008",
          "reads": 5321
+        },
+        {
+         "sample": "EX0007",
+         "reads": 4630
         }
        ],
        "groupDist": [
-        {
-         "sample": "EX0007",
-         "reads": 21285
-        },
         {
          "sample": "EX0021",
          "reads": 5157
@@ -7778,6 +7774,10 @@
         {
          "sample": "EX0008",
          "reads": 6587
+        },
+        {
+         "sample": "EX0007",
+         "reads": 21285
         }
        ]
       },
@@ -7799,10 +7799,6 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0007",
-         "reads": 14515
-        },
-        {
          "sample": "EX0021",
          "reads": 14357
         },
@@ -7813,6 +7809,10 @@
         {
          "sample": "EX0008",
          "reads": 5682
+        },
+        {
+         "sample": "EX0007",
+         "reads": 14515
         }
        ]
       },
@@ -7824,16 +7824,12 @@
        "percent": 8.100180145710778,
        "reads": 10162,
        "sampleHits": [
-        "EX0007",
         "EX0021",
         "EX0020",
-        "EX0008"
+        "EX0008",
+        "EX0007"
        ],
        "speciesDist": [
-        {
-         "sample": "EX0007",
-         "reads": 4695
-        },
         {
          "sample": "EX0021",
          "reads": 3350
@@ -7845,13 +7841,13 @@
         {
          "sample": "EX0008",
          "reads": 866
-        }
-       ],
-       "groupDist": [
+        },
         {
          "sample": "EX0007",
          "reads": 4695
-        },
+        }
+       ],
+       "groupDist": [
         {
          "sample": "EX0021",
          "reads": 3350
@@ -7863,6 +7859,10 @@
         {
          "sample": "EX0008",
          "reads": 8270
+        },
+        {
+         "sample": "EX0007",
+         "reads": 4695
         }
        ]
       },
@@ -7884,10 +7884,6 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0007",
-         "reads": 4695
-        },
-        {
          "sample": "EX0021",
          "reads": 3350
         },
@@ -7898,6 +7894,10 @@
         {
          "sample": "EX0008",
          "reads": 8270
+        },
+        {
+         "sample": "EX0007",
+         "reads": 4695
         }
        ]
       },
@@ -7909,15 +7909,11 @@
        "percent": 4.280453393275623,
        "reads": 5370,
        "sampleHits": [
-        "EX0007",
         "EX0021",
-        "EX0008"
+        "EX0008",
+        "EX0007"
        ],
        "speciesDist": [
-        {
-         "sample": "EX0007",
-         "reads": 3895
-        },
         {
          "sample": "EX0021",
          "reads": 705
@@ -7925,13 +7921,13 @@
         {
          "sample": "EX0008",
          "reads": 770
+        },
+        {
+         "sample": "EX0007",
+         "reads": 3895
         }
        ],
        "groupDist": [
-        {
-         "sample": "EX0007",
-         "reads": 21285
-        },
         {
          "sample": "EX0021",
          "reads": 5157
@@ -7943,6 +7939,10 @@
         {
          "sample": "EX0008",
          "reads": 6587
+        },
+        {
+         "sample": "EX0007",
+         "reads": 21285
         }
        ]
       },
@@ -7969,10 +7969,6 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0007",
-         "reads": 14515
-        },
-        {
          "sample": "EX0021",
          "reads": 14357
         },
@@ -7983,6 +7979,10 @@
         {
          "sample": "EX0008",
          "reads": 5682
+        },
+        {
+         "sample": "EX0007",
+         "reads": 14515
         }
        ]
       },
@@ -8004,12 +8004,12 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0007",
-         "reads": 1003
-        },
-        {
          "sample": "EX0008",
          "reads": 3334
+        },
+        {
+         "sample": "EX0007",
+         "reads": 1003
         }
        ]
       },
@@ -8021,24 +8021,20 @@
        "percent": 1.8628341862355922,
        "reads": 2337,
        "sampleHits": [
-        "EX0007",
-        "EX0021"
+        "EX0021",
+        "EX0007"
        ],
        "speciesDist": [
         {
-         "sample": "EX0007",
-         "reads": 1406
-        },
-        {
          "sample": "EX0021",
          "reads": 931
+        },
+        {
+         "sample": "EX0007",
+         "reads": 1406
         }
        ],
        "groupDist": [
-        {
-         "sample": "EX0007",
-         "reads": 21285
-        },
         {
          "sample": "EX0021",
          "reads": 5157
@@ -8050,6 +8046,10 @@
         {
          "sample": "EX0008",
          "reads": 6587
+        },
+        {
+         "sample": "EX0007",
+         "reads": 21285
         }
        ]
       },
@@ -8099,10 +8099,6 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0007",
-         "reads": 21285
-        },
-        {
          "sample": "EX0021",
          "reads": 5157
         },
@@ -8113,6 +8109,10 @@
         {
          "sample": "EX0008",
          "reads": 6587
+        },
+        {
+         "sample": "EX0007",
+         "reads": 21285
         }
        ]
       },
@@ -8157,10 +8157,6 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0007",
-         "reads": 14515
-        },
-        {
          "sample": "EX0021",
          "reads": 14357
         },
@@ -8171,6 +8167,10 @@
         {
          "sample": "EX0008",
          "reads": 5682
+        },
+        {
+         "sample": "EX0007",
+         "reads": 14515
         }
        ]
       },
@@ -8192,12 +8192,12 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0007",
-         "reads": 1003
-        },
-        {
          "sample": "EX0008",
          "reads": 3334
+        },
+        {
+         "sample": "EX0007",
+         "reads": 1003
         }
        ]
       },
@@ -8219,10 +8219,6 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0007",
-         "reads": 21285
-        },
-        {
          "sample": "EX0021",
          "reads": 5157
         },
@@ -8233,6 +8229,10 @@
         {
          "sample": "EX0008",
          "reads": 6587
+        },
+        {
+         "sample": "EX0007",
+         "reads": 21285
         }
        ]
       },
@@ -8284,23 +8284,6 @@
       "COI"
      ],
      "sampleMeta": {
-      "EX0006": {
-       "Sample Name": "EXS3_B_071426",
-       "Station": "EXS3",
-       "Cruise": "EXC01",
-       "Date": "2026-07-14",
-       "Category": "sample",
-       "Sample Depth": "Bottom",
-       "Min Depth (m)": 17,
-       "Max Depth (m)": 19,
-       "Temperature": 17.3,
-       "Salinity": 30.6,
-       "Latitude": 38.575,
-       "Longitude": -74.8,
-       "Location": "Example Coast (synthetic)",
-       "Collection Device": "Niskin bottle",
-       "Storage Solution": "Longmire's buffer"
-      },
       "EX0018": {
        "Sample Name": "EXS3_S_092226",
        "Station": "EXS3",
@@ -8318,17 +8301,17 @@
        "Collection Device": "Niskin bottle",
        "Storage Solution": "Longmire's buffer"
       },
-      "EX0005": {
-       "Sample Name": "EXS3_S_071426",
+      "EX0006": {
+       "Sample Name": "EXS3_B_071426",
        "Station": "EXS3",
        "Cruise": "EXC01",
        "Date": "2026-07-14",
        "Category": "sample",
-       "Sample Depth": "Surface",
-       "Min Depth (m)": 1,
-       "Max Depth (m)": 1,
-       "Temperature": 25.4,
-       "Salinity": 30.06,
+       "Sample Depth": "Bottom",
+       "Min Depth (m)": 17,
+       "Max Depth (m)": 19,
+       "Temperature": 17.3,
+       "Salinity": 30.6,
        "Latitude": 38.575,
        "Longitude": -74.8,
        "Location": "Example Coast (synthetic)",
@@ -8351,6 +8334,23 @@
        "Location": "Example Coast (synthetic)",
        "Collection Device": "Niskin bottle",
        "Storage Solution": "Longmire's buffer"
+      },
+      "EX0005": {
+       "Sample Name": "EXS3_S_071426",
+       "Station": "EXS3",
+       "Cruise": "EXC01",
+       "Date": "2026-07-14",
+       "Category": "sample",
+       "Sample Depth": "Surface",
+       "Min Depth (m)": 1,
+       "Max Depth (m)": 1,
+       "Temperature": 25.4,
+       "Salinity": 30.06,
+       "Latitude": 38.575,
+       "Longitude": -74.8,
+       "Location": "Example Coast (synthetic)",
+       "Collection Device": "Niskin bottle",
+       "Storage Solution": "Longmire's buffer"
       }
      },
      "rows": [
@@ -8362,18 +8362,18 @@
        "percent": 35.28455423686755,
        "reads": 41236,
        "sampleHits": [
-        "EX0006",
         "EX0018",
+        "EX0006",
         "EX0005"
        ],
        "speciesDist": [
         {
-         "sample": "EX0006",
-         "reads": 8431
-        },
-        {
          "sample": "EX0018",
          "reads": 16594
+        },
+        {
+         "sample": "EX0006",
+         "reads": 8431
         },
         {
          "sample": "EX0005",
@@ -8382,20 +8382,20 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0006",
-         "reads": 11251
-        },
-        {
          "sample": "EX0018",
          "reads": 19655
         },
         {
-         "sample": "EX0005",
-         "reads": 18265
+         "sample": "EX0006",
+         "reads": 11251
         },
         {
          "sample": "EX0019",
          "reads": 2605
+        },
+        {
+         "sample": "EX0005",
+         "reads": 18265
         }
        ]
       },
@@ -8422,20 +8422,20 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0006",
-         "reads": 7106
-        },
-        {
          "sample": "EX0018",
          "reads": 13006
         },
         {
-         "sample": "EX0005",
-         "reads": 20514
+         "sample": "EX0006",
+         "reads": 7106
         },
         {
          "sample": "EX0019",
          "reads": 851
+        },
+        {
+         "sample": "EX0005",
+         "reads": 20514
         }
        ]
       },
@@ -8462,20 +8462,20 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0006",
-         "reads": 7106
-        },
-        {
          "sample": "EX0018",
          "reads": 13006
         },
         {
-         "sample": "EX0005",
-         "reads": 20514
+         "sample": "EX0006",
+         "reads": 7106
         },
         {
          "sample": "EX0019",
          "reads": 851
+        },
+        {
+         "sample": "EX0005",
+         "reads": 20514
         }
        ]
       },
@@ -8487,45 +8487,45 @@
        "percent": 8.619199602967475,
        "reads": 10073,
        "sampleHits": [
-        "EX0006",
         "EX0018",
-        "EX0005",
-        "EX0019"
+        "EX0006",
+        "EX0019",
+        "EX0005"
        ],
        "speciesDist": [
+        {
+         "sample": "EX0018",
+         "reads": 2312
+        },
         {
          "sample": "EX0006",
          "reads": 2998
         },
         {
-         "sample": "EX0018",
-         "reads": 2312
+         "sample": "EX0019",
+         "reads": 1298
         },
         {
          "sample": "EX0005",
          "reads": 3465
-        },
-        {
-         "sample": "EX0019",
-         "reads": 1298
         }
        ],
        "groupDist": [
-        {
-         "sample": "EX0006",
-         "reads": 2998
-        },
         {
          "sample": "EX0018",
          "reads": 2312
         },
         {
-         "sample": "EX0005",
-         "reads": 5651
+         "sample": "EX0006",
+         "reads": 2998
         },
         {
          "sample": "EX0019",
          "reads": 1298
+        },
+        {
+         "sample": "EX0005",
+         "reads": 5651
         }
        ]
       },
@@ -8537,18 +8537,18 @@
        "percent": 6.214756945929989,
        "reads": 7263,
        "sampleHits": [
-        "EX0006",
         "EX0018",
+        "EX0006",
         "EX0019"
        ],
        "speciesDist": [
         {
-         "sample": "EX0006",
-         "reads": 2820
-        },
-        {
          "sample": "EX0018",
          "reads": 3061
+        },
+        {
+         "sample": "EX0006",
+         "reads": 2820
         },
         {
          "sample": "EX0019",
@@ -8557,20 +8557,20 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0006",
-         "reads": 11251
-        },
-        {
          "sample": "EX0018",
          "reads": 19655
         },
         {
-         "sample": "EX0005",
-         "reads": 18265
+         "sample": "EX0006",
+         "reads": 11251
         },
         {
          "sample": "EX0019",
          "reads": 2605
+        },
+        {
+         "sample": "EX0005",
+         "reads": 18265
         }
        ]
       },
@@ -8597,20 +8597,20 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0006",
-         "reads": 7106
-        },
-        {
          "sample": "EX0018",
          "reads": 13006
         },
         {
-         "sample": "EX0005",
-         "reads": 20514
+         "sample": "EX0006",
+         "reads": 7106
         },
         {
          "sample": "EX0019",
          "reads": 851
+        },
+        {
+         "sample": "EX0005",
+         "reads": 20514
         }
        ]
       },
@@ -8622,17 +8622,17 @@
        "percent": 3.6828189309214747,
        "reads": 4304,
        "sampleHits": [
-        "EX0005",
-        "EX0019"
+        "EX0019",
+        "EX0005"
        ],
        "speciesDist": [
         {
-         "sample": "EX0005",
-         "reads": 2461
-        },
-        {
          "sample": "EX0019",
          "reads": 1843
+        },
+        {
+         "sample": "EX0005",
+         "reads": 2461
         }
        ],
        "groupDist": [
@@ -8641,12 +8641,12 @@
          "reads": 2346
         },
         {
-         "sample": "EX0005",
-         "reads": 2461
-        },
-        {
          "sample": "EX0019",
          "reads": 1843
+        },
+        {
+         "sample": "EX0005",
+         "reads": 2461
         }
        ]
       },
@@ -8658,45 +8658,45 @@
        "percent": 3.576715411536191,
        "reads": 4180,
        "sampleHits": [
-        "EX0006",
         "EX0018",
-        "EX0005",
-        "EX0019"
+        "EX0006",
+        "EX0019",
+        "EX0005"
        ],
        "speciesDist": [
-        {
-         "sample": "EX0006",
-         "reads": 1783
-        },
         {
          "sample": "EX0018",
          "reads": 1173
         },
         {
-         "sample": "EX0005",
-         "reads": 675
+         "sample": "EX0006",
+         "reads": 1783
         },
         {
          "sample": "EX0019",
          "reads": 549
+        },
+        {
+         "sample": "EX0005",
+         "reads": 675
         }
        ],
        "groupDist": [
-        {
-         "sample": "EX0006",
-         "reads": 7106
-        },
         {
          "sample": "EX0018",
          "reads": 13006
         },
         {
-         "sample": "EX0005",
-         "reads": 20514
+         "sample": "EX0006",
+         "reads": 7106
         },
         {
          "sample": "EX0019",
          "reads": 851
+        },
+        {
+         "sample": "EX0005",
+         "reads": 20514
         }
        ]
       },
@@ -8708,27 +8708,27 @@
        "percent": 2.0886991195119236,
        "reads": 2441,
        "sampleHits": [
-        "EX0005",
-        "EX0019"
+        "EX0019",
+        "EX0005"
        ],
        "speciesDist": [
         {
-         "sample": "EX0005",
-         "reads": 2059
-        },
-        {
          "sample": "EX0019",
          "reads": 382
+        },
+        {
+         "sample": "EX0005",
+         "reads": 2059
         }
        ],
        "groupDist": [
         {
-         "sample": "EX0005",
-         "reads": 2817
-        },
-        {
          "sample": "EX0019",
          "reads": 382
+        },
+        {
+         "sample": "EX0005",
+         "reads": 2817
         }
        ]
       },
@@ -8754,12 +8754,12 @@
          "reads": 2346
         },
         {
-         "sample": "EX0005",
-         "reads": 2461
-        },
-        {
          "sample": "EX0019",
          "reads": 1843
+        },
+        {
+         "sample": "EX0005",
+         "reads": 2461
         }
        ]
       },
@@ -8781,20 +8781,20 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0006",
-         "reads": 2998
-        },
-        {
          "sample": "EX0018",
          "reads": 2312
         },
         {
-         "sample": "EX0005",
-         "reads": 5651
+         "sample": "EX0006",
+         "reads": 2998
         },
         {
          "sample": "EX0019",
          "reads": 1298
+        },
+        {
+         "sample": "EX0005",
+         "reads": 5651
         }
        ]
       },
@@ -8816,20 +8816,20 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0006",
-         "reads": 11251
-        },
-        {
          "sample": "EX0018",
          "reads": 19655
         },
         {
-         "sample": "EX0005",
-         "reads": 18265
+         "sample": "EX0006",
+         "reads": 11251
         },
         {
          "sample": "EX0019",
          "reads": 2605
+        },
+        {
+         "sample": "EX0005",
+         "reads": 18265
         }
        ]
       },
@@ -8856,20 +8856,20 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0006",
-         "reads": 7106
-        },
-        {
          "sample": "EX0018",
          "reads": 13006
         },
         {
-         "sample": "EX0005",
-         "reads": 20514
+         "sample": "EX0006",
+         "reads": 7106
         },
         {
          "sample": "EX0019",
          "reads": 851
+        },
+        {
+         "sample": "EX0005",
+         "reads": 20514
         }
        ]
       },
@@ -8914,20 +8914,20 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0006",
-         "reads": 11251
-        },
-        {
          "sample": "EX0018",
          "reads": 19655
         },
         {
-         "sample": "EX0005",
-         "reads": 18265
+         "sample": "EX0006",
+         "reads": 11251
         },
         {
          "sample": "EX0019",
          "reads": 2605
+        },
+        {
+         "sample": "EX0005",
+         "reads": 18265
         }
        ]
       },
@@ -8949,12 +8949,12 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0005",
-         "reads": 2817
-        },
-        {
          "sample": "EX0019",
          "reads": 382
+        },
+        {
+         "sample": "EX0005",
+         "reads": 2817
         }
        ]
       },
@@ -8976,20 +8976,20 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0006",
-         "reads": 7106
-        },
-        {
          "sample": "EX0018",
          "reads": 13006
         },
         {
-         "sample": "EX0005",
-         "reads": 20514
+         "sample": "EX0006",
+         "reads": 7106
         },
         {
          "sample": "EX0019",
          "reads": 851
+        },
+        {
+         "sample": "EX0005",
+         "reads": 20514
         }
        ]
       },
@@ -9041,23 +9041,6 @@
       "COI"
      ],
      "sampleMeta": {
-      "EX0003": {
-       "Sample Name": "EXS2_S_071426",
-       "Station": "EXS2",
-       "Cruise": "EXC01",
-       "Date": "2026-07-14",
-       "Category": "sample",
-       "Sample Depth": "Surface",
-       "Min Depth (m)": 1,
-       "Max Depth (m)": 1,
-       "Temperature": 25.3,
-       "Salinity": 29.76,
-       "Latitude": 38.64,
-       "Longitude": -74.93,
-       "Location": "Example Coast (synthetic)",
-       "Collection Device": "Niskin bottle",
-       "Storage Solution": "Longmire's buffer"
-      },
       "EX0004": {
        "Sample Name": "EXS2_B_071426",
        "Station": "EXS2",
@@ -9069,23 +9052,6 @@
        "Max Depth (m)": 14,
        "Temperature": 18.1,
        "Salinity": 29.93,
-       "Latitude": 38.64,
-       "Longitude": -74.93,
-       "Location": "Example Coast (synthetic)",
-       "Collection Device": "Niskin bottle",
-       "Storage Solution": "Longmire's buffer"
-      },
-      "EX0017": {
-       "Sample Name": "EXS2_B_092226",
-       "Station": "EXS2",
-       "Cruise": "EXC02",
-       "Date": "2026-09-22",
-       "Category": "sample",
-       "Sample Depth": "Bottom",
-       "Min Depth (m)": 12,
-       "Max Depth (m)": 14,
-       "Temperature": 17.8,
-       "Salinity": 29.91,
        "Latitude": 38.64,
        "Longitude": -74.93,
        "Location": "Example Coast (synthetic)",
@@ -9108,6 +9074,40 @@
        "Location": "Example Coast (synthetic)",
        "Collection Device": "Niskin bottle",
        "Storage Solution": "Longmire's buffer"
+      },
+      "EX0003": {
+       "Sample Name": "EXS2_S_071426",
+       "Station": "EXS2",
+       "Cruise": "EXC01",
+       "Date": "2026-07-14",
+       "Category": "sample",
+       "Sample Depth": "Surface",
+       "Min Depth (m)": 1,
+       "Max Depth (m)": 1,
+       "Temperature": 25.3,
+       "Salinity": 29.76,
+       "Latitude": 38.64,
+       "Longitude": -74.93,
+       "Location": "Example Coast (synthetic)",
+       "Collection Device": "Niskin bottle",
+       "Storage Solution": "Longmire's buffer"
+      },
+      "EX0017": {
+       "Sample Name": "EXS2_B_092226",
+       "Station": "EXS2",
+       "Cruise": "EXC02",
+       "Date": "2026-09-22",
+       "Category": "sample",
+       "Sample Depth": "Bottom",
+       "Min Depth (m)": 12,
+       "Max Depth (m)": 14,
+       "Temperature": 17.8,
+       "Salinity": 29.91,
+       "Latitude": 38.64,
+       "Longitude": -74.93,
+       "Location": "Example Coast (synthetic)",
+       "Collection Device": "Niskin bottle",
+       "Storage Solution": "Longmire's buffer"
       }
      },
      "rows": [
@@ -9119,45 +9119,45 @@
        "percent": 46.76874654417082,
        "reads": 54979,
        "sampleHits": [
-        "EX0003",
         "EX0004",
-        "EX0017",
-        "EX0016"
+        "EX0016",
+        "EX0003",
+        "EX0017"
        ],
        "speciesDist": [
-        {
-         "sample": "EX0003",
-         "reads": 41044
-        },
         {
          "sample": "EX0004",
          "reads": 3925
         },
         {
-         "sample": "EX0017",
-         "reads": 1096
-        },
-        {
          "sample": "EX0016",
          "reads": 8914
+        },
+        {
+         "sample": "EX0003",
+         "reads": 41044
+        },
+        {
+         "sample": "EX0017",
+         "reads": 1096
         }
        ],
        "groupDist": [
-        {
-         "sample": "EX0003",
-         "reads": 53133
-        },
         {
          "sample": "EX0004",
          "reads": 6344
         },
         {
-         "sample": "EX0017",
-         "reads": 4522
-        },
-        {
          "sample": "EX0016",
          "reads": 20026
+        },
+        {
+         "sample": "EX0003",
+         "reads": 53133
+        },
+        {
+         "sample": "EX0017",
+         "reads": 4522
         }
        ]
       },
@@ -9169,11 +9169,15 @@
        "percent": 15.346008251456764,
        "reads": 18040,
        "sampleHits": [
+        "EX0016",
         "EX0003",
-        "EX0017",
-        "EX0016"
+        "EX0017"
        ],
        "speciesDist": [
+        {
+         "sample": "EX0016",
+         "reads": 7099
+        },
         {
          "sample": "EX0003",
          "reads": 8845
@@ -9181,28 +9185,24 @@
         {
          "sample": "EX0017",
          "reads": 2096
-        },
-        {
-         "sample": "EX0016",
-         "reads": 7099
         }
        ],
        "groupDist": [
-        {
-         "sample": "EX0003",
-         "reads": 53133
-        },
         {
          "sample": "EX0004",
          "reads": 6344
         },
         {
-         "sample": "EX0017",
-         "reads": 4522
-        },
-        {
          "sample": "EX0016",
          "reads": 20026
+        },
+        {
+         "sample": "EX0003",
+         "reads": 53133
+        },
+        {
+         "sample": "EX0017",
+         "reads": 4522
         }
        ]
       },
@@ -9214,45 +9214,45 @@
        "percent": 4.695674365190762,
        "reads": 5520,
        "sampleHits": [
-        "EX0003",
         "EX0004",
-        "EX0017",
-        "EX0016"
+        "EX0016",
+        "EX0003",
+        "EX0017"
        ],
        "speciesDist": [
-        {
-         "sample": "EX0003",
-         "reads": 3252
-        },
         {
          "sample": "EX0004",
          "reads": 478
         },
         {
-         "sample": "EX0017",
-         "reads": 825
-        },
-        {
          "sample": "EX0016",
          "reads": 965
+        },
+        {
+         "sample": "EX0003",
+         "reads": 3252
+        },
+        {
+         "sample": "EX0017",
+         "reads": 825
         }
        ],
        "groupDist": [
-        {
-         "sample": "EX0003",
-         "reads": 4701
-        },
         {
          "sample": "EX0004",
          "reads": 2701
         },
         {
-         "sample": "EX0017",
-         "reads": 825
-        },
-        {
          "sample": "EX0016",
          "reads": 965
+        },
+        {
+         "sample": "EX0003",
+         "reads": 4701
+        },
+        {
+         "sample": "EX0017",
+         "reads": 825
         }
        ]
       },
@@ -9264,15 +9264,11 @@
        "percent": 4.249925566755987,
        "reads": 4996,
        "sampleHits": [
-        "EX0003",
         "EX0004",
-        "EX0016"
+        "EX0016",
+        "EX0003"
        ],
        "speciesDist": [
-        {
-         "sample": "EX0003",
-         "reads": 1994
-        },
         {
          "sample": "EX0004",
          "reads": 2049
@@ -9280,13 +9276,13 @@
         {
          "sample": "EX0016",
          "reads": 953
-        }
-       ],
-       "groupDist": [
+        },
         {
          "sample": "EX0003",
          "reads": 1994
-        },
+        }
+       ],
+       "groupDist": [
         {
          "sample": "EX0004",
          "reads": 6645
@@ -9294,6 +9290,10 @@
         {
          "sample": "EX0016",
          "reads": 3424
+        },
+        {
+         "sample": "EX0003",
+         "reads": 1994
         }
        ]
       },
@@ -9337,15 +9337,11 @@
        "percent": 3.946237931181149,
        "reads": 4639,
        "sampleHits": [
-        "EX0003",
         "EX0004",
-        "EX0016"
+        "EX0016",
+        "EX0003"
        ],
        "speciesDist": [
-        {
-         "sample": "EX0003",
-         "reads": 2365
-        },
         {
          "sample": "EX0004",
          "reads": 1074
@@ -9353,24 +9349,28 @@
         {
          "sample": "EX0016",
          "reads": 1200
+        },
+        {
+         "sample": "EX0003",
+         "reads": 2365
         }
        ],
        "groupDist": [
-        {
-         "sample": "EX0003",
-         "reads": 53133
-        },
         {
          "sample": "EX0004",
          "reads": 6344
         },
         {
-         "sample": "EX0017",
-         "reads": 4522
-        },
-        {
          "sample": "EX0016",
          "reads": 20026
+        },
+        {
+         "sample": "EX0003",
+         "reads": 53133
+        },
+        {
+         "sample": "EX0017",
+         "reads": 4522
         }
        ]
       },
@@ -9392,16 +9392,16 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0003",
-         "reads": 1994
-        },
-        {
          "sample": "EX0004",
          "reads": 6645
         },
         {
          "sample": "EX0016",
          "reads": 3424
+        },
+        {
+         "sample": "EX0003",
+         "reads": 1994
         }
        ]
       },
@@ -9413,35 +9413,35 @@
        "percent": 3.123644251626898,
        "reads": 3672,
        "sampleHits": [
-        "EX0003",
-        "EX0004"
+        "EX0004",
+        "EX0003"
        ],
        "speciesDist": [
         {
-         "sample": "EX0003",
-         "reads": 1449
-        },
-        {
          "sample": "EX0004",
          "reads": 2223
+        },
+        {
+         "sample": "EX0003",
+         "reads": 1449
         }
        ],
        "groupDist": [
-        {
-         "sample": "EX0003",
-         "reads": 4701
-        },
         {
          "sample": "EX0004",
          "reads": 2701
         },
         {
-         "sample": "EX0017",
-         "reads": 825
-        },
-        {
          "sample": "EX0016",
          "reads": 965
+        },
+        {
+         "sample": "EX0003",
+         "reads": 4701
+        },
+        {
+         "sample": "EX0017",
+         "reads": 825
         }
        ]
       },
@@ -9500,16 +9500,16 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0003",
-         "reads": 1994
-        },
-        {
          "sample": "EX0004",
          "reads": 6645
         },
         {
          "sample": "EX0016",
          "reads": 3424
+        },
+        {
+         "sample": "EX0003",
+         "reads": 1994
         }
        ]
       },
@@ -9521,11 +9521,15 @@
        "percent": 2.3095572285313257,
        "reads": 2715,
        "sampleHits": [
+        "EX0016",
         "EX0003",
-        "EX0017",
-        "EX0016"
+        "EX0017"
        ],
        "speciesDist": [
+        {
+         "sample": "EX0016",
+         "reads": 1114
+        },
         {
          "sample": "EX0003",
          "reads": 879
@@ -9533,28 +9537,24 @@
         {
          "sample": "EX0017",
          "reads": 722
-        },
-        {
-         "sample": "EX0016",
-         "reads": 1114
         }
        ],
        "groupDist": [
-        {
-         "sample": "EX0003",
-         "reads": 53133
-        },
         {
          "sample": "EX0004",
          "reads": 6344
         },
         {
-         "sample": "EX0017",
-         "reads": 4522
-        },
-        {
          "sample": "EX0016",
          "reads": 20026
+        },
+        {
+         "sample": "EX0003",
+         "reads": 53133
+        },
+        {
+         "sample": "EX0017",
+         "reads": 4522
         }
        ]
       },
@@ -9581,20 +9581,20 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0003",
-         "reads": 53133
-        },
-        {
          "sample": "EX0004",
          "reads": 6344
         },
         {
-         "sample": "EX0017",
-         "reads": 4522
-        },
-        {
          "sample": "EX0016",
          "reads": 20026
+        },
+        {
+         "sample": "EX0003",
+         "reads": 53133
+        },
+        {
+         "sample": "EX0017",
+         "reads": 4522
         }
        ]
       },
@@ -9616,16 +9616,16 @@
        ],
        "groupDist": [
         {
+         "sample": "EX0016",
+         "reads": 2216
+        },
+        {
          "sample": "EX0003",
          "reads": 1030
         },
         {
          "sample": "EX0017",
          "reads": 447
-        },
-        {
-         "sample": "EX0016",
-         "reads": 2216
         }
        ]
       },
@@ -9652,16 +9652,16 @@
        ],
        "groupDist": [
         {
+         "sample": "EX0016",
+         "reads": 2216
+        },
+        {
          "sample": "EX0003",
          "reads": 1030
         },
         {
          "sample": "EX0017",
          "reads": 447
-        },
-        {
-         "sample": "EX0016",
-         "reads": 2216
         }
        ]
       },
@@ -9673,35 +9673,35 @@
        "percent": 1.0335587597294884,
        "reads": 1215,
        "sampleHits": [
-        "EX0017",
-        "EX0016"
+        "EX0016",
+        "EX0017"
        ],
        "speciesDist": [
         {
-         "sample": "EX0017",
-         "reads": 608
-        },
-        {
          "sample": "EX0016",
          "reads": 607
+        },
+        {
+         "sample": "EX0017",
+         "reads": 608
         }
        ],
        "groupDist": [
-        {
-         "sample": "EX0003",
-         "reads": 53133
-        },
         {
          "sample": "EX0004",
          "reads": 6344
         },
         {
-         "sample": "EX0017",
-         "reads": 4522
-        },
-        {
          "sample": "EX0016",
          "reads": 20026
+        },
+        {
+         "sample": "EX0003",
+         "reads": 53133
+        },
+        {
+         "sample": "EX0017",
+         "reads": 4522
         }
        ]
       },
@@ -9776,6 +9776,57 @@
       "COI"
      ],
      "sampleMeta": {
+      "EX0015": {
+       "Sample Name": "EXS1_B_092226",
+       "Station": "EXS1",
+       "Cruise": "EXC02",
+       "Date": "2026-09-22",
+       "Category": "sample",
+       "Sample Depth": "Bottom",
+       "Min Depth (m)": 6,
+       "Max Depth (m)": 8,
+       "Temperature": 18.2,
+       "Salinity": 29.7,
+       "Latitude": 38.705,
+       "Longitude": -75.06,
+       "Location": "Example Coast (synthetic)",
+       "Collection Device": "Niskin bottle",
+       "Storage Solution": "Longmire's buffer"
+      },
+      "EX0014": {
+       "Sample Name": "EXS1_S_092226",
+       "Station": "EXS1",
+       "Cruise": "EXC02",
+       "Date": "2026-09-22",
+       "Category": "sample",
+       "Sample Depth": "Surface",
+       "Min Depth (m)": 1,
+       "Max Depth (m)": 1,
+       "Temperature": 21.8,
+       "Salinity": 28.81,
+       "Latitude": 38.705,
+       "Longitude": -75.06,
+       "Location": "Example Coast (synthetic)",
+       "Collection Device": "Niskin bottle",
+       "Storage Solution": "Longmire's buffer"
+      },
+      "EX0002": {
+       "Sample Name": "EXS1_B_071426",
+       "Station": "EXS1",
+       "Cruise": "EXC01",
+       "Date": "2026-07-14",
+       "Category": "sample",
+       "Sample Depth": "Bottom",
+       "Min Depth (m)": 6,
+       "Max Depth (m)": 8,
+       "Temperature": 18.3,
+       "Salinity": 29.39,
+       "Latitude": 38.705,
+       "Longitude": -75.06,
+       "Location": "Example Coast (synthetic)",
+       "Collection Device": "Niskin bottle",
+       "Storage Solution": "Longmire's buffer"
+      },
       "EX0013": {
        "Sample Name": "FIELDBLANK_071426",
        "Station": "EXS1",
@@ -9809,57 +9860,6 @@
        "Collection Device": "Niskin bottle",
        "Storage Solution": "Longmire's buffer"
       },
-      "EX0014": {
-       "Sample Name": "EXS1_S_092226",
-       "Station": "EXS1",
-       "Cruise": "EXC02",
-       "Date": "2026-09-22",
-       "Category": "sample",
-       "Sample Depth": "Surface",
-       "Min Depth (m)": 1,
-       "Max Depth (m)": 1,
-       "Temperature": 21.8,
-       "Salinity": 28.81,
-       "Latitude": 38.705,
-       "Longitude": -75.06,
-       "Location": "Example Coast (synthetic)",
-       "Collection Device": "Niskin bottle",
-       "Storage Solution": "Longmire's buffer"
-      },
-      "EX0015": {
-       "Sample Name": "EXS1_B_092226",
-       "Station": "EXS1",
-       "Cruise": "EXC02",
-       "Date": "2026-09-22",
-       "Category": "sample",
-       "Sample Depth": "Bottom",
-       "Min Depth (m)": 6,
-       "Max Depth (m)": 8,
-       "Temperature": 18.2,
-       "Salinity": 29.7,
-       "Latitude": 38.705,
-       "Longitude": -75.06,
-       "Location": "Example Coast (synthetic)",
-       "Collection Device": "Niskin bottle",
-       "Storage Solution": "Longmire's buffer"
-      },
-      "EX0002": {
-       "Sample Name": "EXS1_B_071426",
-       "Station": "EXS1",
-       "Cruise": "EXC01",
-       "Date": "2026-07-14",
-       "Category": "sample",
-       "Sample Depth": "Bottom",
-       "Min Depth (m)": 6,
-       "Max Depth (m)": 8,
-       "Temperature": 18.3,
-       "Salinity": 29.39,
-       "Latitude": 38.705,
-       "Longitude": -75.06,
-       "Location": "Example Coast (synthetic)",
-       "Collection Device": "Niskin bottle",
-       "Storage Solution": "Longmire's buffer"
-      },
       "EX0026": {
        "Sample Name": "FIELDBLANK_092226",
        "Station": "EXS1",
@@ -9886,45 +9886,45 @@
        "percent": 21.41112828438949,
        "reads": 27706,
        "sampleHits": [
-        "EX0001",
-        "EX0014",
         "EX0015",
-        "EX0002"
+        "EX0014",
+        "EX0002",
+        "EX0001"
        ],
        "speciesDist": [
         {
-         "sample": "EX0001",
-         "reads": 18362
+         "sample": "EX0015",
+         "reads": 3018
         },
         {
          "sample": "EX0014",
          "reads": 3803
-        },
-        {
-         "sample": "EX0015",
-         "reads": 3018
         },
         {
          "sample": "EX0002",
          "reads": 2523
+        },
+        {
+         "sample": "EX0001",
+         "reads": 18362
         }
        ],
        "groupDist": [
         {
-         "sample": "EX0001",
-         "reads": 18362
+         "sample": "EX0015",
+         "reads": 3018
         },
         {
          "sample": "EX0014",
          "reads": 3803
         },
         {
-         "sample": "EX0015",
-         "reads": 3018
-        },
-        {
          "sample": "EX0002",
          "reads": 3852
+        },
+        {
+         "sample": "EX0001",
+         "reads": 18362
         }
        ]
       },
@@ -9936,15 +9936,11 @@
        "percent": 13.838485316846985,
        "reads": 17907,
        "sampleHits": [
-        "EX0001",
         "EX0015",
-        "EX0002"
+        "EX0002",
+        "EX0001"
        ],
        "speciesDist": [
-        {
-         "sample": "EX0001",
-         "reads": 11236
-        },
         {
          "sample": "EX0015",
          "reads": 2754
@@ -9952,17 +9948,13 @@
         {
          "sample": "EX0002",
          "reads": 3917
-        }
-       ],
-       "groupDist": [
-        {
-         "sample": "EX0013",
-         "reads": 51
         },
         {
          "sample": "EX0001",
-         "reads": 16019
-        },
+         "reads": 11236
+        }
+       ],
+       "groupDist": [
         {
          "sample": "EX0015",
          "reads": 12192
@@ -9970,6 +9962,14 @@
         {
          "sample": "EX0002",
          "reads": 20817
+        },
+        {
+         "sample": "EX0013",
+         "reads": 51
+        },
+        {
+         "sample": "EX0001",
+         "reads": 16019
         }
        ]
       },
@@ -9981,35 +9981,35 @@
        "percent": 13.356259659969089,
        "reads": 17283,
        "sampleHits": [
-        "EX0014",
-        "EX0015"
+        "EX0015",
+        "EX0014"
        ],
        "speciesDist": [
         {
-         "sample": "EX0014",
-         "reads": 10841
-        },
-        {
          "sample": "EX0015",
          "reads": 6442
+        },
+        {
+         "sample": "EX0014",
+         "reads": 10841
         }
        ],
        "groupDist": [
         {
-         "sample": "EX0001",
-         "reads": 575
+         "sample": "EX0015",
+         "reads": 9689
         },
         {
          "sample": "EX0014",
          "reads": 12207
         },
         {
-         "sample": "EX0015",
-         "reads": 9689
-        },
-        {
          "sample": "EX0002",
          "reads": 4414
+        },
+        {
+         "sample": "EX0001",
+         "reads": 575
         },
         {
          "sample": "EX0026",
@@ -10025,15 +10025,11 @@
        "percent": 11.368624420401854,
        "reads": 14711,
        "sampleHits": [
-        "EX0001",
         "EX0015",
-        "EX0002"
+        "EX0002",
+        "EX0001"
        ],
        "speciesDist": [
-        {
-         "sample": "EX0001",
-         "reads": 3263
-        },
         {
          "sample": "EX0015",
          "reads": 8960
@@ -10041,17 +10037,13 @@
         {
          "sample": "EX0002",
          "reads": 2488
-        }
-       ],
-       "groupDist": [
-        {
-         "sample": "EX0013",
-         "reads": 51
         },
         {
          "sample": "EX0001",
-         "reads": 16019
-        },
+         "reads": 3263
+        }
+       ],
+       "groupDist": [
         {
          "sample": "EX0015",
          "reads": 12192
@@ -10059,6 +10051,14 @@
         {
          "sample": "EX0002",
          "reads": 20817
+        },
+        {
+         "sample": "EX0013",
+         "reads": 51
+        },
+        {
+         "sample": "EX0001",
+         "reads": 16019
         }
        ]
       },
@@ -10080,20 +10080,20 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0013",
-         "reads": 51
-        },
-        {
-         "sample": "EX0001",
-         "reads": 16019
-        },
-        {
          "sample": "EX0015",
          "reads": 12192
         },
         {
          "sample": "EX0002",
          "reads": 20817
+        },
+        {
+         "sample": "EX0013",
+         "reads": 51
+        },
+        {
+         "sample": "EX0001",
+         "reads": 16019
         }
        ]
       },
@@ -10105,15 +10105,11 @@
        "percent": 6.593508500772797,
        "reads": 8532,
        "sampleHits": [
-        "EX0001",
         "EX0015",
-        "EX0002"
+        "EX0002",
+        "EX0001"
        ],
        "speciesDist": [
-        {
-         "sample": "EX0001",
-         "reads": 7521
-        },
         {
          "sample": "EX0015",
          "reads": 636
@@ -10121,24 +10117,28 @@
         {
          "sample": "EX0002",
          "reads": 375
+        },
+        {
+         "sample": "EX0001",
+         "reads": 7521
         }
        ],
        "groupDist": [
         {
-         "sample": "EX0001",
-         "reads": 8392
+         "sample": "EX0015",
+         "reads": 1933
         },
         {
          "sample": "EX0014",
          "reads": 830
         },
         {
-         "sample": "EX0015",
-         "reads": 1933
-        },
-        {
          "sample": "EX0002",
          "reads": 1418
+        },
+        {
+         "sample": "EX0001",
+         "reads": 8392
         }
        ]
       },
@@ -10150,18 +10150,18 @@
        "percent": 6.095054095826893,
        "reads": 7887,
        "sampleHits": [
-        "EX0014",
         "EX0015",
+        "EX0014",
         "EX0002"
        ],
        "speciesDist": [
         {
-         "sample": "EX0014",
-         "reads": 752
-        },
-        {
          "sample": "EX0015",
          "reads": 2721
+        },
+        {
+         "sample": "EX0014",
+         "reads": 752
         },
         {
          "sample": "EX0002",
@@ -10170,20 +10170,20 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0001",
-         "reads": 575
+         "sample": "EX0015",
+         "reads": 9689
         },
         {
          "sample": "EX0014",
          "reads": 12207
         },
         {
-         "sample": "EX0015",
-         "reads": 9689
-        },
-        {
          "sample": "EX0002",
          "reads": 4414
+        },
+        {
+         "sample": "EX0001",
+         "reads": 575
         },
         {
          "sample": "EX0026",
@@ -10209,12 +10209,12 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0001",
-         "reads": 5921
-        },
-        {
          "sample": "EX0014",
          "reads": 1185
+        },
+        {
+         "sample": "EX0001",
+         "reads": 5921
         },
         {
          "sample": "EX0026",
@@ -10230,45 +10230,45 @@
        "percent": 3.1228748068006182,
        "reads": 4041,
        "sampleHits": [
-        "EX0001",
-        "EX0014",
         "EX0015",
-        "EX0002"
+        "EX0014",
+        "EX0002",
+        "EX0001"
        ],
        "speciesDist": [
-        {
-         "sample": "EX0001",
-         "reads": 871
-        },
-        {
-         "sample": "EX0014",
-         "reads": 830
-        },
         {
          "sample": "EX0015",
          "reads": 1297
         },
         {
+         "sample": "EX0014",
+         "reads": 830
+        },
+        {
          "sample": "EX0002",
          "reads": 1043
+        },
+        {
+         "sample": "EX0001",
+         "reads": 871
         }
        ],
        "groupDist": [
         {
-         "sample": "EX0001",
-         "reads": 8392
+         "sample": "EX0015",
+         "reads": 1933
         },
         {
          "sample": "EX0014",
          "reads": 830
         },
         {
-         "sample": "EX0015",
-         "reads": 1933
-        },
-        {
          "sample": "EX0002",
          "reads": 1418
+        },
+        {
+         "sample": "EX0001",
+         "reads": 8392
         }
        ]
       },
@@ -10280,18 +10280,18 @@
        "percent": 2.087326120556414,
        "reads": 2701,
        "sampleHits": [
-        "EX0001",
         "EX0014",
+        "EX0001",
         "EX0026"
        ],
        "speciesDist": [
         {
-         "sample": "EX0001",
-         "reads": 1513
-        },
-        {
          "sample": "EX0014",
          "reads": 1185
+        },
+        {
+         "sample": "EX0001",
+         "reads": 1513
         },
         {
          "sample": "EX0026",
@@ -10300,12 +10300,12 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0001",
-         "reads": 5921
-        },
-        {
          "sample": "EX0014",
          "reads": 1185
+        },
+        {
+         "sample": "EX0001",
+         "reads": 5921
         },
         {
          "sample": "EX0026",
@@ -10344,40 +10344,40 @@
        "percent": 1.5803709428129828,
        "reads": 2045,
        "sampleHits": [
-        "EX0001",
+        "EX0015",
         "EX0014",
-        "EX0015"
+        "EX0001"
        ],
        "speciesDist": [
         {
-         "sample": "EX0001",
-         "reads": 747
+         "sample": "EX0015",
+         "reads": 884
         },
         {
          "sample": "EX0014",
          "reads": 414
         },
         {
-         "sample": "EX0015",
-         "reads": 884
+         "sample": "EX0001",
+         "reads": 747
         }
        ],
        "groupDist": [
         {
-         "sample": "EX0001",
-         "reads": 747
+         "sample": "EX0015",
+         "reads": 884
         },
         {
          "sample": "EX0014",
          "reads": 414
         },
         {
-         "sample": "EX0015",
-         "reads": 884
-        },
-        {
          "sample": "EX0002",
          "reads": 31
+        },
+        {
+         "sample": "EX0001",
+         "reads": 747
         }
        ]
       },
@@ -10399,20 +10399,20 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0013",
-         "reads": 51
-        },
-        {
-         "sample": "EX0001",
-         "reads": 16019
-        },
-        {
          "sample": "EX0015",
          "reads": 12192
         },
         {
          "sample": "EX0002",
          "reads": 20817
+        },
+        {
+         "sample": "EX0013",
+         "reads": 51
+        },
+        {
+         "sample": "EX0001",
+         "reads": 16019
         }
        ]
       },
@@ -10434,20 +10434,20 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0001",
-         "reads": 18362
+         "sample": "EX0015",
+         "reads": 3018
         },
         {
          "sample": "EX0014",
          "reads": 3803
         },
         {
-         "sample": "EX0015",
-         "reads": 3018
-        },
-        {
          "sample": "EX0002",
          "reads": 3852
+        },
+        {
+         "sample": "EX0001",
+         "reads": 18362
         }
        ]
       },
@@ -10459,18 +10459,18 @@
        "percent": 0.9489953632148378,
        "reads": 1228,
        "sampleHits": [
-        "EX0001",
         "EX0014",
+        "EX0001",
         "EX0026"
        ],
        "speciesDist": [
         {
-         "sample": "EX0001",
-         "reads": 575
-        },
-        {
          "sample": "EX0014",
          "reads": 614
+        },
+        {
+         "sample": "EX0001",
+         "reads": 575
         },
         {
          "sample": "EX0026",
@@ -10479,20 +10479,20 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0001",
-         "reads": 575
+         "sample": "EX0015",
+         "reads": 9689
         },
         {
          "sample": "EX0014",
          "reads": 12207
         },
         {
-         "sample": "EX0015",
-         "reads": 9689
-        },
-        {
          "sample": "EX0002",
          "reads": 4414
+        },
+        {
+         "sample": "EX0001",
+         "reads": 575
         },
         {
          "sample": "EX0026",
@@ -10518,20 +10518,20 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0001",
-         "reads": 575
+         "sample": "EX0015",
+         "reads": 9689
         },
         {
          "sample": "EX0014",
          "reads": 12207
         },
         {
-         "sample": "EX0015",
-         "reads": 9689
-        },
-        {
          "sample": "EX0002",
          "reads": 4414
+        },
+        {
+         "sample": "EX0001",
+         "reads": 575
         },
         {
          "sample": "EX0026",
@@ -10547,28 +10547,20 @@
        "percent": 0.3910355486862442,
        "reads": 506,
        "sampleHits": [
-        "EX0013",
-        "EX0015"
+        "EX0015",
+        "EX0013"
        ],
        "speciesDist": [
         {
-         "sample": "EX0013",
-         "reads": 28
-        },
-        {
          "sample": "EX0015",
          "reads": 478
+        },
+        {
+         "sample": "EX0013",
+         "reads": 28
         }
        ],
        "groupDist": [
-        {
-         "sample": "EX0013",
-         "reads": 51
-        },
-        {
-         "sample": "EX0001",
-         "reads": 16019
-        },
         {
          "sample": "EX0015",
          "reads": 12192
@@ -10576,6 +10568,14 @@
         {
          "sample": "EX0002",
          "reads": 20817
+        },
+        {
+         "sample": "EX0013",
+         "reads": 51
+        },
+        {
+         "sample": "EX0001",
+         "reads": 16019
         }
        ]
       },
@@ -10597,20 +10597,20 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0001",
-         "reads": 747
+         "sample": "EX0015",
+         "reads": 884
         },
         {
          "sample": "EX0014",
          "reads": 414
         },
         {
-         "sample": "EX0015",
-         "reads": 884
-        },
-        {
          "sample": "EX0002",
          "reads": 31
+        },
+        {
+         "sample": "EX0001",
+         "reads": 747
         }
        ]
       },
@@ -10632,20 +10632,20 @@
        ],
        "groupDist": [
         {
-         "sample": "EX0013",
-         "reads": 51
-        },
-        {
-         "sample": "EX0001",
-         "reads": 16019
-        },
-        {
          "sample": "EX0015",
          "reads": 12192
         },
         {
          "sample": "EX0002",
          "reads": 20817
+        },
+        {
+         "sample": "EX0013",
+         "reads": 51
+        },
+        {
+         "sample": "EX0001",
+         "reads": 16019
         }
        ]
       }
@@ -10653,6 +10653,426 @@
     }
    ],
    "samples": [
+    {
+     "sampleId": "EX0015",
+     "uid": "EX0015",
+     "station": "EXS1",
+     "lat": 38.705,
+     "lon": -75.06,
+     "meta": {
+      "samp_number": "EX0015",
+      "samp_name": "EXS1_B_092226",
+      "materialSampleID": "EXS1_B_092226",
+      "Cruise Number": "EXC02",
+      "Station": "EXS1",
+      "Sample Depth": "Bottom",
+      "samp_category": "sample",
+      "decimalLatitude": "38.705",
+      "decimalLongitude": "-75.06",
+      "geo_loc_name": "Example Coast (synthetic)",
+      "eventDate": "2026-09-22",
+      "minimumDepthInMeters": "6",
+      "maximumDepthInMeters": "8",
+      "temp": "18.2",
+      "salinity": "29.7",
+      "samp_collect_device": "Niskin bottle",
+      "samp_store_sol": "Longmire's buffer",
+      "volume_filtered": "1L",
+      "env_broad_scale": "marine biome [ENVO:00000447]",
+      "Run": "Wilder_WLMEX0002",
+      "Project": "ExampleCoast",
+      "Cruise": "20260922",
+      "platform": "Illumina",
+      "Source": "Manifest",
+      "CollectionDate": "2026-09-22"
+     },
+     "category": "sample"
+    },
+    {
+     "sampleId": "EX0014",
+     "uid": "EX0014",
+     "station": "EXS1",
+     "lat": 38.705,
+     "lon": -75.06,
+     "meta": {
+      "samp_number": "EX0014",
+      "samp_name": "EXS1_S_092226",
+      "materialSampleID": "EXS1_S_092226",
+      "Cruise Number": "EXC02",
+      "Station": "EXS1",
+      "Sample Depth": "Surface",
+      "samp_category": "sample",
+      "decimalLatitude": "38.705",
+      "decimalLongitude": "-75.06",
+      "geo_loc_name": "Example Coast (synthetic)",
+      "eventDate": "2026-09-22",
+      "minimumDepthInMeters": "1",
+      "maximumDepthInMeters": "1",
+      "temp": "21.8",
+      "salinity": "28.81",
+      "samp_collect_device": "Niskin bottle",
+      "samp_store_sol": "Longmire's buffer",
+      "volume_filtered": "1L",
+      "env_broad_scale": "marine biome [ENVO:00000447]",
+      "Run": "Wilder_WLMEX0002",
+      "Project": "ExampleCoast",
+      "Cruise": "20260922",
+      "platform": "Illumina",
+      "Source": "Manifest",
+      "CollectionDate": "2026-09-22"
+     },
+     "category": "sample"
+    },
+    {
+     "sampleId": "EX0018",
+     "uid": "EX0018",
+     "station": "EXS3",
+     "lat": 38.575,
+     "lon": -74.8,
+     "meta": {
+      "samp_number": "EX0018",
+      "samp_name": "EXS3_S_092226",
+      "materialSampleID": "EXS3_S_092226",
+      "Cruise Number": "EXC02",
+      "Station": "EXS3",
+      "Sample Depth": "Surface",
+      "samp_category": "sample",
+      "decimalLatitude": "38.575",
+      "decimalLongitude": "-74.8",
+      "geo_loc_name": "Example Coast (synthetic)",
+      "eventDate": "2026-09-22",
+      "minimumDepthInMeters": "1",
+      "maximumDepthInMeters": "1",
+      "temp": "21.5",
+      "salinity": "29.94",
+      "samp_collect_device": "Niskin bottle",
+      "samp_store_sol": "Longmire's buffer",
+      "volume_filtered": "1L",
+      "env_broad_scale": "marine biome [ENVO:00000447]",
+      "Run": "Wilder_WLMEX0002",
+      "Project": "ExampleCoast",
+      "Cruise": "20260922",
+      "platform": "Illumina",
+      "Source": "Manifest",
+      "CollectionDate": "2026-09-22"
+     },
+     "category": "sample"
+    },
+    {
+     "sampleId": "EX0006",
+     "uid": "EX0006",
+     "station": "EXS3",
+     "lat": 38.575,
+     "lon": -74.8,
+     "meta": {
+      "samp_number": "EX0006",
+      "samp_name": "EXS3_B_071426",
+      "materialSampleID": "EXS3_B_071426",
+      "Cruise Number": "EXC01",
+      "Station": "EXS3",
+      "Sample Depth": "Bottom",
+      "samp_category": "sample",
+      "decimalLatitude": "38.575",
+      "decimalLongitude": "-74.8",
+      "geo_loc_name": "Example Coast (synthetic)",
+      "eventDate": "2026-07-14",
+      "minimumDepthInMeters": "17",
+      "maximumDepthInMeters": "19",
+      "temp": "17.3",
+      "salinity": "30.6",
+      "samp_collect_device": "Niskin bottle",
+      "samp_store_sol": "Longmire's buffer",
+      "volume_filtered": "1L",
+      "env_broad_scale": "marine biome [ENVO:00000447]",
+      "Run": "Wilder_WLMEX0001",
+      "Project": "ExampleCoast",
+      "Cruise": "20260714",
+      "platform": "Illumina",
+      "Source": "Manifest",
+      "CollectionDate": "2026-07-14"
+     },
+     "category": "sample"
+    },
+    {
+     "sampleId": "EX0023",
+     "uid": "EX0023",
+     "station": "EXS5",
+     "lat": 38.445,
+     "lon": -74.53,
+     "meta": {
+      "samp_number": "EX0023",
+      "samp_name": "EXS5_B_092226",
+      "materialSampleID": "EXS5_B_092226",
+      "Cruise Number": "EXC02",
+      "Station": "EXS5",
+      "Sample Depth": "Bottom",
+      "samp_category": "sample",
+      "decimalLatitude": "38.445",
+      "decimalLongitude": "-74.53",
+      "geo_loc_name": "Example Coast (synthetic)",
+      "eventDate": "2026-09-22",
+      "minimumDepthInMeters": "28",
+      "maximumDepthInMeters": "30",
+      "temp": "17",
+      "salinity": "32.19",
+      "samp_collect_device": "Niskin bottle",
+      "samp_store_sol": "Longmire's buffer",
+      "volume_filtered": "1L",
+      "env_broad_scale": "marine biome [ENVO:00000447]",
+      "Run": "Wilder_WLMEX0002",
+      "Project": "ExampleCoast",
+      "Cruise": "20260922",
+      "platform": "Illumina",
+      "Source": "Manifest",
+      "CollectionDate": "2026-09-22"
+     },
+     "category": "sample"
+    },
+    {
+     "sampleId": "EX0022",
+     "uid": "EX0022",
+     "station": "EXS5",
+     "lat": 38.445,
+     "lon": -74.53,
+     "meta": {
+      "samp_number": "EX0022",
+      "samp_name": "EXS5_S_092226",
+      "materialSampleID": "EXS5_S_092226",
+      "Cruise Number": "EXC02",
+      "Station": "EXS5",
+      "Sample Depth": "Surface",
+      "samp_category": "sample",
+      "decimalLatitude": "38.445",
+      "decimalLongitude": "-74.53",
+      "geo_loc_name": "Example Coast (synthetic)",
+      "eventDate": "2026-09-22",
+      "minimumDepthInMeters": "1",
+      "maximumDepthInMeters": "1",
+      "temp": "21.4",
+      "salinity": "31.44",
+      "samp_collect_device": "Niskin bottle",
+      "samp_store_sol": "Longmire's buffer",
+      "volume_filtered": "1L",
+      "env_broad_scale": "marine biome [ENVO:00000447]",
+      "Run": "Wilder_WLMEX0002",
+      "Project": "ExampleCoast",
+      "Cruise": "20260922",
+      "platform": "Illumina",
+      "Source": "Manifest",
+      "CollectionDate": "2026-09-22"
+     },
+     "category": "sample"
+    },
+    {
+     "sampleId": "EX0010",
+     "uid": "EX0010",
+     "station": "EXS5",
+     "lat": 38.445,
+     "lon": -74.53,
+     "meta": {
+      "samp_number": "EX0010",
+      "samp_name": "EXS5_B_071426",
+      "materialSampleID": "EXS5_B_071426",
+      "Cruise Number": "EXC01",
+      "Station": "EXS5",
+      "Sample Depth": "Bottom",
+      "samp_category": "sample",
+      "decimalLatitude": "38.445",
+      "decimalLongitude": "-74.53",
+      "geo_loc_name": "Example Coast (synthetic)",
+      "eventDate": "2026-07-14",
+      "minimumDepthInMeters": "28",
+      "maximumDepthInMeters": "30",
+      "temp": "17",
+      "salinity": "31.74",
+      "samp_collect_device": "Niskin bottle",
+      "samp_store_sol": "Longmire's buffer",
+      "volume_filtered": "1L",
+      "env_broad_scale": "marine biome [ENVO:00000447]",
+      "Run": "Wilder_WLMEX0001",
+      "Project": "ExampleCoast",
+      "Cruise": "20260714",
+      "platform": "Illumina",
+      "Source": "Manifest",
+      "CollectionDate": "2026-07-14"
+     },
+     "category": "sample"
+    },
+    {
+     "sampleId": "EX0004",
+     "uid": "EX0004",
+     "station": "EXS2",
+     "lat": 38.64,
+     "lon": -74.93,
+     "meta": {
+      "samp_number": "EX0004",
+      "samp_name": "EXS2_B_071426",
+      "materialSampleID": "EXS2_B_071426",
+      "Cruise Number": "EXC01",
+      "Station": "EXS2",
+      "Sample Depth": "Bottom",
+      "samp_category": "sample",
+      "decimalLatitude": "38.64",
+      "decimalLongitude": "-74.93",
+      "geo_loc_name": "Example Coast (synthetic)",
+      "eventDate": "2026-07-14",
+      "minimumDepthInMeters": "12",
+      "maximumDepthInMeters": "14",
+      "temp": "18.1",
+      "salinity": "29.93",
+      "samp_collect_device": "Niskin bottle",
+      "samp_store_sol": "Longmire's buffer",
+      "volume_filtered": "1L",
+      "env_broad_scale": "marine biome [ENVO:00000447]",
+      "Run": "Wilder_WLMEX0001",
+      "Project": "ExampleCoast",
+      "Cruise": "20260714",
+      "platform": "Illumina",
+      "Source": "Manifest",
+      "CollectionDate": "2026-07-14"
+     },
+     "category": "sample"
+    },
+    {
+     "sampleId": "EX0021",
+     "uid": "EX0021",
+     "station": "EXS4",
+     "lat": 38.51,
+     "lon": -74.665,
+     "meta": {
+      "samp_number": "EX0021",
+      "samp_name": "EXS4_B_092226",
+      "materialSampleID": "EXS4_B_092226",
+      "Cruise Number": "EXC02",
+      "Station": "EXS4",
+      "Sample Depth": "Bottom",
+      "samp_category": "sample",
+      "decimalLatitude": "38.51",
+      "decimalLongitude": "-74.665",
+      "geo_loc_name": "Example Coast (synthetic)",
+      "eventDate": "2026-09-22",
+      "minimumDepthInMeters": "22",
+      "maximumDepthInMeters": "24",
+      "temp": "17.4",
+      "salinity": "31.29",
+      "samp_collect_device": "Niskin bottle",
+      "samp_store_sol": "Longmire's buffer",
+      "volume_filtered": "1L",
+      "env_broad_scale": "marine biome [ENVO:00000447]",
+      "Run": "Wilder_WLMEX0002",
+      "Project": "ExampleCoast",
+      "Cruise": "20260922",
+      "platform": "Illumina",
+      "Source": "Manifest",
+      "CollectionDate": "2026-09-22"
+     },
+     "category": "sample"
+    },
+    {
+     "sampleId": "EX0002",
+     "uid": "EX0002",
+     "station": "EXS1",
+     "lat": 38.705,
+     "lon": -75.06,
+     "meta": {
+      "samp_number": "EX0002",
+      "samp_name": "EXS1_B_071426",
+      "materialSampleID": "EXS1_B_071426",
+      "Cruise Number": "EXC01",
+      "Station": "EXS1",
+      "Sample Depth": "Bottom",
+      "samp_category": "sample",
+      "decimalLatitude": "38.705",
+      "decimalLongitude": "-75.06",
+      "geo_loc_name": "Example Coast (synthetic)",
+      "eventDate": "2026-07-14",
+      "minimumDepthInMeters": "6",
+      "maximumDepthInMeters": "8",
+      "temp": "18.3",
+      "salinity": "29.39",
+      "samp_collect_device": "Niskin bottle",
+      "samp_store_sol": "Longmire's buffer",
+      "volume_filtered": "1L",
+      "env_broad_scale": "marine biome [ENVO:00000447]",
+      "Run": "Wilder_WLMEX0001",
+      "Project": "ExampleCoast",
+      "Cruise": "20260714",
+      "platform": "Illumina",
+      "Source": "Manifest",
+      "CollectionDate": "2026-07-14"
+     },
+     "category": "sample"
+    },
+    {
+     "sampleId": "EX0009",
+     "uid": "EX0009",
+     "station": "EXS5",
+     "lat": 38.445,
+     "lon": -74.53,
+     "meta": {
+      "samp_number": "EX0009",
+      "samp_name": "EXS5_S_071426",
+      "materialSampleID": "EXS5_S_071426",
+      "Cruise Number": "EXC01",
+      "Station": "EXS5",
+      "Sample Depth": "Surface",
+      "samp_category": "sample",
+      "decimalLatitude": "38.445",
+      "decimalLongitude": "-74.53",
+      "geo_loc_name": "Example Coast (synthetic)",
+      "eventDate": "2026-07-14",
+      "minimumDepthInMeters": "1",
+      "maximumDepthInMeters": "1",
+      "temp": "24.7",
+      "salinity": "31.2",
+      "samp_collect_device": "Niskin bottle",
+      "samp_store_sol": "Longmire's buffer",
+      "volume_filtered": "1L",
+      "env_broad_scale": "marine biome [ENVO:00000447]",
+      "Run": "Wilder_WLMEX0001",
+      "Project": "ExampleCoast",
+      "Cruise": "20260714",
+      "platform": "Illumina",
+      "Source": "Manifest",
+      "CollectionDate": "2026-07-14"
+     },
+     "category": "sample"
+    },
+    {
+     "sampleId": "EX0019",
+     "uid": "EX0019",
+     "station": "EXS3",
+     "lat": 38.575,
+     "lon": -74.8,
+     "meta": {
+      "samp_number": "EX0019",
+      "samp_name": "EXS3_B_092226",
+      "materialSampleID": "EXS3_B_092226",
+      "Cruise Number": "EXC02",
+      "Station": "EXS3",
+      "Sample Depth": "Bottom",
+      "samp_category": "sample",
+      "decimalLatitude": "38.575",
+      "decimalLongitude": "-74.8",
+      "geo_loc_name": "Example Coast (synthetic)",
+      "eventDate": "2026-09-22",
+      "minimumDepthInMeters": "17",
+      "maximumDepthInMeters": "19",
+      "temp": "17.7",
+      "salinity": "30.84",
+      "samp_collect_device": "Niskin bottle",
+      "samp_store_sol": "Longmire's buffer",
+      "volume_filtered": "1L",
+      "env_broad_scale": "marine biome [ENVO:00000447]",
+      "Run": "Wilder_WLMEX0002",
+      "Project": "ExampleCoast",
+      "Cruise": "20260922",
+      "platform": "Illumina",
+      "Source": "Manifest",
+      "CollectionDate": "2026-09-22"
+     },
+     "category": "sample"
+    },
     {
      "sampleId": "EX0025",
      "uid": "EX0025",
@@ -10685,6 +11105,181 @@
       "platform": "Illumina",
       "Source": "Manifest",
       "CollectionDate": "2026-09-22"
+     },
+     "category": "sample"
+    },
+    {
+     "sampleId": "EX0005",
+     "uid": "EX0005",
+     "station": "EXS3",
+     "lat": 38.575,
+     "lon": -74.8,
+     "meta": {
+      "samp_number": "EX0005",
+      "samp_name": "EXS3_S_071426",
+      "materialSampleID": "EXS3_S_071426",
+      "Cruise Number": "EXC01",
+      "Station": "EXS3",
+      "Sample Depth": "Surface",
+      "samp_category": "sample",
+      "decimalLatitude": "38.575",
+      "decimalLongitude": "-74.8",
+      "geo_loc_name": "Example Coast (synthetic)",
+      "eventDate": "2026-07-14",
+      "minimumDepthInMeters": "1",
+      "maximumDepthInMeters": "1",
+      "temp": "25.4",
+      "salinity": "30.06",
+      "samp_collect_device": "Niskin bottle",
+      "samp_store_sol": "Longmire's buffer",
+      "volume_filtered": "1L",
+      "env_broad_scale": "marine biome [ENVO:00000447]",
+      "Run": "Wilder_WLMEX0001",
+      "Project": "ExampleCoast",
+      "Cruise": "20260714",
+      "platform": "Illumina",
+      "Source": "Manifest",
+      "CollectionDate": "2026-07-14"
+     },
+     "category": "sample"
+    },
+    {
+     "sampleId": "EX0020",
+     "uid": "EX0020",
+     "station": "EXS4",
+     "lat": 38.51,
+     "lon": -74.665,
+     "meta": {
+      "samp_number": "EX0020",
+      "samp_name": "EXS4_S_092226",
+      "materialSampleID": "EXS4_S_092226",
+      "Cruise Number": "EXC02",
+      "Station": "EXS4",
+      "Sample Depth": "Surface",
+      "samp_category": "sample",
+      "decimalLatitude": "38.51",
+      "decimalLongitude": "-74.665",
+      "geo_loc_name": "Example Coast (synthetic)",
+      "eventDate": "2026-09-22",
+      "minimumDepthInMeters": "1",
+      "maximumDepthInMeters": "1",
+      "temp": "21.3",
+      "salinity": "31.01",
+      "samp_collect_device": "Niskin bottle",
+      "samp_store_sol": "Longmire's buffer",
+      "volume_filtered": "1L",
+      "env_broad_scale": "marine biome [ENVO:00000447]",
+      "Run": "Wilder_WLMEX0002",
+      "Project": "ExampleCoast",
+      "Cruise": "20260922",
+      "platform": "Illumina",
+      "Source": "Manifest",
+      "CollectionDate": "2026-09-22"
+     },
+     "category": "sample"
+    },
+    {
+     "sampleId": "EX0008",
+     "uid": "EX0008",
+     "station": "EXS4",
+     "lat": 38.51,
+     "lon": -74.665,
+     "meta": {
+      "samp_number": "EX0008",
+      "samp_name": "EXS4_B_071426",
+      "materialSampleID": "EXS4_B_071426",
+      "Cruise Number": "EXC01",
+      "Station": "EXS4",
+      "Sample Depth": "Bottom",
+      "samp_category": "sample",
+      "decimalLatitude": "38.51",
+      "decimalLongitude": "-74.665",
+      "geo_loc_name": "Example Coast (synthetic)",
+      "eventDate": "2026-07-14",
+      "minimumDepthInMeters": "22",
+      "maximumDepthInMeters": "24",
+      "temp": "17.2",
+      "salinity": "31.4",
+      "samp_collect_device": "Niskin bottle",
+      "samp_store_sol": "Longmire's buffer",
+      "volume_filtered": "1L",
+      "env_broad_scale": "marine biome [ENVO:00000447]",
+      "Run": "Wilder_WLMEX0001",
+      "Project": "ExampleCoast",
+      "Cruise": "20260714",
+      "platform": "Illumina",
+      "Source": "Manifest",
+      "CollectionDate": "2026-07-14"
+     },
+     "category": "sample"
+    },
+    {
+     "sampleId": "EX0016",
+     "uid": "EX0016",
+     "station": "EXS2",
+     "lat": 38.64,
+     "lon": -74.93,
+     "meta": {
+      "samp_number": "EX0016",
+      "samp_name": "EXS2_S_092226",
+      "materialSampleID": "EXS2_S_092226",
+      "Cruise Number": "EXC02",
+      "Station": "EXS2",
+      "Sample Depth": "Surface",
+      "samp_category": "sample",
+      "decimalLatitude": "38.64",
+      "decimalLongitude": "-74.93",
+      "geo_loc_name": "Example Coast (synthetic)",
+      "eventDate": "2026-09-22",
+      "minimumDepthInMeters": "1",
+      "maximumDepthInMeters": "1",
+      "temp": "21.5",
+      "salinity": "29.69",
+      "samp_collect_device": "Niskin bottle",
+      "samp_store_sol": "Longmire's buffer",
+      "volume_filtered": "1L",
+      "env_broad_scale": "marine biome [ENVO:00000447]",
+      "Run": "Wilder_WLMEX0002",
+      "Project": "ExampleCoast",
+      "Cruise": "20260922",
+      "platform": "Illumina",
+      "Source": "Manifest",
+      "CollectionDate": "2026-09-22"
+     },
+     "category": "sample"
+    },
+    {
+     "sampleId": "EX0012",
+     "uid": "EX0012",
+     "station": "EXS6",
+     "lat": 38.38,
+     "lon": -74.395,
+     "meta": {
+      "samp_number": "EX0012",
+      "samp_name": "EXS6_B_071426",
+      "materialSampleID": "EXS6_B_071426",
+      "Cruise Number": "EXC01",
+      "Station": "EXS6",
+      "Sample Depth": "Bottom",
+      "samp_category": "sample",
+      "decimalLatitude": "38.38",
+      "decimalLongitude": "-74.395",
+      "geo_loc_name": "Example Coast (synthetic)",
+      "eventDate": "2026-07-14",
+      "minimumDepthInMeters": "34",
+      "maximumDepthInMeters": "36",
+      "temp": "17.1",
+      "salinity": "32.41",
+      "samp_collect_device": "Niskin bottle",
+      "samp_store_sol": "Longmire's buffer",
+      "volume_filtered": "1L",
+      "env_broad_scale": "marine biome [ENVO:00000447]",
+      "Run": "Wilder_WLMEX0001",
+      "Project": "ExampleCoast",
+      "Cruise": "20260714",
+      "platform": "Illumina",
+      "Source": "Manifest",
+      "CollectionDate": "2026-07-14"
      },
      "category": "sample"
     },
@@ -10793,41 +11388,6 @@
      "category": "sample"
     },
     {
-     "sampleId": "EX0006",
-     "uid": "EX0006",
-     "station": "EXS3",
-     "lat": 38.575,
-     "lon": -74.8,
-     "meta": {
-      "samp_number": "EX0006",
-      "samp_name": "EXS3_B_071426",
-      "materialSampleID": "EXS3_B_071426",
-      "Cruise Number": "EXC01",
-      "Station": "EXS3",
-      "Sample Depth": "Bottom",
-      "samp_category": "sample",
-      "decimalLatitude": "38.575",
-      "decimalLongitude": "-74.8",
-      "geo_loc_name": "Example Coast (synthetic)",
-      "eventDate": "2026-07-14",
-      "minimumDepthInMeters": "17",
-      "maximumDepthInMeters": "19",
-      "temp": "17.3",
-      "salinity": "30.6",
-      "samp_collect_device": "Niskin bottle",
-      "samp_store_sol": "Longmire's buffer",
-      "volume_filtered": "1L",
-      "env_broad_scale": "marine biome [ENVO:00000447]",
-      "Run": "Wilder_WLMEX0001",
-      "Project": "ExampleCoast",
-      "Cruise": "20260714",
-      "platform": "Illumina",
-      "Source": "Manifest",
-      "CollectionDate": "2026-07-14"
-     },
-     "category": "sample"
-    },
-    {
      "sampleId": "EX0007",
      "uid": "EX0007",
      "station": "EXS4",
@@ -10863,377 +11423,28 @@
      "category": "sample"
     },
     {
-     "sampleId": "EX0022",
-     "uid": "EX0022",
-     "station": "EXS5",
-     "lat": 38.445,
-     "lon": -74.53,
-     "meta": {
-      "samp_number": "EX0022",
-      "samp_name": "EXS5_S_092226",
-      "materialSampleID": "EXS5_S_092226",
-      "Cruise Number": "EXC02",
-      "Station": "EXS5",
-      "Sample Depth": "Surface",
-      "samp_category": "sample",
-      "decimalLatitude": "38.445",
-      "decimalLongitude": "-74.53",
-      "geo_loc_name": "Example Coast (synthetic)",
-      "eventDate": "2026-09-22",
-      "minimumDepthInMeters": "1",
-      "maximumDepthInMeters": "1",
-      "temp": "21.4",
-      "salinity": "31.44",
-      "samp_collect_device": "Niskin bottle",
-      "samp_store_sol": "Longmire's buffer",
-      "volume_filtered": "1L",
-      "env_broad_scale": "marine biome [ENVO:00000447]",
-      "Run": "Wilder_WLMEX0002",
-      "Project": "ExampleCoast",
-      "Cruise": "20260922",
-      "platform": "Illumina",
-      "Source": "Manifest",
-      "CollectionDate": "2026-09-22"
-     },
-     "category": "sample"
-    },
-    {
-     "sampleId": "EX0018",
-     "uid": "EX0018",
-     "station": "EXS3",
-     "lat": 38.575,
-     "lon": -74.8,
-     "meta": {
-      "samp_number": "EX0018",
-      "samp_name": "EXS3_S_092226",
-      "materialSampleID": "EXS3_S_092226",
-      "Cruise Number": "EXC02",
-      "Station": "EXS3",
-      "Sample Depth": "Surface",
-      "samp_category": "sample",
-      "decimalLatitude": "38.575",
-      "decimalLongitude": "-74.8",
-      "geo_loc_name": "Example Coast (synthetic)",
-      "eventDate": "2026-09-22",
-      "minimumDepthInMeters": "1",
-      "maximumDepthInMeters": "1",
-      "temp": "21.5",
-      "salinity": "29.94",
-      "samp_collect_device": "Niskin bottle",
-      "samp_store_sol": "Longmire's buffer",
-      "volume_filtered": "1L",
-      "env_broad_scale": "marine biome [ENVO:00000447]",
-      "Run": "Wilder_WLMEX0002",
-      "Project": "ExampleCoast",
-      "Cruise": "20260922",
-      "platform": "Illumina",
-      "Source": "Manifest",
-      "CollectionDate": "2026-09-22"
-     },
-     "category": "sample"
-    },
-    {
-     "sampleId": "EX0012",
-     "uid": "EX0012",
-     "station": "EXS6",
-     "lat": 38.38,
-     "lon": -74.395,
-     "meta": {
-      "samp_number": "EX0012",
-      "samp_name": "EXS6_B_071426",
-      "materialSampleID": "EXS6_B_071426",
-      "Cruise Number": "EXC01",
-      "Station": "EXS6",
-      "Sample Depth": "Bottom",
-      "samp_category": "sample",
-      "decimalLatitude": "38.38",
-      "decimalLongitude": "-74.395",
-      "geo_loc_name": "Example Coast (synthetic)",
-      "eventDate": "2026-07-14",
-      "minimumDepthInMeters": "34",
-      "maximumDepthInMeters": "36",
-      "temp": "17.1",
-      "salinity": "32.41",
-      "samp_collect_device": "Niskin bottle",
-      "samp_store_sol": "Longmire's buffer",
-      "volume_filtered": "1L",
-      "env_broad_scale": "marine biome [ENVO:00000447]",
-      "Run": "Wilder_WLMEX0001",
-      "Project": "ExampleCoast",
-      "Cruise": "20260714",
-      "platform": "Illumina",
-      "Source": "Manifest",
-      "CollectionDate": "2026-07-14"
-     },
-     "category": "sample"
-    },
-    {
-     "sampleId": "EX0005",
-     "uid": "EX0005",
-     "station": "EXS3",
-     "lat": 38.575,
-     "lon": -74.8,
-     "meta": {
-      "samp_number": "EX0005",
-      "samp_name": "EXS3_S_071426",
-      "materialSampleID": "EXS3_S_071426",
-      "Cruise Number": "EXC01",
-      "Station": "EXS3",
-      "Sample Depth": "Surface",
-      "samp_category": "sample",
-      "decimalLatitude": "38.575",
-      "decimalLongitude": "-74.8",
-      "geo_loc_name": "Example Coast (synthetic)",
-      "eventDate": "2026-07-14",
-      "minimumDepthInMeters": "1",
-      "maximumDepthInMeters": "1",
-      "temp": "25.4",
-      "salinity": "30.06",
-      "samp_collect_device": "Niskin bottle",
-      "samp_store_sol": "Longmire's buffer",
-      "volume_filtered": "1L",
-      "env_broad_scale": "marine biome [ENVO:00000447]",
-      "Run": "Wilder_WLMEX0001",
-      "Project": "ExampleCoast",
-      "Cruise": "20260714",
-      "platform": "Illumina",
-      "Source": "Manifest",
-      "CollectionDate": "2026-07-14"
-     },
-     "category": "sample"
-    },
-    {
-     "sampleId": "EX0014",
-     "uid": "EX0014",
-     "station": "EXS1",
-     "lat": 38.705,
-     "lon": -75.06,
-     "meta": {
-      "samp_number": "EX0014",
-      "samp_name": "EXS1_S_092226",
-      "materialSampleID": "EXS1_S_092226",
-      "Cruise Number": "EXC02",
-      "Station": "EXS1",
-      "Sample Depth": "Surface",
-      "samp_category": "sample",
-      "decimalLatitude": "38.705",
-      "decimalLongitude": "-75.06",
-      "geo_loc_name": "Example Coast (synthetic)",
-      "eventDate": "2026-09-22",
-      "minimumDepthInMeters": "1",
-      "maximumDepthInMeters": "1",
-      "temp": "21.8",
-      "salinity": "28.81",
-      "samp_collect_device": "Niskin bottle",
-      "samp_store_sol": "Longmire's buffer",
-      "volume_filtered": "1L",
-      "env_broad_scale": "marine biome [ENVO:00000447]",
-      "Run": "Wilder_WLMEX0002",
-      "Project": "ExampleCoast",
-      "Cruise": "20260922",
-      "platform": "Illumina",
-      "Source": "Manifest",
-      "CollectionDate": "2026-09-22"
-     },
-     "category": "sample"
-    },
-    {
-     "sampleId": "EX0024",
-     "uid": "EX0024",
-     "station": "EXS6",
-     "lat": 38.38,
-     "lon": -74.395,
-     "meta": {
-      "samp_number": "EX0024",
-      "samp_name": "EXS6_S_092226",
-      "materialSampleID": "EXS6_S_092226",
-      "Cruise Number": "EXC02",
-      "Station": "EXS6",
-      "Sample Depth": "Surface",
-      "samp_category": "sample",
-      "decimalLatitude": "38.38",
-      "decimalLongitude": "-74.395",
-      "geo_loc_name": "Example Coast (synthetic)",
-      "eventDate": "2026-09-22",
-      "minimumDepthInMeters": "1",
-      "maximumDepthInMeters": "1",
-      "temp": "20.5",
-      "salinity": "32.23",
-      "samp_collect_device": "Niskin bottle",
-      "samp_store_sol": "Longmire's buffer",
-      "volume_filtered": "1L",
-      "env_broad_scale": "marine biome [ENVO:00000447]",
-      "Run": "Wilder_WLMEX0002",
-      "Project": "ExampleCoast",
-      "Cruise": "20260922",
-      "platform": "Illumina",
-      "Source": "Manifest",
-      "CollectionDate": "2026-09-22"
-     },
-     "category": "sample"
-    },
-    {
-     "sampleId": "EX0009",
-     "uid": "EX0009",
-     "station": "EXS5",
-     "lat": 38.445,
-     "lon": -74.53,
-     "meta": {
-      "samp_number": "EX0009",
-      "samp_name": "EXS5_S_071426",
-      "materialSampleID": "EXS5_S_071426",
-      "Cruise Number": "EXC01",
-      "Station": "EXS5",
-      "Sample Depth": "Surface",
-      "samp_category": "sample",
-      "decimalLatitude": "38.445",
-      "decimalLongitude": "-74.53",
-      "geo_loc_name": "Example Coast (synthetic)",
-      "eventDate": "2026-07-14",
-      "minimumDepthInMeters": "1",
-      "maximumDepthInMeters": "1",
-      "temp": "24.7",
-      "salinity": "31.2",
-      "samp_collect_device": "Niskin bottle",
-      "samp_store_sol": "Longmire's buffer",
-      "volume_filtered": "1L",
-      "env_broad_scale": "marine biome [ENVO:00000447]",
-      "Run": "Wilder_WLMEX0001",
-      "Project": "ExampleCoast",
-      "Cruise": "20260714",
-      "platform": "Illumina",
-      "Source": "Manifest",
-      "CollectionDate": "2026-07-14"
-     },
-     "category": "sample"
-    },
-    {
-     "sampleId": "EX0004",
-     "uid": "EX0004",
+     "sampleId": "EX0017",
+     "uid": "EX0017",
      "station": "EXS2",
      "lat": 38.64,
      "lon": -74.93,
      "meta": {
-      "samp_number": "EX0004",
-      "samp_name": "EXS2_B_071426",
-      "materialSampleID": "EXS2_B_071426",
-      "Cruise Number": "EXC01",
+      "samp_number": "EX0017",
+      "samp_name": "EXS2_B_092226",
+      "materialSampleID": "EXS2_B_092226",
+      "Cruise Number": "EXC02",
       "Station": "EXS2",
       "Sample Depth": "Bottom",
       "samp_category": "sample",
       "decimalLatitude": "38.64",
       "decimalLongitude": "-74.93",
       "geo_loc_name": "Example Coast (synthetic)",
-      "eventDate": "2026-07-14",
+      "eventDate": "2026-09-22",
       "minimumDepthInMeters": "12",
       "maximumDepthInMeters": "14",
-      "temp": "18.1",
-      "salinity": "29.93",
+      "temp": "17.8",
+      "salinity": "29.91",
       "samp_collect_device": "Niskin bottle",
-      "samp_store_sol": "Longmire's buffer",
-      "volume_filtered": "1L",
-      "env_broad_scale": "marine biome [ENVO:00000447]",
-      "Run": "Wilder_WLMEX0001",
-      "Project": "ExampleCoast",
-      "Cruise": "20260714",
-      "platform": "Illumina",
-      "Source": "Manifest",
-      "CollectionDate": "2026-07-14"
-     },
-     "category": "sample"
-    },
-    {
-     "sampleId": "EX0015",
-     "uid": "EX0015",
-     "station": "EXS1",
-     "lat": 38.705,
-     "lon": -75.06,
-     "meta": {
-      "samp_number": "EX0015",
-      "samp_name": "EXS1_B_092226",
-      "materialSampleID": "EXS1_B_092226",
-      "Cruise Number": "EXC02",
-      "Station": "EXS1",
-      "Sample Depth": "Bottom",
-      "samp_category": "sample",
-      "decimalLatitude": "38.705",
-      "decimalLongitude": "-75.06",
-      "geo_loc_name": "Example Coast (synthetic)",
-      "eventDate": "2026-09-22",
-      "minimumDepthInMeters": "6",
-      "maximumDepthInMeters": "8",
-      "temp": "18.2",
-      "salinity": "29.7",
-      "samp_collect_device": "Niskin bottle",
-      "samp_store_sol": "Longmire's buffer",
-      "volume_filtered": "1L",
-      "env_broad_scale": "marine biome [ENVO:00000447]",
-      "Run": "Wilder_WLMEX0002",
-      "Project": "ExampleCoast",
-      "Cruise": "20260922",
-      "platform": "Illumina",
-      "Source": "Manifest",
-      "CollectionDate": "2026-09-22"
-     },
-     "category": "sample"
-    },
-    {
-     "sampleId": "EX0002",
-     "uid": "EX0002",
-     "station": "EXS1",
-     "lat": 38.705,
-     "lon": -75.06,
-     "meta": {
-      "samp_number": "EX0002",
-      "samp_name": "EXS1_B_071426",
-      "materialSampleID": "EXS1_B_071426",
-      "Cruise Number": "EXC01",
-      "Station": "EXS1",
-      "Sample Depth": "Bottom",
-      "samp_category": "sample",
-      "decimalLatitude": "38.705",
-      "decimalLongitude": "-75.06",
-      "geo_loc_name": "Example Coast (synthetic)",
-      "eventDate": "2026-07-14",
-      "minimumDepthInMeters": "6",
-      "maximumDepthInMeters": "8",
-      "temp": "18.3",
-      "salinity": "29.39",
-      "samp_collect_device": "Niskin bottle",
-      "samp_store_sol": "Longmire's buffer",
-      "volume_filtered": "1L",
-      "env_broad_scale": "marine biome [ENVO:00000447]",
-      "Run": "Wilder_WLMEX0001",
-      "Project": "ExampleCoast",
-      "Cruise": "20260714",
-      "platform": "Illumina",
-      "Source": "Manifest",
-      "CollectionDate": "2026-07-14"
-     },
-     "category": "sample"
-    },
-    {
-     "sampleId": "EX0026",
-     "uid": "EX0026",
-     "station": "EXS1",
-     "lat": 38.705,
-     "lon": -75.06,
-     "meta": {
-      "samp_number": "EX0026",
-      "samp_name": "FIELDBLANK_092226",
-      "materialSampleID": "FIELDBLANK_092226",
-      "Cruise Number": "EXC02",
-      "Station": "EXS1",
-      "Sample Depth": "Surface",
-      "samp_category": "negative control",
-      "neg_cont_type": "field negative",
-      "decimalLatitude": "38.705",
-      "decimalLongitude": "-75.06",
-      "geo_loc_name": "Example Coast (synthetic)",
-      "eventDate": "2026-09-22",
-      "minimumDepthInMeters": "0",
-      "maximumDepthInMeters": "0",
-      "samp_collect_device": "deionised water blank",
       "samp_store_sol": "Longmire's buffer",
       "volume_filtered": "1L",
       "env_broad_scale": "marine biome [ENVO:00000447]",
@@ -11282,28 +11493,27 @@
      "category": "sample"
     },
     {
-     "sampleId": "EX0023",
-     "uid": "EX0023",
-     "station": "EXS5",
-     "lat": 38.445,
-     "lon": -74.53,
+     "sampleId": "EX0026",
+     "uid": "EX0026",
+     "station": "EXS1",
+     "lat": 38.705,
+     "lon": -75.06,
      "meta": {
-      "samp_number": "EX0023",
-      "samp_name": "EXS5_B_092226",
-      "materialSampleID": "EXS5_B_092226",
+      "samp_number": "EX0026",
+      "samp_name": "FIELDBLANK_092226",
+      "materialSampleID": "FIELDBLANK_092226",
       "Cruise Number": "EXC02",
-      "Station": "EXS5",
-      "Sample Depth": "Bottom",
-      "samp_category": "sample",
-      "decimalLatitude": "38.445",
-      "decimalLongitude": "-74.53",
+      "Station": "EXS1",
+      "Sample Depth": "Surface",
+      "samp_category": "negative control",
+      "neg_cont_type": "field negative",
+      "decimalLatitude": "38.705",
+      "decimalLongitude": "-75.06",
       "geo_loc_name": "Example Coast (synthetic)",
       "eventDate": "2026-09-22",
-      "minimumDepthInMeters": "28",
-      "maximumDepthInMeters": "30",
-      "temp": "17",
-      "salinity": "32.19",
-      "samp_collect_device": "Niskin bottle",
+      "minimumDepthInMeters": "0",
+      "maximumDepthInMeters": "0",
+      "samp_collect_device": "deionised water blank",
       "samp_store_sol": "Longmire's buffer",
       "volume_filtered": "1L",
       "env_broad_scale": "marine biome [ENVO:00000447]",
@@ -11317,132 +11527,27 @@
      "category": "sample"
     },
     {
-     "sampleId": "EX0017",
-     "uid": "EX0017",
-     "station": "EXS2",
-     "lat": 38.64,
-     "lon": -74.93,
+     "sampleId": "EX0024",
+     "uid": "EX0024",
+     "station": "EXS6",
+     "lat": 38.38,
+     "lon": -74.395,
      "meta": {
-      "samp_number": "EX0017",
-      "samp_name": "EXS2_B_092226",
-      "materialSampleID": "EXS2_B_092226",
+      "samp_number": "EX0024",
+      "samp_name": "EXS6_S_092226",
+      "materialSampleID": "EXS6_S_092226",
       "Cruise Number": "EXC02",
-      "Station": "EXS2",
-      "Sample Depth": "Bottom",
-      "samp_category": "sample",
-      "decimalLatitude": "38.64",
-      "decimalLongitude": "-74.93",
-      "geo_loc_name": "Example Coast (synthetic)",
-      "eventDate": "2026-09-22",
-      "minimumDepthInMeters": "12",
-      "maximumDepthInMeters": "14",
-      "temp": "17.8",
-      "salinity": "29.91",
-      "samp_collect_device": "Niskin bottle",
-      "samp_store_sol": "Longmire's buffer",
-      "volume_filtered": "1L",
-      "env_broad_scale": "marine biome [ENVO:00000447]",
-      "Run": "Wilder_WLMEX0002",
-      "Project": "ExampleCoast",
-      "Cruise": "20260922",
-      "platform": "Illumina",
-      "Source": "Manifest",
-      "CollectionDate": "2026-09-22"
-     },
-     "category": "sample"
-    },
-    {
-     "sampleId": "EX0021",
-     "uid": "EX0021",
-     "station": "EXS4",
-     "lat": 38.51,
-     "lon": -74.665,
-     "meta": {
-      "samp_number": "EX0021",
-      "samp_name": "EXS4_B_092226",
-      "materialSampleID": "EXS4_B_092226",
-      "Cruise Number": "EXC02",
-      "Station": "EXS4",
-      "Sample Depth": "Bottom",
-      "samp_category": "sample",
-      "decimalLatitude": "38.51",
-      "decimalLongitude": "-74.665",
-      "geo_loc_name": "Example Coast (synthetic)",
-      "eventDate": "2026-09-22",
-      "minimumDepthInMeters": "22",
-      "maximumDepthInMeters": "24",
-      "temp": "17.4",
-      "salinity": "31.29",
-      "samp_collect_device": "Niskin bottle",
-      "samp_store_sol": "Longmire's buffer",
-      "volume_filtered": "1L",
-      "env_broad_scale": "marine biome [ENVO:00000447]",
-      "Run": "Wilder_WLMEX0002",
-      "Project": "ExampleCoast",
-      "Cruise": "20260922",
-      "platform": "Illumina",
-      "Source": "Manifest",
-      "CollectionDate": "2026-09-22"
-     },
-     "category": "sample"
-    },
-    {
-     "sampleId": "EX0010",
-     "uid": "EX0010",
-     "station": "EXS5",
-     "lat": 38.445,
-     "lon": -74.53,
-     "meta": {
-      "samp_number": "EX0010",
-      "samp_name": "EXS5_B_071426",
-      "materialSampleID": "EXS5_B_071426",
-      "Cruise Number": "EXC01",
-      "Station": "EXS5",
-      "Sample Depth": "Bottom",
-      "samp_category": "sample",
-      "decimalLatitude": "38.445",
-      "decimalLongitude": "-74.53",
-      "geo_loc_name": "Example Coast (synthetic)",
-      "eventDate": "2026-07-14",
-      "minimumDepthInMeters": "28",
-      "maximumDepthInMeters": "30",
-      "temp": "17",
-      "salinity": "31.74",
-      "samp_collect_device": "Niskin bottle",
-      "samp_store_sol": "Longmire's buffer",
-      "volume_filtered": "1L",
-      "env_broad_scale": "marine biome [ENVO:00000447]",
-      "Run": "Wilder_WLMEX0001",
-      "Project": "ExampleCoast",
-      "Cruise": "20260714",
-      "platform": "Illumina",
-      "Source": "Manifest",
-      "CollectionDate": "2026-07-14"
-     },
-     "category": "sample"
-    },
-    {
-     "sampleId": "EX0020",
-     "uid": "EX0020",
-     "station": "EXS4",
-     "lat": 38.51,
-     "lon": -74.665,
-     "meta": {
-      "samp_number": "EX0020",
-      "samp_name": "EXS4_S_092226",
-      "materialSampleID": "EXS4_S_092226",
-      "Cruise Number": "EXC02",
-      "Station": "EXS4",
+      "Station": "EXS6",
       "Sample Depth": "Surface",
       "samp_category": "sample",
-      "decimalLatitude": "38.51",
-      "decimalLongitude": "-74.665",
+      "decimalLatitude": "38.38",
+      "decimalLongitude": "-74.395",
       "geo_loc_name": "Example Coast (synthetic)",
       "eventDate": "2026-09-22",
       "minimumDepthInMeters": "1",
       "maximumDepthInMeters": "1",
-      "temp": "21.3",
-      "salinity": "31.01",
+      "temp": "20.5",
+      "salinity": "32.23",
       "samp_collect_device": "Niskin bottle",
       "samp_store_sol": "Longmire's buffer",
       "volume_filtered": "1L",
@@ -11453,111 +11558,6 @@
       "platform": "Illumina",
       "Source": "Manifest",
       "CollectionDate": "2026-09-22"
-     },
-     "category": "sample"
-    },
-    {
-     "sampleId": "EX0019",
-     "uid": "EX0019",
-     "station": "EXS3",
-     "lat": 38.575,
-     "lon": -74.8,
-     "meta": {
-      "samp_number": "EX0019",
-      "samp_name": "EXS3_B_092226",
-      "materialSampleID": "EXS3_B_092226",
-      "Cruise Number": "EXC02",
-      "Station": "EXS3",
-      "Sample Depth": "Bottom",
-      "samp_category": "sample",
-      "decimalLatitude": "38.575",
-      "decimalLongitude": "-74.8",
-      "geo_loc_name": "Example Coast (synthetic)",
-      "eventDate": "2026-09-22",
-      "minimumDepthInMeters": "17",
-      "maximumDepthInMeters": "19",
-      "temp": "17.7",
-      "salinity": "30.84",
-      "samp_collect_device": "Niskin bottle",
-      "samp_store_sol": "Longmire's buffer",
-      "volume_filtered": "1L",
-      "env_broad_scale": "marine biome [ENVO:00000447]",
-      "Run": "Wilder_WLMEX0002",
-      "Project": "ExampleCoast",
-      "Cruise": "20260922",
-      "platform": "Illumina",
-      "Source": "Manifest",
-      "CollectionDate": "2026-09-22"
-     },
-     "category": "sample"
-    },
-    {
-     "sampleId": "EX0016",
-     "uid": "EX0016",
-     "station": "EXS2",
-     "lat": 38.64,
-     "lon": -74.93,
-     "meta": {
-      "samp_number": "EX0016",
-      "samp_name": "EXS2_S_092226",
-      "materialSampleID": "EXS2_S_092226",
-      "Cruise Number": "EXC02",
-      "Station": "EXS2",
-      "Sample Depth": "Surface",
-      "samp_category": "sample",
-      "decimalLatitude": "38.64",
-      "decimalLongitude": "-74.93",
-      "geo_loc_name": "Example Coast (synthetic)",
-      "eventDate": "2026-09-22",
-      "minimumDepthInMeters": "1",
-      "maximumDepthInMeters": "1",
-      "temp": "21.5",
-      "salinity": "29.69",
-      "samp_collect_device": "Niskin bottle",
-      "samp_store_sol": "Longmire's buffer",
-      "volume_filtered": "1L",
-      "env_broad_scale": "marine biome [ENVO:00000447]",
-      "Run": "Wilder_WLMEX0002",
-      "Project": "ExampleCoast",
-      "Cruise": "20260922",
-      "platform": "Illumina",
-      "Source": "Manifest",
-      "CollectionDate": "2026-09-22"
-     },
-     "category": "sample"
-    },
-    {
-     "sampleId": "EX0008",
-     "uid": "EX0008",
-     "station": "EXS4",
-     "lat": 38.51,
-     "lon": -74.665,
-     "meta": {
-      "samp_number": "EX0008",
-      "samp_name": "EXS4_B_071426",
-      "materialSampleID": "EXS4_B_071426",
-      "Cruise Number": "EXC01",
-      "Station": "EXS4",
-      "Sample Depth": "Bottom",
-      "samp_category": "sample",
-      "decimalLatitude": "38.51",
-      "decimalLongitude": "-74.665",
-      "geo_loc_name": "Example Coast (synthetic)",
-      "eventDate": "2026-07-14",
-      "minimumDepthInMeters": "22",
-      "maximumDepthInMeters": "24",
-      "temp": "17.2",
-      "salinity": "31.4",
-      "samp_collect_device": "Niskin bottle",
-      "samp_store_sol": "Longmire's buffer",
-      "volume_filtered": "1L",
-      "env_broad_scale": "marine biome [ENVO:00000447]",
-      "Run": "Wilder_WLMEX0001",
-      "Project": "ExampleCoast",
-      "Cruise": "20260714",
-      "platform": "Illumina",
-      "Source": "Manifest",
-      "CollectionDate": "2026-07-14"
      },
      "category": "sample"
     }

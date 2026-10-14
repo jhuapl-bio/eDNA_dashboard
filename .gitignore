@@ -3,7 +3,7 @@ data/*
 !data/README.md
 !data/example/
 data/example/**/~$*
-
+data/projects/
 # generated output
 reports/
 outputs/

@@ -83,7 +83,34 @@ project folder (`data/projects/MBON`) or at the shorthand `data/MBON`; the last 
 resolve to the root and restrict the build to that project. `outputs/` and
 `reports/` are both git-ignored, so per-project builds never get committed.
 
-The report has Cross-Sample, Map, Explore, Data Table and Metadata tabs; you can
+The report has Cross-Sample, Map, Explore, **Fish Compare**, Data Table and Metadata tabs:
+
+- **Map** — a *Map options* panel offers keyless basemaps (Esri Light Gray / Ocean /
+  Satellite / Topographic, GEBCO bathymetry, CARTO, OpenStreetMap, vector coastlines,
+  none) with automatic failover, overlays (place labels, OpenSeaMap sea marks, lat/long
+  grid, scale bar, station labels, cursor coordinates), marker size/colour by reads,
+  samples, richness, dominant group or one taxon, cluster behaviour, dimming of
+  stations that don't match the Filters, and *Export PNG*. Drawn regions can be shown
+  on their own (*Regions only*), tiling the region windows to fill the pane.
+- **Fish Compare** — pick fish (or any group's taxa) and compare them across stations,
+  cruises, depths, months or drawn regions as a matrix, mini maps, trends,
+  head-to-head, co-occurrence or location cards; controls/blanks excluded by default.
+- **Values: Reads / % of sample** — a report-wide toggle (Filters panel, mirrored on
+  Cross-Sample, Explore, Data Table, the station panel and Map options). “% of sample”
+  shows each organism's share of all reads in its sample — or in the pooled samples /
+  group a view aggregates — while raw reads stay in tooltips and cells.
+- **Sample grouping** — *Filters → Sample grouping → Group samples…* opens a dialog to
+  group samples by one or more metadata columns (station, cruise, depth, month,
+  category, drawn map region or any categorical column; several columns combine).
+  Each group can be shown, highlighted or hidden, and grouping can be switched off.
+  Groups drive map pies + legend, Data Table “Per sample group”, Explore group panels,
+  Fish Compare “Sample groups”, Cross-Sample group dots and a Metadata group column;
+  hidden groups (and hidden samples) drop out of every tab and the map.
+- **Cross-Sample → Occupancy bar → Stacked by group** — hover a legend item to
+  highlight that group; Ctrl/⌘+click legend items or bar segments, then *Compare*
+  to open them side by side (dialog, new window or CSV).
+
+You can
 switch between ASV and Kraken2 results, filter by run, database, group or sample,
 draw map regions to compare areas, and export any chart or table (PNG/SVG/PDF/CSV/XLSX).
 Files dropped into the report's **Data** panel overwrite samples that are already
