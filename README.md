@@ -53,7 +53,8 @@ eDNA_processing/
 │   └── projects/            # YOUR data (git-ignored)
 │       ├── report_manifest.xlsx
 │       └── <project>/{faire,kraken2,wilder,meta}/
-├── reports/             # generated HTML (git-ignored)
+├── reports/             # generated HTML, default output (git-ignored)
+├── outputs/             # your per-project reports, e.g. outputs/mbon.html (git-ignored)
 ├── logs/                # run logs (git-ignored)
 ├── sql/create_tables.sql
 ├── api/  frontend/  deploy/  docs/  tests/
@@ -70,14 +71,25 @@ python build_mbon_html.py --projects OceanX --split        # one project, + one 
 python build_mbon_html.py --runs 20260524_MV1_test02       # selected runs only
 python build_mbon_html.py --skip-runs run_a,run_b          # leave runs out without editing the manifest
 python build_mbon_html.py --projects-dir /mnt/share/projects -o reports/latest.html
+python build_mbon_html.py --projects-dir data/projects/MBON -o outputs/mbon.html
+                                                           # one project folder -> builds just that project
 python build_mbon_html.py --json-out reports/latest.json   # also save the data payload
 python build_mbon_html.py --from-json reports/latest.json  # re-render a saved payload
 python build_mbon_html.py --help                           # all options
 ```
 
+`--projects-dir` may point at the projects root (`data/projects`), at a single
+project folder (`data/projects/MBON`) or at the shorthand `data/MBON`; the last two
+resolve to the root and restrict the build to that project. `outputs/` and
+`reports/` are both git-ignored, so per-project builds never get committed.
+
 The report has Cross-Sample, Map, Explore, Data Table and Metadata tabs; you can
 switch between ASV and Kraken2 results, filter by run, database, group or sample,
 draw map regions to compare areas, and export any chart or table (PNG/SVG/PDF/CSV/XLSX).
+Files dropped into the report's **Data** panel overwrite samples that are already
+loaded (matched on sample ID) instead of duplicating them — a FAIRe `sampleMetadata`
+sheet replaces their metadata, an ASV workbook or Kraken2 report their reads — and
+**Reset to original** drops every upload and manual edit.
 More files can be dropped into the report's **Data Sources** panel in the browser.
 
 ## Loading the database — `ingest.py`

@@ -97,17 +97,34 @@ REPORT_TITLE = "MBON eDNA Explorer"
 
 # sampleMetadata tooltip fields (carried through to the map popups)
 SAMPLE_TOOLTIP_FIELDS = {
-    'samp_category': 'Category', 'samp_collect_device': 'Collection Device',
-    'samp_store_sol': 'Storage Solution', 'temp': 'Temperature', 'salinity': 'Salinity',
+    # (order == display order in the map popup's per-sample tooltip)
+    'samp_name': 'Sample Name', 'Station': 'Station', 'Cruise Number': 'Cruise',
+    'eventDate': 'Date', 'samp_category': 'Category', 'neg_cont_type': 'Control Type',
     'Sample Depth': 'Sample Depth', 'minimumDepthInMeters': 'Min Depth (m)',
-    'maximumDepthInMeters': 'Max Depth (m)',
+    'maximumDepthInMeters': 'Max Depth (m)', 'tot_depth_water_col': 'Water Column Depth (m)',
+    'temp': 'Temperature', 'salinity': 'Salinity',
+    'decimalLatitude': 'Latitude', 'decimalLongitude': 'Longitude',
+    'geo_loc_name': 'Location', 'samp_collect_device': 'Collection Device',
+    'filter_name': 'Filter', 'size_frac': 'Size Fraction (um)',
+    'samp_store_sol': 'Storage Solution', 'Coordinate Note': 'Coordinate Note',
 }
 INFO_COLS = ['ScientificName', 'Rank', 'TaxID', 'CommonName', 'Group']
 
 
 def _clean(v):
-    if pd.isna(v):
+    if v is None:
         return None
+    try:
+        if pd.isna(v):
+            return None
+    except (TypeError, ValueError):
+        pass
+    if isinstance(v, pd.Timestamp) or hasattr(v, 'strftime'):
+        try:
+            if getattr(v, 'hour', 0) == 0 and getattr(v, 'minute', 0) == 0:
+                return v.strftime('%Y-%m-%d')
+        except Exception:
+            pass
     return str(v).strip().replace('\xa0', '')
 
 
@@ -126,7 +143,7 @@ def _norm_colname(v):
 
 
 def _coerce_latlon(lat, lon, who=''):
-    """(lat, lon) rounded to 4 dp, or (None, None) when missing / non-numeric /
+    """(lat, lon) rounded to 5 dp (~1 m), or (None, None) when missing / non-numeric /
     out of range. Swapped coordinates are repaired (see _fix_latlon); anything
     still impossible is logged and dropped rather than plotted off the map."""
     try:
@@ -144,7 +161,7 @@ def _coerce_latlon(lat, lon, who=''):
     if lat == 0 and lon == 0:
         log.warning("coordinates for %s are (0, 0) — treated as missing", who or '?')
         return None, None
-    return round(lat, 4), round(lon, 4)
+    return round(lat, 5), round(lon, 5)
 
 
 def read_aggregated(fpath):
@@ -253,7 +270,9 @@ def load_station_map_from_file(fpath):
     try:
         ec.require_file(fpath, 'station metadata workbook', ec.SPREADSHEET_EXT + ('.csv',))
         if str(fpath).lower().endswith('.csv'):
-            return _station_map_from_frame(pd.read_csv(fpath, header=None, dtype=str), fpath)
+            smap = _station_map_from_frame(pd.read_csv(fpath, header=None, dtype=str), fpath)
+            _fill_station_coords(smap)
+            return smap
         xls = pd.ExcelFile(fpath, engine='openpyxl')
     except (InputError, Exception) as e:
         log.error("station metadata unreadable — %s", e)
@@ -282,6 +301,7 @@ def load_station_map_from_file(fpath):
             smap[sid].update({k: v for k, v in rec.items() if v is not None})
         else:
             smap[sid] = dict(rec)
+    _fill_station_coords(smap)
     n_xy = sum(1 for r in smap.values()
                if r.get('decimalLatitude') not in (None, '') and r.get('decimalLongitude') not in (None, ''))
     log.info("station metadata %s: %d sample(s), %d with coordinates",
@@ -341,6 +361,38 @@ def _station_map_from_frame(raw, fpath):
 _STATION_CACHE = {}
 
 
+def _num_or_none(v):
+    try:
+        f = float(str(v).strip().replace('\xa0', ''))
+        return None if np.isnan(f) else f
+    except (TypeError, ValueError):
+        return None
+
+
+def _fill_station_coords(smap):
+    """A sample row with a Station but blank decimalLatitude/Longitude inherits
+    the most common coordinates recorded for that same Station elsewhere in the
+    sheet (e.g. a field blank logged without a position). The record is tagged
+    with a 'Coordinate Note' so the dashboard shows the position was inferred.
+    Rows with their own coordinates are never touched."""
+    votes = {}
+    for rec in smap.values():
+        st = (rec.get('Station') or '').strip()
+        lat, lon = _num_or_none(rec.get('decimalLatitude')), _num_or_none(rec.get('decimalLongitude'))
+        if st and lat is not None and lon is not None:
+            v = votes.setdefault(st, {})
+            v[(lat, lon)] = v.get((lat, lon), 0) + 1
+    modal = {st: max(v.items(), key=lambda kv: kv[1])[0] for st, v in votes.items()}
+    for rec in smap.values():
+        st = (rec.get('Station') or '').strip()
+        if not st or st not in modal:
+            continue
+        if (_num_or_none(rec.get('decimalLatitude')) is None
+                or _num_or_none(rec.get('decimalLongitude')) is None):
+            rec['decimalLatitude'], rec['decimalLongitude'] = modal[st]
+            rec['Coordinate Note'] = f'No coordinates in sheet; using Station {st} position'
+
+
 def load_mbon_station_map(folder):
     """Default station map used when no metadata file is named explicitly:
     --station-metadata if given, else the first workbook matching
@@ -371,6 +423,30 @@ def _loose_key(v):
     return re.sub(r'[^a-z0-9]+', '', str(v).lower())
 
 
+def _zero_key(v):
+    """Like _loose_key, but also drops leading zeros inside every digit run, so
+    report names such as 'MBON3_024_A_071825' or 'T1C_9_A_112425' still match a
+    sheet samp_name 'MBON3_24_A_071825' / 'T1C_09_A_112425'."""
+    return _loose_key(re.sub(r'\d+', lambda m: str(int(m.group(0))), str(v)))
+
+
+def _zero_index(station_map):
+    """zero-insensitive key -> samp_number over samp_number + samp_name only
+    (NOT Station, so 'MBON1' can't collide with samp_number 'MBON0001').
+    Ambiguous keys map to None and are ignored."""
+    idx = {}
+    for num, rec in station_map.items():
+        for v in {num, (rec.get('samp_name') or '').strip()}:
+            if not v:
+                continue
+            k = _zero_key(v)
+            if k in idx and idx[k] != num:
+                idx[k] = None
+            else:
+                idx[k] = num
+    return idx
+
+
 def _name_station_indexes(station_map):
     """Build samp_name->samp_number and Station->samp_number lookups, plus a
     loose (case/punctuation-insensitive) index over samp_number, samp_name and
@@ -397,7 +473,7 @@ def tooltip_meta(sid, station_map):
         if val is None:
             continue
         try:
-            f = float(val); out[label] = int(f) if f == int(f) else round(f, 4)
+            f = float(val); out[label] = int(f) if f == int(f) else round(f, 5)
         except (ValueError, TypeError):
             out[label] = val
     return out
@@ -1750,6 +1826,7 @@ def _build_manifest_project(gkey, rows, cmap, extra_cols,
     if not station_map:
         station_map = default_station_map
     name_to_num, station_to_num, loose_index = _name_station_indexes(station_map)
+    zero_index = _zero_index(station_map)
     unlinked = []   # samples that carry report data but found no coordinates
     samples_seen = set()   # sampleIds already appended to `samples`
 
@@ -1760,7 +1837,7 @@ def _build_manifest_project(gkey, rows, cmap, extra_cols,
         snum = (qbase if qbase in station_map else
                 qsid if qsid in station_map else
                 name_to_num.get(qbase) or station_to_num.get(qbase) or
-                loose_index.get(_loose_key(qbase)))
+                loose_index.get(_loose_key(qbase)) or zero_index.get(_zero_key(qbase)))
         if not snum and run_val and str(run_val).lower() != 'nan':
             snum = (run_val if run_val in station_map else
                     name_to_num.get(run_val) or station_to_num.get(run_val) or
@@ -1768,6 +1845,14 @@ def _build_manifest_project(gkey, rows, cmap, extra_cols,
         m = station_map.get(snum, {}) if snum else {}
         lat, lon = _coerce_latlon(m.get('decimalLatitude'), m.get('decimalLongitude'), snum or '?')
         return lat, lon, m
+
+    def _resolve_snum(q):
+        """samp_number for a report/sample id via the sheet (exact, loose,
+        zero-insensitive), or None."""
+        if not q:
+            return None
+        return (q if q in station_map else name_to_num.get(q) or
+                loose_index.get(_loose_key(q)) or zero_index.get(_zero_key(q)))
 
     for r in rows:
         sid = _clean(r[cmap['sample_id']])
@@ -1795,7 +1880,7 @@ def _build_manifest_project(gkey, rows, cmap, extra_cols,
         snum = (base if base in station_map else
                 sid if sid in station_map else
                 name_to_num.get(base) or station_to_num.get(base) or
-                loose_index.get(_loose_key(base)))
+                loose_index.get(_loose_key(base)) or zero_index.get(_zero_key(base)))
         # Expanded barcode samples ('barcode01_<run>', 'unclassified_<run>')
         # won't match a samp_number directly — fall back to the row's run value
         # so every barcode inherits the run-level station coordinates.
@@ -1859,7 +1944,20 @@ def _build_manifest_project(gkey, rows, cmap, extra_cols,
                     except ValueError:
                         rel = rf.name
                     conc_info = conc_k2.get(rel)
-                    sub_sid = conc_info['samp_number'] if conc_info else stem
+                    conc_num = conc_info.get('samp_number') if conc_info else None
+                    # The metadata workbook is the source of truth: a concordance
+                    # entry is used only if that samp_number still exists in it;
+                    # otherwise the report name is linked straight to the sheet
+                    # (samp_name / samp_number, punctuation + leading-zero tolerant),
+                    # so edits to the workbook flow through without re-running ingest.py.
+                    # Only an EXACT match adopts the samp_number as the sample id;
+                    # a fuzzy match (e.g. re-run 'A5C_024_A_071825' next to
+                    # 'A5C_24_A_071825') keeps its own id so two reports are never
+                    # pooled into one sample -- it still inherits the sheet's
+                    # coordinates + metadata via _link_station / the alias pass.
+                    sub_sid = (conc_num if conc_num in station_map else
+                               stem if stem in station_map else
+                               name_to_num.get(stem) or stem)
                     if sub_sid not in samples_seen:
                         sub_lat, sub_lon, sub_m = _link_station(sub_sid, sub_sid, rv)
                         sub_meta = {k: v for k, v in (sub_m or {}).items() if v is not None}
@@ -1959,12 +2057,19 @@ def _build_manifest_project(gkey, rows, cmap, extra_cols,
     # the per-tab sample columns. Folded unclassified bins (no universal-ID
     # metadata) get a minimal synthesized record from their assigned station.
     for s in samples:
+        m_ = s.get('meta') or {}
+        if m_.get('eventDate') and not m_.get('CollectionDate'):
+            m_['CollectionDate'] = m_['eventDate']
+    for s in samples:
         sid = s['sampleId']
         if sid in station_map:
             continue
         base = _split_run_suffix(sid, (s.get('meta') or {}).get('Run'))
+        snum_ = _resolve_snum(base)
         if base in station_map:
             station_map[sid] = station_map[base]
+        elif snum_:
+            station_map[sid] = station_map[snum_]
         elif s.get('station') is not None and s.get('lat') is not None:
             station_map[sid] = {'Station': s['station'],
                                 'decimalLatitude': s['lat'],
@@ -2011,6 +2116,11 @@ def _build_manifest_project(gkey, rows, cmap, extra_cols,
             if target is None:
                 conc_entry = conc_wilder.get(f'{job_id}:{nc}')
                 target = conc_entry.get('samp_number') if conc_entry else None
+                if target is not None and target not in station_map:
+                    target = None
+            if target is None:
+                # no concordance: link the WLM ClientSampleID to the sheet directly
+                target = _resolve_snum(uid_map.get(nc))
             if target is None:
                 continue
             if target not in samples_seen:
@@ -2736,6 +2846,31 @@ def build_parser():
     return p
 
 
+_PROJECT_SUBDIRS = ('faire', 'kraken2', 'wilder', 'meta')
+
+
+def _resolve_projects_root(path, given):
+    """(projects_root, single_project_or_None) for a --projects-dir value.
+
+    ``data/projects``       -> (data/projects, None)
+    ``data/projects/MBON``  -> (data/projects, 'MBON')   one project folder
+    ``data/MBON``           -> (data/projects, 'MBON')   shorthand, if that exists
+    """
+    path = Path(path)
+    if (path.is_dir() and any((path / d).is_dir() for d in _PROJECT_SUBDIRS)
+            and not (path / ec.MANIFEST_NAME).exists()):
+        log.info("--projects-dir %r is a single project -> projects root %s, project '%s'",
+                 given, ec.rel(path.parent), path.name)
+        return path.parent, path.name
+    if not path.is_dir() and given:
+        for root in (path.parent / 'projects', ec.DATA_DIR / 'projects'):
+            if (root / path.name).is_dir():
+                log.info("--projects-dir %r not found -> using projects root %s, project '%s'",
+                         given, ec.rel(root), path.name)
+                return root, path.name
+    return path, None
+
+
 def main(argv=None):
     global DATA_DIR, DATA_PROJECTS, MANIFEST, MANIFEST_EXCLUSIVE, ONLY_PROJECTS, ONLY_RUNS
     global SKIP_MANIFEST_RUNS, SKIP_FOLDERS, SKIP_WILDER02_ONLY
@@ -2753,6 +2888,13 @@ def main(argv=None):
             DATA_PROJECTS = ec.EXAMPLE_PROJECTS_DIR
         elif args.projects_dir or os.getenv("EDNA_PROJECTS_DIR"):
             DATA_PROJECTS = ec.resolve_path(args.projects_dir or os.getenv("EDNA_PROJECTS_DIR"))
+        # Tolerate --projects-dir pointing at ONE project (data/projects/MBON) or
+        # a shorthand that doesn't exist (data/MBON): resolve it to the real
+        # projects root and build just that project. Otherwise the bad root
+        # silently breaks concordance + report lookups and samples lose metadata.
+        auto_project = None
+        if not args.example:
+            DATA_PROJECTS, auto_project = _resolve_projects_root(DATA_PROJECTS, args.projects_dir)
         # The legacy/basename-search data folder defaults to the folder that
         # contains the projects dir (data/ for data/projects), so searches never
         # wander into an unrelated tree.
@@ -2763,7 +2905,7 @@ def main(argv=None):
                   (ec.REPO_ROOT / "examples" / "example_report.html" if args.example else OUTPUT))
         # (re)set every option from this invocation, so repeated main() calls
         # (tests, notebooks) never inherit state from a previous run
-        ONLY_PROJECTS = ec.split_list(args.projects)
+        ONLY_PROJECTS = ec.split_list(args.projects) or ({auto_project} if auto_project else set())
         ONLY_RUNS = ec.split_list(args.runs)
         SKIP_MANIFEST_RUNS = ec.split_list(os.getenv("EDNA_SKIP_RUNS")) | ec.split_list(args.skip_runs)
         SKIP_FOLDERS = ec.split_list(os.getenv("EDNA_SKIP_FOLDERS")) | ec.split_list(args.skip_folders)

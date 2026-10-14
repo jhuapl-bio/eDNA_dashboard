@@ -6,6 +6,7 @@ data/example/**/~$*
 
 # generated output
 reports/
+outputs/
 logs/
 *.log
 
