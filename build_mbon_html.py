@@ -941,8 +941,11 @@ def parse_kraken2_report(fpath):
         sci, common = _split_common(r['name'])
         if suffix:
             sci = f'{sci} ({suffix})'
+        # lineage names (domain -> genus) for the organism-icon matcher
+        lineage = [nm for _, rc, nm in r['stack'][:-1] if rc and rc[:1] in 'DKPCOFG']
         out.append({'species': sci, 'commonName': common, 'group': group,
-                    'taxid': r['taxid'], 'reads': r['reads'], 'isEuk': bool(is_euk)})
+                    'taxid': r['taxid'], 'lineage': lineage,
+                    'reads': r['reads'], 'isEuk': bool(is_euk)})
     return out
 
 
@@ -1002,7 +1005,8 @@ def load_kraken2(folder, run_id, label, files=None):
         for r in recs:
             reads_map[r['species']] = reads_map.get(r['species'], 0) + r['reads']
             sp_meta.setdefault(r['species'], {'commonName': r['commonName'],
-                                              'group': r['group'], 'isEuk': r['isEuk']})
+                                              'group': r['group'], 'isEuk': r['isEuk'],
+                                              'taxid': r.get('taxid'), 'lineage': r.get('lineage')})
         per_sample_reads[sid] = reads_map
         samples.append({'sampleId': sid, 'uid': sid, 'station': m.get('Station'),
                         'lat': lat, 'lon': lon,
@@ -1032,6 +1036,10 @@ def load_kraken2(folder, run_id, label, files=None):
         meta = sp_meta.get(t['species'], {})
         t['commonName'] = meta.get('commonName')
         t['isEuk'] = bool(meta.get('isEuk'))
+        if meta.get('taxid'):
+            t['taxid'] = str(meta['taxid'])
+        if meta.get('lineage'):
+            t['lineage'] = meta['lineage']
         has_euk = has_euk or t['isEuk']
     run['hasEuk'] = has_euk
     run['sources'] = sources
@@ -1786,6 +1794,48 @@ def _manifest_job_meta(gkey, runs_set, proj_set, cruise_set, n_samples):
     return meta
 
 
+def _coverage_record(sid, meta, why):
+    """Compact sample record for the HTML coverage panel."""
+    meta = meta or {}
+    pick = lambda *ks: next((str(meta[k]) for k in ks
+                             if meta.get(k) not in (None, '') and str(meta[k]).lower() != 'nan'), None)
+    return {'sampleId': str(sid),
+            'name': pick('samp_name', 'Sample Name', 'materialSampleID'),
+            'cruise': pick('Cruise Number', 'Cruise', 'cruise'),
+            'run': pick('Run', 'run'),
+            'station': pick('Station', 'station'),
+            'category': pick('samp_category', 'Category'),
+            'why': why}
+
+
+def _coverage_no_data(samples, runs, station_map, project_specific=True):
+    """Samples with no reads in any run of a project (see _build_manifest_project)."""
+    with_data = set()
+    for run in runs:
+        for s in run.get('samples') or []:
+            with_data.add(s['sampleId'])
+    out, linked = [], set()
+    for s in samples:
+        m = s.get('meta') or {}
+        if s['sampleId'] in with_data:
+            linked.update(x for x in (s['sampleId'], s.get('uid'), m.get('samp_number'),
+                                      m.get('samp_name')) if x)
+            continue
+        out.append(_coverage_record(s['sampleId'], m, 'manifest'))
+        linked.update(x for x in (s['sampleId'], s.get('uid'), m.get('samp_number'),
+                                  m.get('samp_name')) if x)
+    if project_specific:
+        for key, m in (station_map or {}).items():
+            m = m or {}
+            if key in linked or (m.get('samp_name') and m.get('samp_name') in linked):
+                continue
+            rec = _coverage_record(key, m, 'metadata')
+            # skip blank template rows (an id and nothing else)
+            if rec['name'] or rec['cruise'] or rec['station']:
+                out.append(rec)
+    return out
+
+
 def _build_manifest_project(gkey, rows, cmap, extra_cols,
                             default_station_map, station_cache):
     samples, sample_coords = [], {}
@@ -1979,7 +2029,8 @@ def _build_manifest_project(gkey, rows, cmap, extra_cols,
                     for x in recs:
                         rmap[x['species']] = rmap.get(x['species'], 0) + x['reads']
                         sp_meta.setdefault(x['species'], {'commonName': x['commonName'],
-                                                          'group': x['group'], 'isEuk': x['isEuk']})
+                                                          'group': x['group'], 'isEuk': x['isEuk'],
+                                                          'taxid': x.get('taxid'), 'lineage': x.get('lineage')})
                     n_linked += 1
                 if (db, rp.name, sid) not in k2_seen:
                     k2_seen.add((db, rp.name, sid))
@@ -1994,7 +2045,8 @@ def _build_manifest_project(gkey, rows, cmap, extra_cols,
             for x in recs:
                 rmap[x['species']] = rmap.get(x['species'], 0) + x['reads']
                 sp_meta.setdefault(x['species'], {'commonName': x['commonName'],
-                                                  'group': x['group'], 'isEuk': x['isEuk']})
+                                                  'group': x['group'], 'isEuk': x['isEuk'],
+                                                  'taxid': x.get('taxid'), 'lineage': x.get('lineage')})
             if (db, rp.name, sid) not in k2_seen:
                 k2_seen.add((db, rp.name, sid))
                 k2_sources.append({'file': rp.name, 'sheets': ['kraken2 report'], 'db': db,
@@ -2229,6 +2281,10 @@ def _build_manifest_project(gkey, rows, cmap, extra_cols,
             m = sp_meta.get(t['species'], {})
             t['commonName'] = m.get('commonName')
             t['isEuk'] = bool(m.get('isEuk'))
+            if m.get('taxid'):
+                t['taxid'] = str(m['taxid'])
+            if m.get('lineage'):
+                t['lineage'] = m['lineage']
             has_euk = has_euk or t['isEuk']
         run['hasEuk'] = has_euk
         src = [x for x in k2_sources if not multi_db or x.get('db') == db]
@@ -2250,6 +2306,18 @@ def _build_manifest_project(gkey, rows, cmap, extra_cols,
                                     f'{base_label} (ASV)' if both else base_label,
                                     meta, kind='manifest')
         runs.append(_finish(run, asv_sources + meta_sources))
+
+    # ---- Coverage gaps -------------------------------------------------------
+    # Samples this project knows about that carry NO reads in any run: manifest
+    # rows whose reports were missing/empty, and (when the project names its own
+    # metadata workbook) metadata-sheet samples never linked to a report. The
+    # HTML's "Data coverage" panel lists these next to the per-method gaps it
+    # works out itself by comparing the project's ASV and Kraken2 runs.
+    if runs:
+        no_data = _coverage_no_data(samples, runs, station_map,
+                                    project_specific=station_map is not default_station_map)
+        for run in runs:
+            run['noData'] = no_data
 
     if not runs:
         return [{'id': base_id, 'label': base_label, 'builtin': True, 'kind': 'manifest',
@@ -2520,11 +2588,48 @@ def _sanitize(obj):
     return obj
 
 
+# ---------------------------------------------------------------- organism icons
+# PhyloPic silhouettes live OUTSIDE this repo (default: ../icons next to it, or
+# $EDNA_ICONS_DIR / --icons-dir). That folder's phylopic_icons.py matches every
+# organism by name -> taxid -> genus -> lineage -> group and the matched SVGs are
+# embedded as mbonData.icons, so the report stays offline/self-contained.
+ICONS_DIR = None            # set in main(); None = icons off
+
+
+def _default_icons_dir():
+    env = os.getenv('EDNA_ICONS_DIR')
+    if env:
+        return ec.resolve_path(env)
+    cand = ec.REPO_ROOT.parent / 'icons'
+    return cand if (cand / 'phylopic_icons.py').exists() else None
+
+
+def _attach_icons(payload):
+    """Add payload['icons'] from ICONS_DIR (best effort: never fails a build)."""
+    if not ICONS_DIR:
+        return payload
+    mod_path = Path(ICONS_DIR) / 'phylopic_icons.py'
+    if not mod_path.exists():
+        log.warning("icons: %s not found — report built without organism icons", mod_path)
+        return payload
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location('phylopic_icons', mod_path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        payload = dict(payload)
+        payload['icons'] = mod.icon_payload(payload, ICONS_DIR, log=log.info)
+    except Exception as e:      # icons are decoration; a problem there must not lose the report
+        log.warning("icons: skipped (%s)", e)
+    return payload
+
+
 def _render(payload, template_path, output_path):
     """Inject the payload into the template's data slot and write the HTML to
     output_path atomically (a failed build never leaves a half-written report)."""
     template_path = ec.require_file(template_path, 'HTML template', ('.html', '.htm'))
     tpl = Path(template_path).read_text(encoding='utf-8')
+    payload = _attach_icons(payload)
     data_js = payload_to_js(_sanitize(payload))
     if _SLOT_RE.search(tpl):
         repl = "/*@@MBON_DATA_START@@*/" + data_js + "/*@@MBON_DATA_END@@*/"
@@ -2841,6 +2946,10 @@ def build_parser():
                         "--data folder that aren't in the manifest")
     p.add_argument('--include-wilder02', action='store_true',
                    help="load Wilder Samples+Taxa CSV-only folders during auto-discovery")
+    p.add_argument('--icons-dir', default=None,
+                   help="PhyloPic icons folder with phylopic_icons.py + svg/ (default: $EDNA_ICONS_DIR, "
+                        "else ../icons next to this repo when present)")
+    p.add_argument('--no-icons', action='store_true', help='build without organism silhouettes')
     p.add_argument('--version', action='version', version=f'%(prog)s {__version__}')
     ec.add_logging_args(p)
     return p
@@ -2874,7 +2983,7 @@ def _resolve_projects_root(path, given):
 def main(argv=None):
     global DATA_DIR, DATA_PROJECTS, MANIFEST, MANIFEST_EXCLUSIVE, ONLY_PROJECTS, ONLY_RUNS
     global SKIP_MANIFEST_RUNS, SKIP_FOLDERS, SKIP_WILDER02_ONLY
-    global STATION_METADATA_FILE, STATION_METADATA_GLOBS
+    global STATION_METADATA_FILE, STATION_METADATA_GLOBS, ICONS_DIR
     args = build_parser().parse_args(argv)
     ec.setup_logging("build_mbon_html", args.log_level, args.log_file, args.quiet)
     ec.load_dotenv_if_present()
@@ -2911,6 +3020,10 @@ def main(argv=None):
         SKIP_FOLDERS = ec.split_list(os.getenv("EDNA_SKIP_FOLDERS")) | ec.split_list(args.skip_folders)
         SKIP_WILDER02_ONLY = not args.include_wilder02
         MANIFEST_EXCLUSIVE = not args.include_unmanifested
+        ICONS_DIR = (None if args.no_icons else
+                     ec.resolve_path(args.icons_dir) if args.icons_dir else _default_icons_dir())
+        if ICONS_DIR:
+            log.info("icons        : %s", ICONS_DIR)
         STATION_METADATA_FILE = None
         if args.station_metadata:
             STATION_METADATA_FILE = ec.require_file(ec.resolve_path(args.station_metadata),

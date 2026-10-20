@@ -83,18 +83,77 @@ project folder (`data/projects/MBON`) or at the shorthand `data/MBON`; the last 
 resolve to the root and restrict the build to that project. `outputs/` and
 `reports/` are both git-ignored, so per-project builds never get committed.
 
-The report has Cross-Sample, Map, Explore, **Fish Compare**, Data Table and Metadata tabs:
+The report has Cross-Sample, Map, Explore, **Comparison**, **Depth & Environment**, Data Table and Metadata tabs:
 
-- **Map** — a *Map options* panel offers keyless basemaps (Esri Light Gray / Ocean /
-  Satellite / Topographic, GEBCO bathymetry, CARTO, OpenStreetMap, vector coastlines,
+- **Map** — a *Map options* panel offers keyless basemaps (Esri Ocean bathymetry — the default — / Light Gray /
+  Satellite / Topographic, GEBCO bathymetry, vector coastlines,
   none) with automatic failover, overlays (place labels, OpenSeaMap sea marks, lat/long
   grid, scale bar, station labels, cursor coordinates), marker size/colour by reads,
   samples, richness, dominant group or one taxon, cluster behaviour, dimming of
   stations that don't match the Filters, and *Export PNG*. Drawn regions can be shown
   on their own (*Regions only*), tiling the region windows to fill the pane.
-- **Fish Compare** — pick fish (or any group's taxa) and compare them across stations,
+- **Filters → Samples** is collapsed to a per-cruise summary (e.g. *Cruise 925 28/29*); *Choose samples* opens a search box and a list grouped by cruise (tick a cruise to show/hide all of it, click its name to expand; each row shows station · depth).
+- **Station charts** — clicking a station opens its panel on the left of the Map and a
+  floating *Station charts* window beside it (Sample Distribution, Cross-Station, Sample
+  Depth), which plots only when you click an underlined species or group name in the
+  station table. Drag it by its header, resize from the corner, minimize or close it (the
+  panel's *Charts* button or picking a taxon brings it back). Each tab has a *Sort*
+  menu (High → low, Low → high, A → Z; Cross-Station also North → south / West → east;
+  Sample Depth also Surface → bottom) and *Swap axes* turns the bars vertical.
+  Two more tabs work from the sample metadata: **Depth Profile** draws the taxon at this
+  station like a CTD cast (depth in m increasing downward = midpoint of
+  `minimumDepthInMeters`/`maximumDepthInMeters`; points labelled *Shallow (1.47 m)*, *Mid*,
+  *Deep*; dotted seafloor at `tot_depth_water_col`; hollow = not detected), with the X axis
+  as reads / % of sample, temperature or salinity (marker size = abundance), a cruise
+  filter and faded other stations. **Environment** plots the taxon against salinity,
+  temperature, water column depth or numeric sample depth, either binned like Sample
+  Depth (selected station vs the rest) or one point per sample.
+- **Station table** — *View: Species / Group / Per sample*; *Per sample* is long format
+  (one row per organism × sample, with reads and % of that sample's reads; Top X counts
+  organisms). *Search* matches species, group, sample ID or sample name.
+- **Show an organism on the map** — the map pin in the Cross-Sample frequency table (and
+  organism clicks in Explore) opens the Map showing only the stations where that organism
+  was detected, with a list of those stations. Untick *Only show stations with it* in that
+  list, or click *Show all* on the chip at the bottom-right of the map, to bring every
+  station back.
+- **Comparison** — pick taxa (all taxa by default, or narrow the *Taxa* menu to Fish or any
+  other group) and compare them across stations,
   cruises, depths, months or drawn regions as a matrix, mini maps, trends,
   head-to-head, co-occurrence or location cards; controls/blanks excluded by default.
+  Co-occurrence shows the top 10 × top 10 taxa by default (set each axis's count, or tick
+  *All*), and can cross one group against another (*Compare with*, e.g. Fish × Crustaceans),
+  coloured by Jaccard overlap or *Beyond chance* (z-score of co-detections vs random
+  placement); *Only samples with both groups* guards against a marker not being run.
+  The *Taxa* and *Compare with* menus, and the *By guild / group of interest* preset, also
+  offer groups of interest a taxon can belong to alongside its fish guild: migratory
+  species, marine mammals (baleen whales, dolphins/porpoises, seals), sea turtles,
+  seabirds, highly migratory fish, gelatinous zooplankton, copepods/krill, harmful algae,
+  commercial shellfish, invasive and ESA/MMPA-protected species, and corals/sponges. These
+  are genus-level, Mid-Atlantic approximations (`TAG_RX` / `ESA_RX` in the template).
+  Small ⓘ icons explain the harder metrics (metric choices, Jaccard, beyond-chance z,
+  Shannon H′, richness, “only here”…): hover to read, click to pin.
+- **Depth & Environment** — prevalence of each organism (share of samples where it was
+  detected; or mean % of sample reads, or total reads) along *depth class* (Shallow / Mid /
+  Deep), *numeric sample depth* (m), *salinity*, *temperature* or *water column depth*, in
+  automatic bins. *Heatmap* shows organisms × bins (bin headers carry the sample count and,
+  for numeric depth, which depth classes fall in the bin); *Depth profile* draws one line per
+  organism with depth increasing downward and shaded Shallow / Mid / Deep bands (salinity
+  and temperature become *Response curves* with a samples-per-bin histogram). *Show top N*
+  keeps the N most prevalent; *Sort* can then order them by depth centre (shallow → deep) or
+  where they peak. Hover any cell or point for counts; click a row, cell or line to open
+  that organism's overview: detection KPIs, depth centre and the temperature / salinity
+  ranges where it was found, a by-depth-class table, every sample plotted by depth, and a
+  sortable sample table. On *Depth profile*, the **Organisms on chart** dropdown is a searchable multi-select: it starts with the top N (by the current sort), and you can search any organism and tick it to add it (Enter adds the first match), untick to remove, *Reset* to the top N or *Clear all* (up to 10 lines). *Add to depth profile* in an organism's overview does the same. Samples without
+  the chosen value are left out (and counted in a note); controls are excluded by default.
+  Large selections collapse to a few chips plus *Manage selection*, a searchable
+  tick-list filtered to all / selected / not selected.
+- **Data coverage** — the Filters panel (open whenever a report is launched; » or the
+  edge tab collapses it) flags samples missing **ASV** reads, and — when the Kraken2 view
+  is selected — samples missing **Kraken2** reads, by comparing each project's ASV and
+  Kraken2 runs and summarising by cruise and sequencing run (expand *Show samples* for
+  the list). *Not sequenced* lists manifest rows whose reports were missing and
+  metadata-sheet samples with no reads yet (`noData` in the payload). An amber dot on
+  the collapsed tab means something is missing.
 - **Values: Reads / % of sample** — a report-wide toggle (Filters panel, mirrored on
   Cross-Sample, Explore, Data Table, the station panel and Map options). “% of sample”
   shows each organism's share of all reads in its sample — or in the pooled samples /
@@ -104,7 +163,7 @@ The report has Cross-Sample, Map, Explore, **Fish Compare**, Data Table and Meta
   category, drawn map region or any categorical column; several columns combine).
   Each group can be shown, highlighted or hidden, and grouping can be switched off.
   Groups drive map pies + legend, Data Table “Per sample group”, Explore group panels,
-  Fish Compare “Sample groups”, Cross-Sample group dots and a Metadata group column;
+  Comparison “Sample groups”, Cross-Sample group dots and a Metadata group column;
   hidden groups (and hidden samples) drop out of every tab and the map.
 - **Cross-Sample → Occupancy bar → Stacked by group** — hover a legend item to
   highlight that group; Ctrl/⌘+click legend items or bar segments, then *Compare*
