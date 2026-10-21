@@ -194,7 +194,7 @@ with the report. The 📁 menu (and Filters → *Project*) switches every tab an
 between the projects in the report, with ‹ › to step through them.
 
 ```bash
-python3 ode_client.py serve       # optional local bridge: live search, sample search, caching
+python3 ode_client.py serve       # optional local bridge: live project list, caching (sample search also works without it)
 python3 ode_client.py catalog     # refresh data/ode_catalog.json (embedded in built reports)
 python3 ode_client.py pull noaa-aoml-mire --analysis MiFish --manifest --build
 ```

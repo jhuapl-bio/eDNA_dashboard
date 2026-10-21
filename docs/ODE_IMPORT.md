@@ -25,7 +25,7 @@ three connection modes, shown as a chip in its header:
 | Chip | Meaning |
 |---|---|
 | **Live · local bridge** | `python3 ode_client.py serve` (port 5051) or `bash api/run.sh` (port 5050) answered. Live project list, sample search across projects, server-side caching, imports built by the report builder, optional *save to data/projects* + manifest. |
-| **Catalog · YYYY-MM-DD** | No bridge. Projects come from the catalog snapshot embedded when the report was built (`data/ode_catalog.json`); files still download live from ODE in the browser. Sample search across projects is off. |
+| **Catalog · YYYY-MM-DD** | No bridge. Projects come from the catalog snapshot embedded when the report was built (`data/ode_catalog.json`); files still download live from ODE in the browser. Sample search works too: the first search downloads each project's sample sheet straight from ODE's file store (it allows this from a hosted page or a file opened from disk), keeps them in memory for the page and searches them in the browser. |
 | **Offline** | No bridge and no catalog. The dialog shows the command to start the bridge. |
 
 Click the chip to see details, change the bridge URL, or reconnect.
@@ -36,7 +36,7 @@ Open it from the 📁 project menu in the header, the Filters panel (*Add data*)
 the Data panel. It has three steps:
 
 1. **Find** — type a project name or id, or switch to **Samples** to search sample
-   names / stations / places across every project (bridge only). Pasting an ODE link
+   names / stations / places across every project (with a bridge it uses the live API; without one it reads each project's sample sheet). Pasting an ODE link
    (e.g. `https://www.oceandnaexplorer.org/explore/sample/noaa-aoml-mire/MIRe_31B_Horseshoe_CB-1_2024-09-18`)
    jumps straight to that project with that sample selected.
 2. **Preview & select** — the project's sample sheet on a mini map plus a sample list

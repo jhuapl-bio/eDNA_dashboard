@@ -14024,7 +14024,7 @@
     if (c.mode === "direct") return { cls: "ok", txt: "Live · direct", tip: "Talking to " + ODE_SITE + " directly." };
     if (c.mode === "catalog") {
       var d = String((c.catalog || {}).generatedAt || "").slice(0, 10);
-      return { cls: "warn", txt: "Catalog · " + (d || "snapshot"), tip: "Project list saved when this report was built (" + (d || "unknown date") + "). Files still download live from Ocean DNA Explorer. For live search, start the bridge: python ode_client.py serve" };
+      return { cls: "warn", txt: "Catalog · " + (d || "snapshot"), tip: "Project list saved when this report was built (" + (d || "unknown date") + "). Files and sample sheets still download live from Ocean DNA Explorer, so sample search works too. For a live project list, start the bridge: python ode_client.py serve" };
     }
     return { cls: "bad", txt: "Offline", tip: "No bridge, no catalog in this report, and the Ocean DNA Explorer API can't be called from this page." };
   }
@@ -14091,10 +14091,63 @@
   }
   function odexSearchSamples(q) {
     return odexConnect().then(function (c) {
-      if (c.mode === "bridge") return odexJSON(c.url + "/samples?q=" + encodeURIComponent(q)).then(function (r) { return r.samples || []; });
+      if (c.mode === "bridge") return odexJSON(c.url + "/samples?q=" + encodeURIComponent(q)).then(function (r) { return r.samples || []; },
+        function () { return odexSearchSheets(q); });
       if (c.mode === "direct") return odexJSON(ODE_SITE + "/api/sample?search=" + encodeURIComponent(q) +
-        "&fields=project_id,samp_name,decimalLatitude,decimalLongitude,eventDate,station_id,geo_loc_name,samp_category&limit=300").then(function (r) { return r.result || []; });
-      throw odexErr("Searching samples across projects needs the live API. Start the bridge (python ode_client.py serve), or open a project and filter its samples in the preview.", 0);
+        "&fields=project_id,samp_name,decimalLatitude,decimalLongitude,eventDate,station_id,geo_loc_name,samp_category&limit=300").then(function (r) { return r.result || []; },
+        function () { return odexSearchSheets(q); });
+      return odexSearchSheets(q);
+    });
+  }
+  // Without a bridge: every project's FAIRe sample sheet comes straight from the Ocean DNA
+  // Explorer file store (it allows browser downloads, also from a hosted page or a file
+  // opened from disk) and is searched here. Loaded once per page, in memory only (the
+  // texts are reused by the project preview); nothing is written to the browser's storage.
+  function odexSheetIndex() {
+    if (ODEX.sheetIdxP) return ODEX.sheetIdxP;
+    ODEX.sheetIdxP = odexAllProjects().then(function (list) {
+      var todo = list.filter(function (p) { return (p.analyses || []).length && (p.files || {}).sampleMetadata; });
+      var idx = [], failed = [], i = 0;
+      ODEX.sheetProg = { done: 0, total: todo.length, bytes: 0 };
+      var paint = function () {
+        if (ODEX.samples && ODEX.samples.busy) { var r = document.getElementById("odex-results"); if (r) r.innerHTML = odexSamplesHtml(); }
+      };
+      var pick = function (o, keys) { for (var k = 0; k < keys.length; k++) { var v = o[keys[k]]; if (v != null && v !== "" && !mbonFaireBlank(v)) return String(v); } return ""; };
+      function one(p) {
+        var f = p.files || {};
+        return Promise.all([odexFetchText(f.sampleMetadata), odexFetchText(f.libraryMetadata).catch(function () { return ""; })]).then(function (t) {
+          var raw = {};
+          odexRecords(t[0]).forEach(function (r) { var sn = r.samp_name || r.samp_number || r.sample_ID; if (sn && !raw[sn]) raw[sn] = r; });
+          odexSummarize(t[0], t[1]).forEach(function (s) {
+            var r = raw[s.samp_name] || {};
+            var extra = pick(r, ["locality", "verbatimLocality", "site_id", "site", "station", "Station", "samp_name_alt"]);
+            idx.push({ project_id: p.project_id, samp_name: s.samp_name, eventDate: s.date || "", decimalLatitude: s.lat, decimalLongitude: s.lon,
+              station_id: s.station || "", geo_loc_name: s.place || "", samp_category: s.category || "", control: s.control,
+              hay: [s.samp_name, s.station, s.place, s.cruise, s.date, s.category, s.depthClass, extra, Object.keys(s.libs || {}).join(" ")]
+                .filter(Boolean).join(" \u0001 ").toLowerCase() });
+          });
+        }, function (e) { failed.push({ project_id: p.project_id, err: e }); }).then(function () {
+          ODEX.sheetProg.done++; paint();
+        });
+      }
+      function worker() { if (i >= todo.length) return Promise.resolve(); return one(todo[i++]).then(worker); }
+      return Promise.all([worker(), worker(), worker()]).then(function () {
+        if (!idx.length && failed.length) throw odexErr("Couldn't download any sample sheet from Ocean DNA Explorer (" + (failed[0].err && failed[0].err.message || "network") + ").", 0);
+        return { rows: idx, failed: failed, projects: todo.length };
+      });
+    });
+    ODEX.sheetIdxP.catch(function () { ODEX.sheetIdxP = null; });   // let a later search retry
+    return ODEX.sheetIdxP;
+  }
+  function odexSearchSheets(q) {
+    var toks = String(q || "").toLowerCase().split(/\s+/).filter(Boolean);
+    return odexSheetIndex().then(function (ix) {
+      var hits = ix.rows.filter(function (r) { return toks.every(function (t) { return r.hay.indexOf(t) >= 0; }); });
+      hits.sort(function (a, b) { return (a.control - b.control) || (a.project_id < b.project_id ? -1 : a.project_id > b.project_id ? 1 : 0) ||
+        String(a.samp_name).localeCompare(String(b.samp_name), undefined, { numeric: true }); });
+      var out = hits.slice(0, 300);
+      out.fromSheets = { projects: ix.projects, failed: ix.failed, total: hits.length };
+      return out;
     });
   }
   // project / analysis file text, cached for the session (preview → import reuses it)
@@ -14320,7 +14373,7 @@
         '<button type="button" data-tab="samples" class="' + (ODEX.tab === "samples" ? "on" : "") + '">Samples</button></div></div>';
     if (c.mode === "catalog") {
       html += '<div class="odex-note warn">📒 Project list from the catalog saved when this report was built (' + odexEsc(String(c.catalog.generatedAt || "").slice(0, 10)) +
-        '). Files are still downloaded live. <a href="#" data-act="help">Live search & sample search →</a></div>';
+        '). Files are still downloaded live, and <b>Samples</b> searches each project’s sample sheet. <a href="#" data-act="help">Live project list →</a></div>';
     }
     html += '<div id="odex-results" class="odex-results">' + (ODEX.tab === "samples" ? odexSamplesHtml() : odexProjectsHtml()) + '</div></div>';
     body.innerHTML = html;
@@ -14408,12 +14461,19 @@
   function odexSamplesHtml() {
     var S = ODEX.samples;
     if (!S) return odexStateHtml("info", "Search samples across every project", "Type part of a sample name, station or place (2+ characters), e.g. <i>Horseshoe</i> or <i>CTD23</i>.");
-    if (S.busy) return odexStateHtml("busy", "Searching samples for “" + S.q + "”…", "");
+    if (S.busy) {
+      var P = ODEX.sheetProg, c0 = ODEX.conn || {};
+      var loading = P && P.total && P.done < P.total && c0.mode !== "bridge" && c0.mode !== "direct";
+      return odexStateHtml("busy", "Searching samples for “" + S.q + "”…", loading ?
+        "Reading each project's sample sheet from Ocean DNA Explorer (" + P.done + " of " + P.total + " projects) — only the first search waits for this." : "");
+    }
     if (S.err) return odexStateHtml("bad", "Sample search unavailable", odexEsc(S.err.message),
       '<div class="odex-cmd"><code>' + odexEsc(odexServeCmd()) + '</code><button type="button" data-copy="' + odexEsc(odexServeCmd()) + '">Copy</button></div>');
-    var keys = Object.keys(S.groups);
-    if (!keys.length) return odexStateHtml("info", "No sample matches “" + S.q + "”", "");
-    return '<div class="odex-count">' + S.rows.length + " sample(s) in " + keys.length + " project(s)" + (S.rows.length >= 300 ? " (first 300)" : "") + "</div>" +
+    var keys = Object.keys(S.groups), fs = S.rows.fromSheets;
+    var fsNote = fs ? '<div class="odex-note">📄 Searched the sample sheets of ' + fs.projects + " project(s) with analyses (no bridge needed)" +
+      (fs.failed.length ? '; couldn’t read ' + fs.failed.map(function (f) { return odexEsc(f.project_id); }).join(", ") : "") + ".</div>" : "";
+    if (!keys.length) return fsNote + odexStateHtml("info", "No sample matches “" + S.q + "”", "Sample name, station, place, cruise, date (YYYY-MM-DD) or library id; several words must all match.");
+    return fsNote + '<div class="odex-count">' + (fs ? fs.total : S.rows.length) + " sample(s) in " + keys.length + " project(s)" + (S.rows.length >= 300 ? " (showing 300)" : "") + "</div>" +
       keys.map(function (pid) {
         var g = S.groups[pid], ds = g.map(function (s) { return String(s.eventDate || "").slice(0, 10); }).filter(Boolean).sort();
         return '<div class="odex-sg"><div class="h"><b>' + odexEsc(pid) + "</b> · " + g.length + " sample(s)" +
