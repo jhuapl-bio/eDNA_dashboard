@@ -38,6 +38,7 @@ Standard library only. Three ways to use it:
        python ode_client.py pull noaa-aoml-mire --analysis MiFish --manifest --build
        python ode_client.py catalog                        # data/ode_catalog.json for reports
        python ode_client.py serve                          # local bridge for the HTML report
+       python ode_client.py serve --no-store               # same, writing nothing to disk
 
 3. **Local bridge** (``serve``, or ``api/run.sh`` which mounts the same routes):
    the HTML report's "Import from Ocean DNA Explorer" dialog talks to it to
@@ -421,6 +422,9 @@ class ODEClient:
         self.ttl = ttl                  # seconds API JSON is memoised (bridge)
         self._memo = {}
         self._lock = threading.Lock()
+        # with no cache_dir, downloads are kept in memory only (bounded) so a preview
+        # followed by an import doesn't fetch twice — nothing touches the disk
+        self._mem, self._mem_bytes, self.mem_limit = {}, 0, 300 * 1024 * 1024
 
     # ---- low level
     def _open(self, url, accept="application/json"):
@@ -571,6 +575,11 @@ class ODEClient:
         if not (FILE_HOST_RE.search(host) or host in self.allow_hosts):
             raise ODEError(f"refusing to fetch from {host or url!r}: not an Ocean DNA Explorer file host", 400, url)
         cp = self._cache_path(url) if (self.cache_dir and use_cache) else None
+        if not self.cache_dir and use_cache and url in self._mem:
+            data = self._mem[url]
+            if progress:
+                progress(len(data), len(data), True)
+            return data
         if cp and cp.is_file() and cp.stat().st_size:
             data = cp.read_bytes()
             if progress:
@@ -595,6 +604,14 @@ class ODEClient:
             data = buf.getvalue()
         if progress:
             progress(len(data), total or len(data), False)
+        if not self.cache_dir and use_cache:
+            with self._lock:
+                while self._mem and self._mem_bytes + len(data) > self.mem_limit:
+                    old = next(iter(self._mem))
+                    self._mem_bytes -= len(self._mem.pop(old))
+                if len(data) <= self.mem_limit:
+                    self._mem[url] = data
+                    self._mem_bytes += len(data)
         if cp:
             try:
                 cp.parent.mkdir(parents=True, exist_ok=True)
@@ -952,8 +969,9 @@ class Job:
 
 
 class JobManager:
-    def __init__(self, client, projects_dir=DEFAULT_PROJECTS, keep=25):
+    def __init__(self, client, projects_dir=DEFAULT_PROJECTS, keep=25, store=True):
         self.client = client
+        self.store = store          # False: never write anything to disk (no save, no temp build)
         self.projects_dir = Path(projects_dir)
         self.jobs = {}
         self.keep = keep
@@ -988,7 +1006,9 @@ class JobManager:
             job.step("lookup", state="done", detail=f"{project.get('project_name') or pid} · {len(chosen)} analysis(es)")
             for key, label, _u, _k in plan_files(project, chosen):
                 job.step(key, label)
-            want_build = req.get("build", True)
+            # --no-store: report layers are built by the browser from the returned files,
+            # because the builder needs a (temporary) folder on disk
+            want_build = req.get("build", True) and self.store
             if want_build:
                 job.step("build", "Build report layers (stations, taxa)")
             if req.get("save"):
@@ -1059,9 +1079,10 @@ class BridgeAPI:
     """Framework-neutral request handler used by `serve` and the Flask blueprint.
     handle() returns (status, content_type, body_bytes)."""
 
-    def __init__(self, client=None, projects_dir=DEFAULT_PROJECTS):
+    def __init__(self, client=None, projects_dir=DEFAULT_PROJECTS, store=True):
         self.client = client or ODEClient()
-        self.jobs = JobManager(self.client, projects_dir)
+        self.store = store
+        self.jobs = JobManager(self.client, projects_dir, store=store)
         self.started = now_iso()
 
     @staticmethod
@@ -1084,7 +1105,8 @@ class BridgeAPI:
                         up, err = False, str(e)
                 return self._json(200, {"ok": True, "service": "ode-bridge", "version": __version__,
                                         "upstream": self.client.base, "upstreamOk": up, "upstreamError": err,
-                                        "builder": builder_module() is not None, "started": self.started,
+                                        "builder": self.store and builder_module() is not None,
+                                        "store": self.store, "started": self.started,
                                         "cache": str(self.client.cache_dir) if self.client.cache_dir else None})
             if method == "GET" and parts == ["projects"]:
                 return self._json(200, {"projects": self.client.projects(q1("q"))})
@@ -1109,6 +1131,8 @@ class BridgeAPI:
                     return self._json(400, {"error": "request body must be JSON"})
                 if not isinstance(req, dict) or not req.get("project_id"):
                     return self._json(400, {"error": "project_id is required"})
+                if req.get("save") and not self.store:
+                    return self._json(403, {"error": "this bridge runs with --no-store: it doesn't write anything to disk"})
                 if req.get("save") and not _local_origin(origin):
                     return self._json(403, {"error": "saving to disk is only allowed from a local page"})
                 job = self.jobs.start(req)
@@ -1193,14 +1217,15 @@ def make_handler(api):
     return Handler
 
 
-def serve(host=BRIDGE_HOST, port=BRIDGE_PORT, client=None, projects_dir=DEFAULT_PROJECTS, ready=None):
-    api = BridgeAPI(client, projects_dir)
+def serve(host=BRIDGE_HOST, port=BRIDGE_PORT, client=None, projects_dir=DEFAULT_PROJECTS, ready=None, store=True):
+    api = BridgeAPI(client, projects_dir, store=store)
     httpd = ThreadingHTTPServer((host, port), make_handler(api))
     httpd.daemon_threads = True
     if ready:
         ready(httpd)
-    log.info("Ocean DNA Explorer bridge on http://%s:%d/api/ode  (upstream %s, cache %s)",
-             host, httpd.server_address[1], api.client.base, api.client.cache_dir)
+    log.info("Ocean DNA Explorer bridge on http://%s:%d/api/ode  (upstream %s, %s)",
+             host, httpd.server_address[1], api.client.base,
+             f"cache {api.client.cache_dir}" if store else "--no-store: nothing is written to disk")
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
@@ -1284,6 +1309,9 @@ def build_parser():
     s.add_argument("--host", default=BRIDGE_HOST)
     s.add_argument("--port", type=int, default=BRIDGE_PORT)
     s.add_argument("--projects-dir", default=str(DEFAULT_PROJECTS))
+    s.add_argument("--no-store", action="store_true",
+                   help="write nothing to disk: no download cache (memory only), no 'save to data/projects', "
+                        "report layers built in the browser — e.g. for a report opened from GitHub Pages")
     return p
 
 
@@ -1366,7 +1394,9 @@ def main(argv=None):
                 out.write("  building: " + " ".join(cmd) + "\n")
                 return subprocess.call(cmd)
         elif args.cmd == "serve":
-            serve(args.host, args.port, client, args.projects_dir)
+            if args.no_store:
+                client.cache_dir = None
+            serve(args.host, args.port, client, args.projects_dir, store=not args.no_store)
         return 0
     except ODEError as e:
         sys.stderr.write(f"\n✕ {e}\n")

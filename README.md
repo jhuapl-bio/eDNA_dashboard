@@ -201,6 +201,9 @@ python3 ode_client.py pull noaa-aoml-mire --analysis MiFish --manifest --build
 
 Without the bridge the dialog uses the catalog embedded at build time and downloads the
 files directly (the ODE API can't be called from a report file; its file store can).
+The GitHub Pages report can import too: it embeds a freshly fetched catalog, keeps
+imports in memory only, and uses a bridge on the visitor's own computer if they start
+`python3 ode_client.py serve --no-store` (nothing is written to disk).
 Details, the HTTP routes and job JSON: [docs/ODE_IMPORT.md](docs/ODE_IMPORT.md).
 
 ## Loading the database — `ingest.py`

@@ -3487,10 +3487,16 @@ def _attach_icons(payload):
 # Explorer" dialog can list projects and download their files without a local
 # bridge (the ODE API itself sends no CORS headers; its file store does).
 ODE_CATALOG = ec.DATA_DIR / 'ode_catalog.json'   # set in main(); None = don't embed
+# False (--ode-no-store, e.g. the GitHub Pages build): the report's import dialog keeps
+# imports in memory only — nothing in IndexedDB or the browser's HTTP cache.
+ODE_PERSIST = True
 
 
 def _attach_ode_catalog(payload):
     """Add payload['odeCatalog'] from ODE_CATALOG when that file exists (best effort)."""
+    if not ODE_PERSIST:
+        payload = dict(payload)
+        payload['odeOptions'] = dict(payload.get('odeOptions') or {}, persist=False)
     if not ODE_CATALOG or 'odeCatalog' in payload:
         return payload
     path = Path(ODE_CATALOG)
@@ -3861,6 +3867,9 @@ def build_parser():
                         "`python ode_client.py catalog`)")
     p.add_argument('--no-ode-catalog', action='store_true',
                    help="don't embed the Ocean DNA Explorer catalog")
+    p.add_argument('--ode-no-store', action='store_true',
+                   help="the report's Ocean DNA Explorer imports stay in memory only (nothing kept in "
+                        "the browser) — used for the GitHub Pages build")
     p.add_argument('--version', action='version', version=f'%(prog)s {__version__}')
     ec.add_logging_args(p)
     return p
@@ -3894,7 +3903,7 @@ def _resolve_projects_root(path, given):
 def main(argv=None):
     global DATA_DIR, DATA_PROJECTS, MANIFEST, MANIFEST_EXCLUSIVE, ONLY_PROJECTS, ONLY_RUNS
     global SKIP_MANIFEST_RUNS, SKIP_FOLDERS, SKIP_WILDER02_ONLY
-    global STATION_METADATA_FILE, STATION_METADATA_GLOBS, ICONS_DIR, ODE_CATALOG
+    global STATION_METADATA_FILE, STATION_METADATA_GLOBS, ICONS_DIR, ODE_CATALOG, ODE_PERSIST
     args = build_parser().parse_args(argv)
     ec.setup_logging("build_mbon_html", args.log_level, args.log_file, args.quiet)
     ec.load_dotenv_if_present()
@@ -3935,6 +3944,7 @@ def main(argv=None):
                      ec.resolve_path(args.icons_dir) if args.icons_dir else _default_icons_dir(args.example))
         if ICONS_DIR:
             log.info("icons        : %s", ICONS_DIR)
+        ODE_PERSIST = not args.ode_no_store
         ODE_CATALOG = (None if args.no_ode_catalog else
                        ec.resolve_path(args.ode_catalog) if args.ode_catalog else ec.DATA_DIR / 'ode_catalog.json')
         STATION_METADATA_FILE = None

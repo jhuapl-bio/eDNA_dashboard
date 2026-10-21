@@ -203,3 +203,46 @@ def test_builder_embeds_catalog(tmp_path, client):
         assert "odeCatalog" not in B._attach_ode_catalog({"runs": []})
     finally:
         B.ODE_CATALOG = old
+
+
+def test_bridge_no_store_writes_nothing(mock, tmp_path):
+    """`serve --no-store` (e.g. for a report on GitHub Pages): memory-only downloads,
+    no save, report layers left to the browser (raw files returned)."""
+    client = oc.ODEClient(base=mock.base, cache_dir=None, allow_hosts=["127.0.0.1"])
+    pd = tmp_path / "pd"
+    box = {}
+    threading.Thread(target=oc.serve, kwargs=dict(host="127.0.0.1", port=0, client=client, projects_dir=pd,
+                                                  ready=lambda h: box.update(h=h), store=False), daemon=True).start()
+    for _ in range(100):
+        if "h" in box:
+            break
+        time.sleep(0.02)
+    base = f"http://127.0.0.1:{box['h'].server_address[1]}/api/ode"
+    try:
+        st, h, j = _get(base + "/health", origin="https://jhuapl-bio.github.io")
+        assert j["store"] is False and h["Access-Control-Allow-Origin"] == "https://jhuapl-bio.github.io"
+        st, _, j = _get(base + "/jobs", "POST", json.dumps({"project_id": SHELF, "save": True}).encode(), origin="null")
+        assert st == 403
+        st, _, j = _get(base + "/jobs", "POST", json.dumps({"project_id": SHELF, "analyses": ["MiFish"]}).encode(),
+                        origin="https://jhuapl-bio.github.io")
+        job = _wait(base, j["job"]["id"])
+        assert job["state"] == "done" and "build" not in [s["key"] for s in job["steps"]]
+        st, _, r = _get(f"{base}/jobs/{job['id']}/result")
+        res = r["result"]
+        assert "runs" not in res and any(k.startswith("table:") for k in res["files"])
+        hits = len(mock.hits)
+        client.fetch_file(client.project(SHELF)["files"]["sampleMetadata"])     # served from memory
+        assert len(mock.hits) == hits
+    finally:
+        box["h"].shutdown()
+    assert not pd.exists() and not any(tmp_path.rglob("*.tsv"))
+
+
+def test_builder_ode_no_store_option(tmp_path):
+    import build_mbon_html as B
+    old = B.ODE_PERSIST
+    try:
+        B.ODE_PERSIST = False
+        assert B._attach_ode_catalog({"runs": []})["odeOptions"] == {"persist": False}
+    finally:
+        B.ODE_PERSIST = old

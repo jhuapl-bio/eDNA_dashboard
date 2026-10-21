@@ -13948,7 +13948,7 @@
   }
   // Text download with progress: onProg(doneBytes, totalBytesOrNull).
   function odexStream(url, onProg, signal) {
-    return fetch(url, { signal: signal, cache: "force-cache" }).then(function (r) {
+    return fetch(url, { signal: signal, cache: odexPersist() ? "force-cache" : "no-store" }).then(function (r) {
       if (!r.ok) throw odexErr("HTTP " + r.status + " for " + odexBase(url) +
         (r.status === 404 || r.status === 403 ? " — the file is gone from Ocean DNA Explorer (the project was probably re-submitted). Refresh the project list or start the bridge." : ""), r.status);
       var total = +(r.headers.get("content-length") || 0) || null;
@@ -13982,6 +13982,19 @@
     return out;
   }
   function odexCatalog() { var c = (window.mbonData || {}).odeCatalog; return c && Array.isArray(c.projects) ? c : null; }
+  // false for reports built with --ode-no-store (the GitHub Pages build) or when the viewer
+  // turned "Keep my imports in this browser" off: imports then live in memory only —
+  // nothing in IndexedDB, localStorage or the HTTP cache; a reload removes them.
+  function odexPersistLocked() { return ((window.mbonData || {}).odeOptions || {}).persist === false; }
+  function odexPersist() {
+    if (odexPersistLocked()) return false;
+    try { return localStorage.getItem("mbon.ode.persist") !== "0"; } catch (e) { return true; }
+  }
+  function odexHosted() {
+    var h = location.hostname || "";
+    return /^https?:$/.test(location.protocol) && !/^(localhost|127\.0\.0\.1|\[::1\])$/.test(h);
+  }
+  function odexServeCmd() { return "python3 ode_client.py serve" + (odexHosted() || !odexPersist() ? " --no-store" : ""); }
   function odexConnect(force) {
     if (ODEX.connP && !force) return ODEX.connP;
     ODEX.conn = { mode: "checking" }; odexPaintConn();
@@ -14006,7 +14019,8 @@
   function odexConnLabel(c) {
     c = c || ODEX.conn || { mode: "checking" };
     if (c.mode === "checking") return { cls: "chk", txt: "Connecting…", tip: "Looking for a local bridge, then the Ocean DNA Explorer API" };
-    if (c.mode === "bridge") return { cls: "ok", txt: "Live · local bridge", tip: "Using the bridge at " + c.url + " (ode_client.py " + ((c.info || {}).version || "") + "). Live project list, sample search, server-side caching" + ((c.info || {}).builder ? ", full report-builder parsing" : "") + "." };
+    if (c.mode === "bridge") return { cls: "ok", txt: "Live · local bridge", tip: "Using the bridge at " + c.url + " (ode_client.py " + ((c.info || {}).version || "") + "). Live project list, sample search" + ((c.info || {}).store === false ? "; started with --no-store, so it writes nothing to disk." :
+      ", server-side caching" + ((c.info || {}).builder ? ", full report-builder parsing" : "") + ".") };
     if (c.mode === "direct") return { cls: "ok", txt: "Live · direct", tip: "Talking to " + ODE_SITE + " directly." };
     if (c.mode === "catalog") {
       var d = String((c.catalog || {}).generatedAt || "").slice(0, 10);
@@ -14257,8 +14271,10 @@
     var bg = document.createElement("div"); bg.className = "mbon-confirm-bg";
     bg.innerHTML = '<div class="mbon-confirm odex-help"><h4>Connection · ' + odexEsc(L.txt) + '</h4><p>' + odexEsc(L.tip) + '</p>' +
       '<p class="odex-hp">The Ocean DNA Explorer API can’t be called directly from a report file, so live search goes through a small local bridge. Start it in a terminal in the <code>eDNA_processing</code> folder:</p>' +
-      '<div class="odex-cmd"><code>python3 ode_client.py serve</code><button type="button" data-copy="python3 ode_client.py serve">Copy</button></div>' +
+      '<div class="odex-cmd"><code>' + odexEsc(odexServeCmd()) + '</code><button type="button" data-copy="' + odexEsc(odexServeCmd()) + '">Copy</button></div>' +
       '<p class="odex-hp">(<code>bash api/run.sh</code> serves the same routes on port 5050.) Without it, this report uses the project catalog saved when it was built and downloads files directly.</p>' +
+      (odexHosted() ? '<p class="odex-hp"><b>This report is hosted (' + odexEsc(location.host) + ').</b> It can still use a bridge running on <i>your</i> computer: start it with <code>--no-store</code> (nothing is written to disk) and allow the browser’s “local network access” prompt if it asks. Chrome, Edge and Firefox allow pages to reach 127.0.0.1; Safari may block it — then open the report from disk instead.</p>' : "") +
+      (!odexPersist() ? '<p class="odex-hp">Imports in this report are kept in memory only — nothing is saved in your browser, and a reload removes them.</p>' : "") +
       '<label class="odex-hp">Bridge URL <input type="text" id="odex-burl" value="' + odexEsc(cur || (function () { try { return localStorage.getItem("mbon.ode.bridge") || ""; } catch (e) { return ""; } })()) + '" placeholder="http://127.0.0.1:5051/api/ode"></label>' +
       '<div class="row"><button class="cancel">Close</button><button class="primary">Reconnect</button></div></div>';
     document.body.appendChild(bg);
@@ -14344,8 +14360,8 @@
   }
   function odexOfflineHtml(err) {
     return odexStateHtml("bad", "Can’t reach Ocean DNA Explorer", odexEsc(err && err.message || "") +
-      '<br>Start the local bridge in the <code>eDNA_processing</code> folder, then retry:',
-      '<div class="odex-cmd"><code>python3 ode_client.py serve</code><button type="button" data-copy="python3 ode_client.py serve">Copy</button></div>' +
+      '<br>Start the local bridge in the <code>eDNA_processing</code> folder' + (odexHosted() ? " on your computer (it serves this hosted page; nothing is saved)" : "") + ', then retry:',
+      '<div class="odex-cmd"><code>' + odexEsc(odexServeCmd()) + '</code><button type="button" data-copy="' + odexEsc(odexServeCmd()) + '">Copy</button></div>' +
       '<div class="odex-row"><button type="button" class="odex-btn pri" data-act="retry">↻ Retry</button><button type="button" class="odex-btn" data-act="help">Connection settings</button></div>');
   }
   function odexProjectsHtml() {
@@ -14394,7 +14410,7 @@
     if (!S) return odexStateHtml("info", "Search samples across every project", "Type part of a sample name, station or place (2+ characters), e.g. <i>Horseshoe</i> or <i>CTD23</i>.");
     if (S.busy) return odexStateHtml("busy", "Searching samples for “" + S.q + "”…", "");
     if (S.err) return odexStateHtml("bad", "Sample search unavailable", odexEsc(S.err.message),
-      '<div class="odex-cmd"><code>python3 ode_client.py serve</code><button type="button" data-copy="python3 ode_client.py serve">Copy</button></div>');
+      '<div class="odex-cmd"><code>' + odexEsc(odexServeCmd()) + '</code><button type="button" data-copy="' + odexEsc(odexServeCmd()) + '">Copy</button></div>');
     var keys = Object.keys(S.groups);
     if (!keys.length) return odexStateHtml("info", "No sample matches “" + S.q + "”", "");
     return '<div class="odex-count">' + S.rows.length + " sample(s) in " + keys.length + " project(s)" + (S.rows.length >= 300 ? " (first 300)" : "") + "</div>" +
@@ -14610,7 +14626,7 @@
     var f = odexFoot('<button type="button" class="odex-btn" data-act="back">‹ Projects</button>' +
       '<div class="odex-sum">' + (ok ? "<b>" + anas.length + "</b> analys" + (anas.length === 1 ? "is" : "es") + " × <b>" + samps.length + "</b> sample" + (samps.length === 1 ? "" : "s") +
         (all ? " (all)" : "") + " · up to <b>" + libs + "</b> libraries" : '<span class="odex-warn">' + odexEsc(why) + "</span>") +
-        (c.mode === "bridge" ? '<label class="odex-opt" title="Also write the FAIRe sheets + Tourmaline tables into data/projects/' + odexEsc(ODEX.project.project_id) + '/ so build_mbon_html.py can include them in built reports"><input type="checkbox" id="odex-save"' + (ODEX.save ? " checked" : "") + "> save to data/projects</label>" +
+        (c.mode === "bridge" && (c.info || {}).store !== false ? '<label class="odex-opt" title="Also write the FAIRe sheets + Tourmaline tables into data/projects/' + odexEsc(ODEX.project.project_id) + '/ so build_mbon_html.py can include them in built reports"><input type="checkbox" id="odex-save"' + (ODEX.save ? " checked" : "") + "> save to data/projects</label>" +
           '<label class="odex-opt' + (ODEX.save ? "" : " dis") + '" title="Add rows to data/projects/report_manifest.xlsx (a backup is made first)"><input type="checkbox" id="odex-man"' + (ODEX.manifest ? " checked" : "") + (ODEX.save ? "" : " disabled") + "> + manifest</label>" : "") +
       '</div><button type="button" class="odex-btn pri" data-act="import"' + (ok ? "" : " disabled") + ">Import ›</button>");
     f.querySelector('[data-act="back"]').addEventListener("click", function () { ODEX.view = "find"; odexRender(); });
@@ -14905,7 +14921,8 @@
           fmt((r.samples || []).length) + " samples · " + fmt(r.stations.length) + " stations · " + fmt(r.taxa.length) + " taxa</span>" +
           (r.warning ? '<div class="w">⚠️ ' + odexEsc(r.warning) + "</div>" : "") + "</div>"; }).join("") +
         (J.saved ? '<div class="r s">💾 Saved to <code>' + odexEsc(J.saved.dir) + "</code>" + (J.manifestAdded != null ? " · " + J.manifestAdded + " manifest row(s) added" : "") + "</div>" : "") +
-        '<div class="r s">Kept in this browser — it reopens with this report. Switch projects from the 📁 menu in the header.</div></div>';
+        '<div class="r s">' + (odexPersist() ? "Kept in this browser — it reopens with this report." : "Not saved anywhere — it stays until you reload this page.") +
+        " Switch projects from the 📁 menu in the header.</div></div>";
     }
     if (J.state === "error") {
       var det = J.error && (J.error.extra || J.error.status) ? JSON.stringify({ status: J.error.status, detail: J.error.extra || null }, null, 1) : "";
@@ -14985,7 +15002,7 @@
     MBON.activeRunId = opts.runId && mbonRunById(opts.runId) ? opts.runId : "__all__";
     populateRunSelect();
     $("#mbon-run-select").value = MBON.activeRunId;
-    try { localStorage.setItem("mbon.project:" + odexPageKey(), MBON.projectFilter || ""); } catch (e) { /* ignore */ }
+    if (odexPersist()) { try { localStorage.setItem("mbon.project:" + odexPageKey(), MBON.projectFilter || ""); } catch (e) { /* ignore */ } }
     odexTransition();
     odexPaintSwitcher();
   }
@@ -15066,7 +15083,9 @@
           '<button type="button" class="odex-btn sm" data-restore="' + odexEsc(s.key) + '">Load</button><button type="button" class="x" data-forget="' + odexEsc(s.key) + '" title="Forget">×</button></div>'; }).join("");
     }
     html += '<button type="button" class="mbon-pm-imp" data-act="import">🌊 Import from Ocean DNA Explorer…</button>' +
-      '<label class="mbon-pm-opt"><input type="checkbox" id="mbon-pm-restore"' + (odexAutoRestore() ? " checked" : "") + "> Reopen my imports when this report loads</label>" +
+      (odexPersistLocked() ? '<div class="mbon-pm-opt">🔒 Imports aren’t saved by this published report — they last until you reload.</div>' :
+        '<label class="mbon-pm-opt"><input type="checkbox" id="mbon-pm-persist"' + (odexPersist() ? " checked" : "") + "> Keep my imports in this browser</label>" +
+        (odexPersist() ? '<label class="mbon-pm-opt"><input type="checkbox" id="mbon-pm-restore"' + (odexAutoRestore() ? " checked" : "") + "> Reopen them when this report loads</label>" : "")) +
       '<div class="mbon-pm-k">Tip: ‹ › beside the menu step through projects.</div>';
     menu.innerHTML = html;
   }
@@ -15100,6 +15119,13 @@
       if (fg) { odexForget(fg.dataset.forget).then(function () { odexRenderMenu(); }); return; }
       if (e.target.closest('[data-act="import"]')) { odexToggleMenu(false); mbonOdeOpen(); return; }
       if (e.target.id === "mbon-pm-restore") { try { localStorage.setItem("mbon.ode.restore", e.target.checked ? "1" : "0"); } catch (x) { /* ignore */ } return; }
+      if (e.target.id === "mbon-pm-persist") {
+        var keep = e.target.checked;
+        try { localStorage.setItem("mbon.ode.persist", keep ? "1" : "0"); } catch (x) { /* ignore */ }
+        if (keep) MBON.runs.forEach(function (r) { if (r.ode) odexSaveRun(r); });
+        else odexListSaved().then(function (list) { return Promise.all(list.map(function (r) { return odexForget(r.key); })); }).then(odexRenderMenu, odexRenderMenu);
+        odexRenderMenu(); return;
+      }
       var row = e.target.closest("[data-pk]");
       if (row) { odexToggleMenu(false); odexSetProject(row.dataset.pk || null); }
     });
@@ -15173,6 +15199,7 @@
     });
   }
   function odexSaveRun(run) {
+    if (!odexPersist()) return Promise.resolve();
     var rec = { key: odexPageKey() + "|" + run.id, page: odexPageKey(), runId: run.id, label: run.label,
       project: mbonRunProject(run), savedAt: new Date().toISOString(), run: JSON.parse(JSON.stringify(run)) };
     return odexTx("readwrite", function (st) { st.put(rec); }).then(odexRefreshSaved, function (e) { console.warn("ODE import not saved in this browser:", e); });
@@ -15223,11 +15250,11 @@
     var sel = document.getElementById("mbon-run-select"); if (sel) sel.addEventListener("change", refresh);
     // remembered project for this report file
     try {
-      var k = localStorage.getItem("mbon.project:" + odexPageKey());
+      var k = odexPersist() ? localStorage.getItem("mbon.project:" + odexPageKey()) : null;
       if (k && odexProjectGroups().some(function (g) { return g.key === k; })) { MBON.projectFilter = k; ensureValidMethod(); populateRunSelect(); applyActiveRunToMap(); }
     } catch (e) { /* ignore */ }
     odexPaintSwitcher();
-    odexRefreshSaved().then(function (list) {
+    (odexPersist() ? odexRefreshSaved() : Promise.resolve([])).then(function (list) {
       if (list.length && odexAutoRestore()) return odexRestoreSaved(null, true).then(function () {
         try {
           var k2 = localStorage.getItem("mbon.project:" + odexPageKey());
@@ -15238,7 +15265,7 @@
     // deep link: report.html#ode=<project_id>[/<samp_name>] opens the dialog on that project
     var h = /[#&]ode=([^&]+)/.exec(location.hash || "");
     if (h) { var parts = decodeURIComponent(h[1]).split("/"); setTimeout(function () { mbonOdeOpen({ project: parts[0], samples: parts[1] ? [parts[1]] : null }); }, 400); }
-    window.MBONOde = { open: mbonOdeOpen, connect: function () { return odexConnect(true); }, state: ODEX, setProject: odexSetProject,
+    window.MBONOde = { open: mbonOdeOpen, persist: odexPersist, connect: function () { return odexConnect(true); }, state: ODEX, setProject: odexSetProject,
       projects: odexProjectGroups, restore: odexRestoreSaved, saved: odexListSaved };
   }
   /* /mbon-ode-api-v1 */

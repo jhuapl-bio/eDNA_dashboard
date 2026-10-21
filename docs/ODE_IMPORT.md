@@ -75,6 +75,31 @@ in this browser that aren't loaded (*Load* / forget), the import entry, and the
 From the console: `MBONOde.open({project: "noaa-aoml-mire", samples: [...]})`,
 `MBONOde.setProject("MBON")`, `MBONOde.projects()`, `MBONOde.restore()`.
 
+## GitHub Pages and "save nothing" mode
+
+GitHub Pages only serves static files, so it can't run the bridge — but the published
+report can use a bridge on the **visitor's own computer**, and nothing needs to be saved:
+
+* **Pages build** (`.github/workflows/pages.yml`): fetches a fresh catalog with
+  `python ode_client.py --cache "" catalog` (metadata only, written to the runner's temp
+  folder, not committed) and builds the example report with
+  `--ode-no-store --ode-catalog …`. Visitors can import any listed project with no setup:
+  files download straight from ODE into their browser.
+* **`--ode-no-store` reports** keep imports in memory only — no IndexedDB, no localStorage,
+  and file downloads bypass the HTTP cache (`cache: "no-store"`); a reload removes them. The
+  📁 menu says so (🔒). In other reports the viewer can untick *Keep my imports in this
+  browser* for the same behaviour.
+* **Live search from the Pages report**: the visitor runs
+  `python3 ode_client.py serve --no-store` locally. The bridge then keeps downloads in memory
+  only (bounded, gone when it stops), refuses *save to data/projects* (403), and skips the
+  server-side build (which needs a temporary folder) — the browser parses the returned
+  files instead. The dialog finds it at `http://127.0.0.1:5051/api/ode` as usual; its
+  connection help shows the `--no-store` command when the page is hosted.
+* **Browsers**: Chrome, Edge and Firefox let an https page call `http://127.0.0.1`
+  (localhost counts as secure). Recent Chrome may show a "local network access" prompt —
+  allow it; the bridge answers the private-network preflight. Safari may block the call;
+  then open the report file from disk instead.
+
 ## Command line
 
 ```bash
@@ -84,6 +109,7 @@ python3 ode_client.py find-samples Horseshoe        # samples across projects
 python3 ode_client.py pull noaa-aoml-mire --analysis MiFish --match Horseshoe --manifest --build
 python3 ode_client.py catalog                       # data/ode_catalog.json (embedded in reports)
 python3 ode_client.py serve                         # the bridge, http://127.0.0.1:5051/api/ode
+python3 ode_client.py serve --no-store              # same, but writes nothing to disk
 ```
 
 `pull` options: `--analysis` (repeatable; analysis_run_name, assay name or marker such
@@ -139,6 +165,8 @@ JOB=$(curl -s -X POST "$B/jobs" -H 'Content-Type: application/json' \
 curl "$B/jobs/$JOB"            # poll: steps + state
 curl "$B/jobs/$JOB/result"     # runs (report JSON) once done
 ```
+
+`health` reports `store: false` for a `--no-store` bridge.
 
 Settings (environment): `ODE_BASE_URL` (default `https://www.oceandnaexplorer.org`),
 `ODE_CACHE_DIR` (default `data/ode_cache`), `ODE_BRIDGE_HOST` / `ODE_BRIDGE_PORT`
