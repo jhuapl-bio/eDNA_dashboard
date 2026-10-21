@@ -6,7 +6,7 @@ Observation Network (MBON).
 
 | Component | What it does |
 |---|---|
-| [`build_mbon_html.py`](build_mbon_html.py) | Reads Wilderlab ASV workbooks, Kraken2 reports and FAIRe station metadata (`.xlsx` / `.csv` / `.json`) and writes a single self-contained HTML report: station map, cross-sample analysis, explorer, data table, metadata. |
+| [`build_mbon_html.py`](build_mbon_html.py) | Reads Wilderlab ASV workbooks, Kraken2 reports, Ocean DNA Explorer (Tourmaline) feature tables and FAIRe station metadata (`.xlsx` / `.csv` / `.tsv` / `.json`) and writes a single self-contained HTML report: station map, cross-sample analysis, explorer, data table, metadata. |
 | [`ingest.py`](ingest.py) | Loads the same inputs into the MBON Postgres schema ([`sql/create_tables.sql`](sql/create_tables.sql)) and writes report↔sample concordance files. |
 | [`api/`](api) + [`frontend/`](frontend) | Flask API + static dashboard (Vue/D3/Leaflet) for browsing the database, spreadsheets or Google Sheets. |
 | [`make_example_data.py`](make_example_data.py) | Regenerates the bundled **synthetic** example dataset in [`data/example/`](data/example). |
@@ -52,7 +52,7 @@ eDNA_processing/
 │   ├── example/projects/…   # synthetic demo data (committed)
 │   └── projects/            # YOUR data (git-ignored)
 │       ├── report_manifest.xlsx
-│       └── <project>/{faire,kraken2,wilder,meta}/
+│       └── <project>/{faire,kraken2,wilder,tourmaline,meta}/
 ├── reports/             # generated HTML, default output (git-ignored)
 ├── outputs/             # your per-project reports, e.g. outputs/mbon.html (git-ignored)
 ├── logs/                # run logs (git-ignored)
@@ -170,11 +170,15 @@ The report has Cross-Sample, Map, Explore, **Comparison**, **Depth & Environment
   to open them side by side (dialog, new window or CSV).
 
 You can
-switch between ASV and Kraken2 results, filter by run, database, group or sample,
+switch between ASV, Kraken2 and Ocean DNA Explorer results (the *Report method*
+dropdown; Ocean DNA Explorer appears only when such a run is loaded), filter by run, database, group or sample,
 draw map regions to compare areas, and export any chart or table (PNG/SVG/PDF/CSV/XLSX).
 Files dropped into the report's **Data** panel overwrite samples that are already
 loaded (matched on sample ID) instead of duplicating them — a FAIRe `sampleMetadata`
-sheet replaces their metadata, an ASV workbook or Kraken2 report their reads — and
+sheet (`.xlsx`, or a FAIRe `.tsv` with `#` comment rows) replaces their metadata, an ASV
+workbook or Kraken2 report their reads; an Ocean DNA Explorer `table_*.tsv` +
+`asvTaxaFeatures_*.tsv` pair (drop it together with the FAIRe `sampleMetadata` and
+`experimentRunMetadata` `.tsv` files) becomes a new Ocean DNA Explorer run — and
 **Reset to original** drops every upload and manual edit.
 More files can be dropped into the report's **Data Sources** panel in the browser.
 
@@ -233,6 +237,15 @@ python build_mbon_html.py --example -o templates/station_top10_species_map_templ
 
 CI (`.github/workflows/ci.yml`) runs lint, the tests, input validation and an
 example build on every push and pull request.
+
+GitHub Pages (`.github/workflows/pages.yml`) runs on every push to `main` (or
+manually from the Actions tab): it runs the tests, rebuilds
+`example_report.html` from `data/example`, copies anything committed under
+`pages/` into the site, writes an `index.html` linking every report, and
+deploys. Only committed files are published; `data/projects/` and `reports/`
+are git-ignored, so real data never reaches the site unless you deliberately
+commit a report under `pages/`. One-time setup: repo **Settings → Pages →
+Build and deployment → Source: GitHub Actions**.
 
 ## About the example data
 

@@ -50,7 +50,7 @@
         }
         /* Base type size: every rem-sized label, table and control in the tabs
            scales from this (browser default is 16px). */
-        html { font-size: 16.5px; }
+        html { font-size: 14px; }   /* was 16.5px; trimmed 2026-10-20 (everything a little smaller) */
 
         #map_mbon {
             position: absolute;
@@ -1896,10 +1896,11 @@
                 <button data-pane="meta">Metadata</button>
             </nav>
             <div class="mbon-spacer"></div>
-            <div id="mbon-method" role="group" aria-label="Report method" title="Switch between ASV (amplicon) and Kraken2 (k-mer) reports." style="display:none;align-items:center;gap:.3rem;margin-right:.35rem;">
+            <div id="mbon-method" role="group" aria-label="Report method" title="Switch between ASV (amplicon), Kraken2 (k-mer) and Ocean DNA Explorer (Tourmaline ASV) reports." style="display:none;align-items:center;gap:.3rem;margin-right:.35rem;">
                 <span style="font-size:.72rem;color:var(--mbon-muted);">View:</span>
                 <button type="button" data-m="asv" style="font:inherit;font-size:.72rem;font-weight:600;border:1px solid #0b6fb5;background:#0b6fb5;color:#fff;padding:.13rem .55rem;border-radius:7px 0 0 7px;cursor:pointer;">ASV</button>
                 <button type="button" data-m="kraken2" style="font:inherit;font-size:.72rem;font-weight:600;border:1px solid #cdd9e3;border-left:none;background:#fff;color:#56707f;padding:.13rem .55rem;border-radius:0 7px 7px 0;cursor:pointer;">Kraken2</button>
+                <button type="button" data-m="ode" style="display:none;font:inherit;font-size:.72rem;font-weight:600;border:1px solid #cdd9e3;border-left:none;background:#fff;color:#56707f;padding:.13rem .55rem;border-radius:0 7px 7px 0;cursor:pointer;">Ocean DNA Explorer</button>
             </div>
             <div class="mbon-runsel" id="mbon-db-wrap" style="display:none" title="Kraken2 reference database. Reads classified against different databases are never pooled — each database is its own set of runs.">
                 <label for="mbon-db-select">Database:</label>
@@ -1997,7 +1998,7 @@
             <div class="mbon-dropzone" id="mbon-dropzone">
                 <strong>Drop spreadsheets or Kraken2 reports here</strong>
                 Or click to choose files
-                <div class="fmt">ASV data: Wilder_01 (.xlsx metadata/aggregated/full) &middot; Wilder_02 (Samples + Taxa) &middot; Kraken2 reports (.kraken2.report / .txt — one per sample; you’ll pick which sample each belongs to) &middot; Station metadata: MBON_Data (.xlsx with sampleMetadata). Load metadata + data together for station mapping.<br><b>Uploads overwrite</b> any already-loaded sample with the same sample ID (FAIRe template → that sample’s metadata; ASV / Kraken2 report → that sample’s reads). Use <b>Reset to original</b> below to undo.</div>
+                <div class="fmt">ASV data: Wilder_01 (.xlsx metadata/aggregated/full) &middot; Wilder_02 (Samples + Taxa) &middot; Ocean DNA Explorer (table_*.tsv + asvTaxaFeatures_*.tsv, with the FAIRe sampleMetadata / experimentRunMetadata .tsv) &middot; Kraken2 reports (.kraken2.report / .txt — one per sample; you’ll pick which sample each belongs to) &middot; Station metadata: MBON_Data (.xlsx with sampleMetadata). Load metadata + data together for station mapping.<br><b>Uploads overwrite</b> any already-loaded sample with the same sample ID (FAIRe template → that sample’s metadata; ASV / Kraken2 report → that sample’s reads). Use <b>Reset to original</b> below to undo.</div>
             </div>
             <input type="file" id="mbon-file-input" accept=".xlsx,.xlsm,.xls,.csv,.tsv,.txt,.report,.kreport,.k2report" multiple style="display:none"/>
             <div id="mbon-source-list"></div>
@@ -2038,6 +2039,7 @@
                     <select id="fd-method">
                         <option value="asv">ASV (amplicon)</option>
                         <option value="kraken2">Kraken2 (k-mer)</option>
+                        <option value="ode">Ocean DNA Explorer (Tourmaline ASV)</option>
                     </select>
                 </div>
                 <div class="mbon-fd-sec">
@@ -2498,7 +2500,7 @@
 
         // Water-column order: Deck/Surface, Low/Shallow, Mid, Deep, Bottom;
         // then numeric depths ascending; Unknown last.
-        var MBON_DEPTH_TIERS = { deck: 0, surface: 0, low: 1, shallow: 1, mid: 2, middle: 2, deep: 3, bottom: 4 };
+        var MBON_DEPTH_TIERS = { deck: 0, surface: 0, low: 1, shallow: 1, mid: 2, middle: 2, 'mid-water': 2, midwater: 2, 'mid water': 2, deep: 3, bottom: 4 };
         function mbonCompareDepthLabels(a, b) {
             if (a === 'Unknown' && b === 'Unknown') { return 0; }
             if (a === 'Unknown') { return 1; }
@@ -3442,7 +3444,7 @@
             /* mbon-depth-horizontal-v1 */
             // Natural order = surface to bottom: Deck/Surface, Low/Shallow, Mid,
             // Deep, Bottom, then numeric depths ascending, Unknown last.
-            var depthRank = { deck: 0, surface: 0, low: 1, shallow: 1, mid: 2, middle: 2, deep: 3, bottom: 4 };
+            var depthRank = { deck: 0, surface: 0, low: 1, shallow: 1, mid: 2, middle: 2, 'mid-water': 2, midwater: 2, 'mid water': 2, deep: 3, bottom: 4 };
             var rankOf = function(lbl) {
                 var t = String(lbl).trim().toLowerCase();
                 if (t === 'unknown') { return [3, 0]; }
@@ -3486,6 +3488,9 @@
             low:     { name: 'Low',     rank: 1, color: '#E69F00', sym: 'circle' },
             mid:     { name: 'Mid',     rank: 2, color: '#009E73', sym: 'triangle' },
             middle:  { name: 'Middle',  rank: 2, color: '#009E73', sym: 'triangle' },
+            'mid-water': { name: 'Mid-water', rank: 2, color: '#009E73', sym: 'triangle' },
+            midwater: { name: 'Mid-water', rank: 2, color: '#009E73', sym: 'triangle' },
+            'mid water': { name: 'Mid-water', rank: 2, color: '#009E73', sym: 'triangle' },
             deep:    { name: 'Deep',    rank: 3, color: '#CC79A7', sym: 'square' },
             bottom:  { name: 'Bottom',  rank: 4, color: '#0072B2', sym: 'wye' }
         };
@@ -6653,7 +6658,7 @@
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function fmt(n) { return Number(n || 0).toLocaleString(); }
   function natural(a, b) { return String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' }); }
-  function emptyish(v) { var t = String(v == null ? '' : v).trim(); return !t || /^(nan|na|n\/a|none|null)$/i.test(t); }
+  function emptyish(v) { var t = String(v == null ? '' : v).trim(); return !t || /^(nan|na|n\/a|none|null)$/i.test(t) || /^(not applicable|missing|not provided|not collected)\b/i.test(t); }
   function clean(v) { return emptyish(v) ? '' : String(v).trim(); }
 
   /* ── tooltip ───────────────────────────────────────────────────────────── */
@@ -6672,7 +6677,7 @@
   function untip() { var t = document.getElementById('fc-tip'); if (t) t.style.opacity = 0; }
 
   /* ── data preparation ─────────────────────────────────────────────────── */
-  var DEPTH_ORDER = { deck: 0, surface: 0, low: 1, shallow: 1, mid: 2, middle: 2, deep: 3, bottom: 4 };
+  var DEPTH_ORDER = { deck: 0, surface: 0, low: 1, shallow: 1, mid: 2, middle: 2, 'mid-water': 2, midwater: 2, 'mid water': 2, deep: 3, bottom: 4 };
   function depthRank(d) {
     var t = String(d).trim().toLowerCase();
     if (t in DEPTH_ORDER) return [0, DEPTH_ORDER[t]];
@@ -7844,7 +7849,7 @@
   function d3() { return window.d3; }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function fmt(n) { return Number(n || 0).toLocaleString(); }
-  function emptyish(v) { var t = String(v == null ? '' : v).trim(); return !t || /^(nan|na|n\/a|none|null|unknown)$/i.test(t); }
+  function emptyish(v) { var t = String(v == null ? '' : v).trim(); return !t || /^(nan|na|n\/a|none|null|unknown)$/i.test(t) || /^(not applicable|missing|not provided|not collected)\b/i.test(t); }
   function clean(v) { return emptyish(v) ? '' : String(v).trim(); }
   function natural(a, b) { return String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' }); }
   function f4(v) { return isFinite(v) ? d3().format('.4~g')(v) : '—'; }
@@ -8692,7 +8697,7 @@
       Object.keys(keys).sort().forEach(function (k) { if (SKIP.test(k)) return; var p = profile(k, false); if (p) out.push(p); });
       return out;
     }
-    var DEPTH = { deck: 0, surface: 0, low: 1, shallow: 1, mid: 2, middle: 2, deep: 3, bottom: 4 };
+    var DEPTH = { deck: 0, surface: 0, low: 1, shallow: 1, mid: 2, middle: 2, 'mid-water': 2, midwater: 2, 'mid water': 2, deep: 3, bottom: 4 };
     function sortKeys(keys) {
       return keys.sort(function (a, b) {
         var pa = a.split(SEP), pb = b.split(SEP);
@@ -8947,7 +8952,7 @@
     if (!run.taxa.length && run.stations.length) run.taxa = deriveTaxa(run.stations);
     // carry hasEuk through; tag each sample with its method class for mixed-kind guards
     if (r.hasEuk != null) run.hasEuk = r.hasEuk;
-    var kc = (run.kind === "kraken2") ? "kraken2" : "asv";
+    var kc = mbonRunKindClass(run);
     (run.samples || []).forEach(function (s) { s.kind = kc; });
     return run;
   }
@@ -8956,8 +8961,21 @@
   // Read counts from Kraken2 (k-mer classification) and ASV (amplicon) pipelines
   // are not directly comparable, so cross-method comparisons are disabled when a
   // view mixes them.
-  function mbonRunKindClass(r) { return (r && r.kind === "kraken2") ? "kraken2" : "asv"; }
-  function mbonKindLabel(kc) { return kc === "kraken2" ? "Kraken2" : "ASV"; }
+  // Three method classes: "asv" (Wilder ASV / manifest), "kraken2" (k-mer) and
+  // "ode" (Ocean DNA Explorer / Tourmaline ASV feature tables).
+  var MBON_METHODS = ["asv", "kraken2", "ode"];
+  var MBON_METHOD_INFO = {
+    asv:     { label: "ASV", long: "ASV (amplicon)", chip: "ASV", c: ["#0b6fb5", "#e6f3fb"] },
+    kraken2: { label: "Kraken2", long: "Kraken2 (k-mer)", chip: "Kraken2", c: ["#7c3aed", "#f3eaff"] },
+    ode:     { label: "Ocean DNA Explorer", long: "Ocean DNA Explorer (Tourmaline ASV)", chip: "ODE", c: ["#0f766e", "#e1f5f1"] }
+  };
+  function mbonRunKindClass(r) {
+    if (!r) return "asv";
+    if (r.kind === "kraken2") return "kraken2";
+    if (r.kind === "ode") return "ode";
+    return "asv";
+  }
+  function mbonKindLabel(kc) { return (MBON_METHOD_INFO[kc] || MBON_METHOD_INFO.asv).label; }
   function mbonActiveKindClasses() {
     if (MBON.activeRunId === "__all__") {
       var s = {};
@@ -8998,15 +9016,17 @@
   function mbonMixNotice(what) {
     return '<div style="padding:10px 12px;margin:8px 0;border:1px solid #f0c98a;background:#fff7e9;' +
       'border-radius:8px;color:#8a5a00;font-size:.78rem;line-height:1.45;">' +
-      '⚠️ This view mixes <b>Kraken2</b> and <b>ASV</b> samples. Read counts aren’t comparable ' +
+      '⚠️ This view mixes samples from different report methods (' +
+      mbonActiveKindClasses().map(function (k) { return '<b>' + mbonKindLabel(k) + '</b>'; }).join(' + ') +
+      '). Read counts aren’t comparable ' +
       'across methods, so ' + (what || "this comparison") + ' is disabled. Pick a single run in the ' +
       '<b>Run</b> selector to compare.</div>';
   }
   function mbonKindChip(kc) {
-    var c = kc === "kraken2" ? ["#7c3aed", "#f3eaff"] : ["#0b6fb5", "#e6f3fb"];
-    return '<span style="display:inline-block;font-size:.62rem;font-weight:700;letter-spacing:.02em;' +
+    var mi = MBON_METHOD_INFO[kc] || MBON_METHOD_INFO.asv, c = mi.c;
+    return '<span title="' + mi.long + '" style="display:inline-block;font-size:.62rem;font-weight:700;letter-spacing:.02em;' +
       'padding:.05rem .4rem;border-radius:999px;color:' + c[0] + ";background:" + c[1] +
-      ';vertical-align:middle;">' + mbonKindLabel(kc) + "</span>";
+      ';vertical-align:middle;">' + mi.chip + "</span>";
   }
 
   // Build species-level aggregate from station rows (fallback)
@@ -9131,22 +9151,29 @@
   function paintMethodToggle() {
     var host = document.getElementById("mbon-method");
     if (!host) return;
-    var hasK2 = mbonMethodAvailable("kraken2");
-    var hasASV = mbonMethodAvailable("asv");
+    var has = {};
+    MBON_METHODS.forEach(function (m) { has[m] = mbonMethodAvailable(m); });
     // Show the toggle whenever there is any data, so the unavailable method is
     // visible-but-disabled (with an explanatory tooltip) rather than hidden.
-    host.style.display = (hasK2 || hasASV) ? "inline-flex" : "none";
+    // The Ocean DNA Explorer button only appears when such data is loaded.
+    host.style.display = (has.kraken2 || has.asv || has.ode) ? "inline-flex" : "none";
+    var btns = Array.prototype.filter.call(host.querySelectorAll("button"), function (b) {
+      var show = b.dataset.m !== "ode" || has.ode;
+      b.style.display = show ? "" : "none";
+      return show;
+    });
+    btns.forEach(function (b, i) {
+      b.style.borderRadius = btns.length === 1 ? "7px" : i === 0 ? "7px 0 0 7px" : i === btns.length - 1 ? "0 7px 7px 0" : "0";
+    });
     Array.prototype.forEach.call(host.querySelectorAll("button"), function (b) {
-      var isK2 = b.dataset.m === "kraken2";
-      var avail = isK2 ? hasK2 : hasASV;
+      var mi = MBON_METHOD_INFO[b.dataset.m] || MBON_METHOD_INFO.asv;
+      var avail = !!has[b.dataset.m];
       var on = b.dataset.m === MBON.method && avail;
-      var c = isK2 ? "#7c3aed" : "#0b6fb5";
+      var c = mi.c[0];
       b.disabled = !avail;
       b.style.cursor = avail ? "pointer" : "not-allowed";
       b.style.opacity = avail ? "1" : ".5";
-      b.title = avail
-        ? ("Show " + (isK2 ? "Kraken2 (k-mer)" : "ASV (amplicon)") + " reports")
-        : "No " + (isK2 ? "Kraken2" : "ASV") + " reports available";
+      b.title = avail ? ("Show " + mi.long + " reports") : "No " + mi.label + " reports available";
       b.style.background = on ? c : "#fff";
       b.style.color = on ? "#fff" : (avail ? "#56707f" : "#9bb0bf");
       b.style.borderColor = on ? c : "#cdd9e3";
@@ -9159,12 +9186,12 @@
   // Kraken2 when no ASV reports are present, and vice-versa).
   function ensureValidMethod() {
     if (mbonMethodAvailable(MBON.method)) return;
-    if (mbonMethodAvailable("asv")) MBON.method = "asv";
-    else if (mbonMethodAvailable("kraken2")) MBON.method = "kraken2";
+    for (var i = 0; i < MBON_METHODS.length; i++)
+      if (mbonMethodAvailable(MBON_METHODS[i])) { MBON.method = MBON_METHODS[i]; return; }
   }
 
   function onMethodChange(m) {
-    if (m !== "asv" && m !== "kraken2") return;
+    if (MBON_METHODS.indexOf(m) < 0) return;
     if (!mbonMethodAvailable(m)) return;  // ignore clicks on a disabled method
     MBON.method = m;
     MBON.activeRunId = "__all__";
@@ -9210,7 +9237,8 @@
     optAll.textContent = "All " + mbonKindLabel(MBON.method) + " runs (" + pool.length + ")"; sel.appendChild(optAll);
     pool.forEach(function (r) {
       var o = document.createElement("option"); o.value = r.id;
-      var ktag = (r.kind === "kraken2" && !/kraken2/i.test(r.label)) ? " · Kraken2" : "";
+      var ktag = (r.kind === "kraken2" && !/kraken2/i.test(r.label)) ? " · Kraken2" :
+        (r.kind === "ode" && !/ocean dna/i.test(r.label)) ? " · ODE" : "";
       o.textContent = r.label + ktag + (r.builtin ? "" : " ↑"); sel.appendChild(o);
     });
     // keep selection valid for the active method
@@ -9230,7 +9258,7 @@
     if (!window.mbonData.map) window.mbonData.map = {};
     var kcs = mbonActiveKindClasses();
     var kindHtml = kcs.length ? (" · " + (kcs.length > 1
-      ? mbonKindChip("kraken2") + " " + mbonKindChip("asv") + ' <span style="font-size:.66rem;color:#8a5a00">mixed</span>'
+      ? kcs.map(mbonKindChip).join(" ") + ' <span style="font-size:.66rem;color:#8a5a00">mixed</span>'
       : kcs.map(mbonKindChip).join(" "))) : "";
     $("#mbon-run-caption").innerHTML = esc(run.label) + " · " +
       (run.stations.length) + " station(s) · " + (run.taxa.length) + " taxa" + kindHtml;
@@ -11632,7 +11660,9 @@
           if (isText) {
             var text = ev.target.result;
             if (reportExt || looksLikeKraken2(text)) { resolve({ file: file, isKraken: true, text: text }); return; }
-            resolve({ file: file, wb: XLSX.read(text, { type: "string", raw: false }), isText: true }); return;
+            // keep the raw text too: FAIRe '#' comment rows and Ocean DNA Explorer
+            // feature tables are parsed from it (see mbonDetectTextTable)
+            resolve({ file: file, wb: XLSX.read(text, { type: "string", raw: false }), isText: true, text: text }); return;
           }
           resolve({ file: file, wb: XLSX.read(new Uint8Array(ev.target.result), { type: "array", cellDates: true, raw: false }), isText: false });
         } catch (err) { reject(err); }
@@ -11682,9 +11712,14 @@
   // ---- FAIRe sampleMetadata file (MBON_Data-PTedit.xlsx) ----
   // samp_number -> { Station, decimalLatitude, decimalLongitude, ...all cols }
   function ingestSampleMetadata(parsed) {
-    var wb = parsed.wb;
-    var nm = wb.SheetNames[wb.SheetNames.map(function (x) { return x.toLowerCase(); }).indexOf("samplemetadata")];
-    var grid = XLSX.utils.sheet_to_json(wb.Sheets[nm], { header: 1, blankrows: false, defval: null });
+    var grid = parsed.grid;
+    if (!grid) {
+      var wb = parsed.wb;
+      var nm = wb.SheetNames[wb.SheetNames.map(function (x) { return x.toLowerCase(); }).indexOf("samplemetadata")];
+      grid = XLSX.utils.sheet_to_json(wb.Sheets[nm], { header: 1, blankrows: false, defval: null });
+    }
+    // FAIRe exports put '# requirement_level_code' / '# section' rows above the header
+    grid = grid.filter(function (row) { return !mbonIsCommentRow(row); });
     // header row isn't always row 0; pick the row best matching known columns
     var expected = ["sampnumber", "sampleid", "sampname", "station", "decimallatitude", "decimallongitude"];
     var bestIdx = 0, bestScore = -1, scan = Math.min(6, grid.length);
@@ -11706,6 +11741,7 @@
       if (!snum || snum.toLowerCase() === "nan") continue;
       var rec = {};
       hdr.forEach(function (h, idx) { if (h && row[idx] != null && String(row[idx]).trim() !== "") rec[h] = mbonCellText(row[idx]); });
+      if (normColName(hdr[ci_num]) === "sampname") mbonFaireAliases(rec);
       MBON.stationMeta[snum] = rec;
       fileRecs.push(rec);
       added++;
@@ -11756,6 +11792,10 @@
   }
 
   function detectAndIngest(parsed) {
+    if (parsed.isText && parsed.text != null) {
+      var tres = mbonDetectTextTable(parsed);
+      if (tres) return tres;
+    }
     var wb = parsed.wb, names = wb.SheetNames;
     var lower = names.map(function (n) { return n.toLowerCase(); });
     // FAIRe sample-metadata workbook (MBON_Data-PTedit.xlsx): station IDs + coords
@@ -11905,6 +11945,215 @@
       label: "↑ " + label, builtin: false, kind: "Wilder_01", sourceName: parsed.file.name,
       stations: stations, samples: samples, taxa: taxa, meta: jobMeta, warning: warn, sources: sources },
       msg: "Imported " + taxa.length + " species across " + stations.length + " station(s)." };
+  }
+
+
+  /* mbon-ode-import-v1 */
+  // ============================================================ Ocean DNA Explorer
+  // Tourmaline outputs from the Ocean DNA Explorer: a feature table
+  // (featureid + one read column per library) and asvTaxaFeatures (featureid ->
+  // taxonomy, kingdom..species, Confidence). Libraries link to samples through the
+  // FAIRe experimentRunMetadata (lib_id -> samp_name) and the sampleMetadata sheet.
+  var odePending = { table: null, taxa: null };
+  MBON.odeLibMap = MBON.odeLibMap || {};
+  MBON.odeProjectMeta = MBON.odeProjectMeta || null;
+
+  function mbonIsCommentRow(row) {
+    if (!row) return true;
+    for (var i = 0; i < row.length; i++) {
+      var v = row[i];
+      if (v == null || String(v).trim() === "") continue;
+      return String(v).replace(/^\s+/, "").charAt(0) === "#";
+    }
+    return true;
+  }
+  function mbonFaireBlank(v) {
+    var s = String(v == null ? "" : v).trim().toLowerCase();
+    return !s || s === "nan" || /^(not applicable|missing|not provided|not collected|none|na|n\/a|unknown)/.test(s);
+  }
+  // FAIRe -> report field names (same rules as build_mbon_html._faire_aliases)
+  function mbonFaireAliases(rec) {
+    var put = function (dst, srcs) {
+      if (!mbonFaireBlank(rec[dst])) return;
+      for (var i = 0; i < srcs.length; i++) if (!mbonFaireBlank(rec[srcs[i]])) { rec[dst] = rec[srcs[i]]; return; }
+    };
+    put("Station", ["ctd_bottle_number", "station_id", "site"]);
+    put("Cruise Number", ["expedition_id", "cruise_id"]);
+    put("Sample Depth", ["depth_category"]);
+    var m = /^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})$/.exec(String(rec.eventDate || "").trim());
+    if (m) {
+      var yr = +m[3]; if (yr < 100) yr += yr < 70 ? 2000 : 1900;
+      if (!rec.verbatimEventDate) rec.verbatimEventDate = rec.eventDate;
+      rec.eventDate = yr + "-" + ("0" + m[1]).slice(-2) + "-" + ("0" + m[2]).slice(-2);
+    }
+    return rec;
+  }
+  // Split CSV/TSV text into rows (quote-aware), dropping blank and '#' lines.
+  function mbonParseDelimited(text) {
+    var lines = String(text || "").replace(/^﻿/, "").split(/\r?\n/).filter(function (l) {
+      return l.trim() !== "" && l.replace(/^\s+/, "").charAt(0) !== "#"; });
+    if (!lines.length) return [];
+    var first = lines[0], best = "\t", bc = -1;
+    ["\t", ",", ";", "|"].forEach(function (c) { var n = first.split(c).length - 1; if (n > bc) { bc = n; best = c; } });
+    var sep = bc > 0 ? best : "\t";
+    return lines.map(function (line) {
+      if (line.indexOf('"') < 0) return line.split(sep);
+      var out = [], cur = "", q = false;
+      for (var i = 0; i < line.length; i++) {
+        var ch = line.charAt(i);
+        if (q) { if (ch === '"') { if (line.charAt(i + 1) === '"') { cur += '"'; i++; } else q = false; } else cur += ch; }
+        else if (ch === '"') q = true;
+        else if (ch === sep) { out.push(cur); cur = ""; }
+        else cur += ch;
+      }
+      out.push(cur); return out;
+    });
+  }
+
+  // Content-based detection for text tables; null = not ours (fall through).
+  function mbonDetectTextTable(parsed) {
+    var rows = mbonParseDelimited(parsed.text);
+    if (!rows.length) return null;
+    var hdr = rows[0].map(normColName), name = parsed.file.name;
+    var has = function (k) { return hdr.indexOf(k) >= 0; };
+    if (["featureid", "otuid", "asvid"].indexOf(hdr[0]) >= 0) {
+      if (has("taxonomy") || has("species") || has("dnasequence")) odePending.taxa = { rows: rows, name: name };
+      else odePending.table = { rows: rows, name: name };
+      return tryPairODE();
+    }
+    if (has("libid") && has("sampname")) {
+      var li = hdr.indexOf("libid"), si = hdr.indexOf("sampname"), n = 0;
+      rows.slice(1).forEach(function (r) {
+        var lib = String(r[li] || "").trim(), sn = String(r[si] || "").trim(); if (!lib || !sn) return;
+        var rec = {}; rows[0].forEach(function (h, j) { if (h && !mbonFaireBlank(r[j])) rec[String(h).trim()] = String(r[j]).trim(); });
+        MBON.odeLibMap[lib] = rec; n++;
+      });
+      mbonToast("FAIRe experimentRunMetadata loaded", name + " — " + n + " librar(ies) mapped to samples.", "metadata");
+      if (odePending.table && odePending.taxa) return tryPairODE();
+      return { ok: false, pending: true, msg: "experimentRunMetadata " + name + ": " + n + " library → sample link(s) ready for an Ocean DNA Explorer feature table." };
+    }
+    if (has("termname")) {
+      var ti = hdr.indexOf("termname"), pi = has("projectlevel") ? hdr.indexOf("projectlevel") : ti + 1, pm = {};
+      rows.slice(1).forEach(function (r) { var t = String(r[ti] || "").trim(); if (t && !mbonFaireBlank(r[pi])) pm[t] = String(r[pi]).trim(); });
+      MBON.odeProjectMeta = pm;
+      return { ok: false, pending: true, msg: "projectMetadata " + name + ": " + Object.keys(pm).length + " project field(s) noted." };
+    }
+    if ((has("sampname") || has("sampnumber") || has("sampleid")) && (has("decimallatitude") || /samplemetadata/i.test(name))) {
+      return ingestSampleMetadata({ file: parsed.file, grid: rows });
+    }
+    return null;
+  }
+
+  function tryPairODE() {
+    if (!odePending.table || !odePending.taxa) {
+      var got = odePending.table ? "feature table" : "asvTaxaFeatures";
+      var need = odePending.table ? "asvTaxaFeatures_*.tsv" : "table_*.tsv";
+      return { ok: false, pending: true, msg: "Ocean DNA Explorer: received the " + got + ". Waiting for " + need + " to complete the pair." };
+    }
+    var res = ingestODE(odePending.table, odePending.taxa);
+    odePending = { table: null, taxa: null };
+    return res;
+  }
+
+  var ODE_RANKS = ["kingdom", "phylum", "class", "order", "family", "genus", "species"];
+  function odeTaxon(rec) {
+    var v = {};
+    ODE_RANKS.forEach(function (k) { var x = String(rec[k] == null ? "" : rec[k]).trim();
+      v[k] = (mbonFaireBlank(x) || /^unassigned|^unclassified/i.test(x)) ? "" : x; });
+    if (!ODE_RANKS.some(function (k) { return v[k]; })) {
+      String(rec.taxonomy || "").split(";").map(function (x) { return x.trim().replace(/^[a-z]__/, ""); })
+        .filter(Boolean).forEach(function (x, i) { if (i < ODE_RANKS.length) v[ODE_RANKS[i]] = x; });
+    }
+    var finest = null;
+    for (var i = ODE_RANKS.length - 1; i >= 0; i--) if (v[ODE_RANKS[i]]) { finest = ODE_RANKS[i]; break; }
+    var name = !finest ? "Unassigned" : finest === "species"
+      ? (v.species.indexOf(" ") < 0 && v.genus ? v.genus + " " + v.species : v.species)
+      : v[finest] + " (" + finest + ")";
+    return { name: name, rank: finest || "unassigned", group: v["class"] || v.phylum || v.kingdom || "Unknown",
+      isEuk: /^eukaryota/i.test(v.kingdom || String(rec.taxonomy || "")) };
+  }
+  function odeShortAssay(a) {
+    var toks = ["MiFish", "Riaz", "Leray", "Folmer", "Teleo", "COI", "18S", "16S", "12S"];
+    for (var i = 0; i < toks.length; i++) { var m = new RegExp(toks[i], "i").exec(String(a || "")); if (m) return String(a).substr(m.index, toks[i].length); }
+    return String(a || "");
+  }
+  function odeLibToSample(lib) {
+    var rec = MBON.odeLibMap[lib];
+    if (rec && rec.samp_name) return rec.samp_name;
+    var meta = MBON.stationMeta || {};
+    if (meta[lib]) return lib;
+    var s = lib;
+    for (var k = 0; k < 3; k++) {
+      s = s.replace(/_S\d+$/i, "").replace(/_L\d{3}$/i, "").replace(/[_-](MiFish|Riaz|12S|16S|18S|COI|ITS)[A-Za-z0-9]*$/i, "");
+      if (meta[s]) return s;
+    }
+    return lib;
+  }
+
+  function ingestODE(tablePart, taxaPart) {
+    var tx = {}, th = taxaPart.rows[0].map(function (h) { return String(h).trim(); });
+    var thn = th.map(normColName);
+    taxaPart.rows.slice(1).forEach(function (r) {
+      var rec = {}; th.forEach(function (h, j) { var k = ODE_RANKS.indexOf(thn[j]) >= 0 ? thn[j] : h; rec[k] = r[j]; });
+      var fid = String(r[0] || "").trim(); if (fid) tx[fid] = odeTaxon(rec);
+    });
+    var libs = tablePart.rows[0].slice(1).map(function (h) { return String(h).trim(); });
+    var lib2sid = {}, sidLibs = {}, assays = {};
+    libs.forEach(function (lib) {
+      var sid = odeLibToSample(lib); lib2sid[lib] = sid; (sidLibs[sid] = sidLibs[sid] || []).push(lib);
+      var lr = MBON.odeLibMap[lib]; if (lr && lr.assay_name) assays[lr.assay_name] = 1;
+    });
+    var assayKeys = Object.keys(assays);
+    var assay = assayKeys.length === 1 ? assayKeys[0] : ((/(mifish|riaz|12s|16s|18s|coi)/i.exec(tablePart.name) || [])[1] || "");
+    var target = odeShortAssay(assay) || "Unknown";
+    var taxaMap = {}, classified = 0;
+    tablePart.rows.slice(1).forEach(function (r) {
+      var fid = String(r[0] || "").trim(); if (!fid) return;
+      var t = tx[fid]; if (t) classified++;
+      t = t || { name: "Unassigned", rank: "unassigned", group: "Unknown", isEuk: false };
+      var e = taxaMap[t.name] || (taxaMap[t.name] = { species: t.name, group: t.group, rank: t.rank, target: target,
+        isEuk: t.isEuk, reads: 0, perSample: {}, stations: {}, asvCount: 0 });
+      var any = false;
+      for (var j = 1; j < r.length && j <= libs.length; j++) {
+        var v = Number(r[j]) || 0; if (v <= 0) continue;
+        var sid = lib2sid[libs[j - 1]]; e.perSample[sid] = (e.perSample[sid] || 0) + v; e.reads += v; any = true;
+      }
+      if (any) e.asvCount++;
+    });
+    Object.keys(taxaMap).forEach(function (k) { if (!taxaMap[k].reads) delete taxaMap[k]; });
+    var samples = [], sampleCoords = {}, sampleStation = {};
+    Object.keys(sidLibs).forEach(function (sid) {
+      var m = (MBON.stationMeta || {})[sid] || {};
+      var la = parseFloat(m.decimalLatitude), lo = parseFloat(m.decimalLongitude);
+      var meta = {}; Object.keys(m).forEach(function (k) { meta[k] = m[k]; });
+      meta.Library = sidLibs[sid].join(", "); if (assay) meta.Assay = assay;
+      var ok = !isNaN(la) && !isNaN(lo) && !(la === 0 && lo === 0);
+      samples.push({ sampleId: sid, uid: sid, station: m.Station || null, lat: ok ? la : null, lon: ok ? lo : null, meta: meta });
+      if (ok) sampleCoords[sid] = [Math.round(la * 1e5) / 1e5, Math.round(lo * 1e5) / 1e5];
+      if (m.Station) sampleStation[sid] = m.Station;
+    });
+    var stationSamples = {};
+    Object.keys(sampleCoords).forEach(function (sid) { var key = sampleCoords[sid].join(","); (stationSamples[key] = stationSamples[key] || []).push(sid); });
+    var stations = buildStationsFromTaxa(taxaMap, stationSamples, sampleCoords, sampleStation);
+    var taxa = Object.keys(taxaMap).map(function (k) { var t = taxaMap[k]; t.stationCount = Object.keys(t.stations).length; delete t.stations; return t; });
+    var pm = MBON.odeProjectMeta || {};
+    var meta = { Method: "Ocean DNA Explorer (Tourmaline ASV)", "Feature table": tablePart.name, "Taxonomy file": taxaPart.name,
+      "ASV features": String(tablePart.rows.length - 1), Libraries: String(libs.length) };
+    if (assay) meta.Assay = assay;
+    [["project_name", "Project name"], ["project_id", "Project ID"], ["institution", "Institution"], ["project_contact", "Contact"],
+     ["target_gene", "Target gene"], ["bioproject_accession", "BioProject"]].forEach(function (p) { if (pm[p[0]]) meta[p[1]] = pm[p[0]]; });
+    var linked = samples.filter(function (s) { return (MBON.stationMeta || {})[s.sampleId]; }).length;
+    var warn = stations.length ? null : (Object.keys(MBON.stationMetaSources || {}).length
+      ? "No library matched a sample with coordinates — load the FAIRe experimentRunMetadata (lib_id → samp_name) .tsv, then the table again."
+      : "No coordinates yet — load the FAIRe sampleMetadata (.tsv/.xlsx) and experimentRunMetadata files to place these samples on the map.");
+    var label = (pm.project_id || pm.short_name || tablePart.name.replace(/^table[_-]/i, "").replace(/-[A-Za-z0-9]{16,}\.(tsv|csv|txt)$/i, "")) +
+      (target && target !== "Unknown" ? " · " + target : "");
+    var sources = [{ file: tablePart.name, sheets: ["feature table"], role: "Ocean DNA Explorer feature table → " + libs.length + " librar(ies)", samples: libs.length },
+      { file: taxaPart.name, sheets: ["asvTaxaFeatures"], role: "ASV taxonomy (" + classified + "/" + (tablePart.rows.length - 1) + " features classified)", samples: 0 }];
+    return { ok: true, run: { id: "up_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+      label: "↑ " + label, builtin: false, kind: "ode", sourceName: tablePart.name + " + " + taxaPart.name,
+      stations: stations, samples: samples, taxa: taxa, meta: meta, warning: warn, sources: sources },
+      msg: "Imported " + taxa.length + " taxa from " + libs.length + " libraries (" + linked + " linked to FAIRe samples) across " + stations.length + " station(s)." };
   }
 
   function buildStationsFromTaxa(taxaMap, stationSamples, sampleCoords, sampleStation) {
@@ -12790,6 +13039,11 @@
 
   function handleFiles(files) {
     var chain = Promise.resolve();
+    // FAIRe metadata (sample / experimentRun / project sheets) before data files,
+    // so an Ocean DNA Explorer feature table dropped together with them links its
+    // libraries to samples and coordinates straight away.
+    var prio = function (f) { return /samplemetadata|experimentrunmetadata|projectmetadata|faire/i.test(f.name) ? 0 : 1; };
+    files = Array.prototype.slice.call(files).sort(function (a, b) { return prio(a) - prio(b); });
     Array.prototype.forEach.call(files, function (f) {
       chain = chain.then(function () { return readFile(f).then(function (parsed) {
         if (parsed.isKraken) {
@@ -12813,7 +13067,7 @@
             (res.overwritten || 0) + " loaded sample(s) overwritten.", true);
         } else if (res.ok) {
           // ASV / taxonomic data file
-          mbonToast("ASV data detected", f.name + " — " + res.msg, "asv");
+          mbonToast(res.run && res.run.kind === "ode" ? "Ocean DNA Explorer data detected" : "ASV data detected", f.name + " — " + res.msg, "asv");
           var plan = mbonPlanRunOverwrite(res.run);
           confirmDialog("Import this dataset?", res.msg + "  " + mbonDescribePlan(plan, res.run),
             "Import", "primary", function () { mbonImportRun(res.run, res.run.sourceName || f.name, plan); });
@@ -12821,7 +13075,7 @@
           // surface info but keep waiting silently
           flashValidation(res.msg, true);
         } else {
-          mbonToast("Unrecognized file", f.name + " — expected an ASV workbook (aggregated sheet), an MBON metadata file (sampleMetadata sheet), or Wilder_02 Samples/Taxa files.", "warn");
+          mbonToast("Unrecognized file", f.name + " — expected an ASV workbook (aggregated sheet), an MBON / FAIRe metadata file (sampleMetadata sheet or .tsv), Wilder_02 Samples/Taxa files, or an Ocean DNA Explorer table_*.tsv / asvTaxaFeatures_*.tsv.", "warn");
           flashValidation(res.msg, false);
         }
       }).catch(function (err) { mbonToast("Error reading file", f.name + ": " + err.message, "error"); flashValidation("Error reading " + f.name + ": " + err.message, false); }); });
@@ -12967,8 +13221,12 @@
 
   function fdSyncMethod() {
     var sel = $("#fd-method"); if (!sel) return;
-    var hasK2 = mbonMethodAvailable("kraken2"), hasASV = mbonMethodAvailable("asv");
-    Array.prototype.forEach.call(sel.options, function (o) { o.disabled = (o.value === "kraken2") ? !hasK2 : !hasASV; });
+    Array.prototype.forEach.call(sel.options, function (o) {
+      var avail = mbonMethodAvailable(o.value);
+      o.disabled = !avail;
+      // Ocean DNA Explorer is only listed when such a run is loaded
+      if (o.value === "ode") { o.hidden = !avail; o.style.display = avail ? "" : "none"; }
+    });
     sel.value = MBON.method;
   }
 
@@ -13055,7 +13313,7 @@
     var res = { total: 0, asv: [], k2: [], none: [], asvAbsentProjects: [], k2AbsentProjects: [], projects: 0, projTotals: {} };
     Object.keys(keys).forEach(function (pk) {
       var pr = runs.filter(function (r) { return covProjectKey(r) === pk; });
-      var asvRuns = pr.filter(function (r) { return mbonRunKindClass(r) === "asv" && (r.taxa || []).length; });
+      var asvRuns = pr.filter(function (r) { return (mbonRunKindClass(r) === "asv" || mbonRunKindClass(r) === "ode") && (r.taxa || []).length; });
       var k2Runs = pr.filter(function (r) { return mbonRunKindClass(r) === "kraken2" && (r.taxa || []).length; });
       // A specific Kraken2 database selected: judge Kraken2 coverage against that run only.
       if (active && mbonRunKindClass(active) === "kraken2" && covProjectKey(active) === pk) k2Runs = [active];
@@ -14475,7 +14733,8 @@
 
   // ------------------------------------------------------------ DOM decorator
   var CAND_SEL = 'td,th,li,span,a,b,i,em,strong,small,label,button,div,dt,dd,h1,h2,h3,h4,h5,h6,p,summary,legend,text';
-  var SKIP_SEL = 'select,option,textarea,script,style,input,#mbon-icon-sprite,.mbi,.mbi-svg,[data-mbi-skip],[contenteditable="true"],#mbi-credits thead';
+  // .xs-grp-pill: Cross-Sample table Group column shows the name only (no silhouette)
+  var SKIP_SEL = 'select,option,textarea,script,style,input,#mbon-icon-sprite,.mbi,.mbi-svg,[data-mbi-skip],[contenteditable="true"],#mbi-credits thead,.xs-grp-pill';
   var TIP_SEL = '#mbon-tip,#xs-tip,.xs-tip,.fc-tip,#dz-tip,.mbon-sample-tooltip,.leaflet-tooltip';
   var SPLIT_RX = /^(.+?)(?:\s*[(\[:·•—–|,;=]|\s+\d|\s+-\s)/;
   var nameRx = null;
@@ -14820,7 +15079,7 @@
     #mbonom-tabs button[aria-selected="true"] { background:var(--mbon-ocean,#0b6fb5); color:#fff; }
     #mbonom-tabs .mbonom-n { font-size:.66rem; font-weight:700; background:rgba(255,255,255,.28); border-radius:999px; padding:0 .38rem; }
     #mbonom-tabs button:not([aria-selected="true"]) .mbonom-n { background:#e6eef6; color:#04527d; }
-    #mbonom-panel { width:330px; max-width:calc(100vw - 90px); background:rgba(255,255,255,.98); border:1px solid #cfd9e6; border-radius:10px; box-shadow:0 6px 22px rgba(20,40,65,.2); display:flex; flex-direction:column; max-height:calc(100% - 70px - var(--mbontl-h, 0px)); font-size:.78rem; color:#1b2631; }
+    #mbonom-panel { width:330px; max-width:calc(100vw - 90px); background:rgba(255,255,255,.98); border:1px solid #cfd9e6; border-radius:10px; box-shadow:0 6px 22px rgba(20,40,65,.2); display:flex; flex-direction:column; font-size:.78rem; color:#1b2631; }
     #mbonom-panel[hidden] { display:none; }
     #mbonom-panel { position:relative; }
     .mbonom-hint { position:absolute; left:calc(100% + 12px); top:52px; width:250px; background:#fff8d6; border:1px solid #e7c75b; color:#5c4a00; border-radius:9px; padding:.55rem 1.6rem .6rem .7rem; font-size:.74rem; line-height:1.45; box-shadow:0 6px 18px rgba(80,60,0,.18); z-index:6; }
@@ -14884,6 +15143,44 @@
     .mbonom-mk.ico svg { position:absolute; left:14%; top:14%; width:72%; height:72%; overflow:visible; }
     .mbonom-mk.absent { border:1.5px dashed #7b8794; background:rgba(255,255,255,.55); }
     .mbonom-mk .mbonom-cnt { position:absolute; right:-5px; bottom:-5px; min-width:15px; height:15px; border-radius:999px; background:#1b2631; color:#fff; font:700 9px/15px system-ui, sans-serif; text-align:center; padding:0 3px; box-sizing:border-box; }
+    .mbonom-mk.dot { opacity:.85; }
+    .mbonom-mk.dim { opacity:.28 !important; }
+    .mbonom-mk.focus { box-shadow:0 0 0 3px rgba(255,255,255,.95), 0 0 0 5px currentColor, 0 2px 8px rgba(0,0,0,.35); }
+    .mbonom-mk.dot.focus { box-shadow:0 0 0 3px #fff, 0 0 0 5px #1b2631; }
+    .mbonom-mk.cur { animation:mbonom-pulse 1.4s ease-in-out infinite; }
+    @keyframes mbonom-pulse { 50% { transform:scale(1.14); } }
+    .mbonom-row button.info:hover { color:#0b6fb5; }
+    #mbon-station-dock.mbonom-dock .mbon-chart-panel, #mbon-station-dock.mbonom-dock .mbon-dock-charts { display:none !important; }
+    .mbonom-dock-body { padding:.7rem .85rem 1rem; font-size:.8rem; color:#1b2631; display:flex; flex-direction:column; gap:.7rem; }
+    .mbonom-dh { display:flex; gap:.7rem; align-items:center; }
+    .mbonom-dhi { flex:0 0 auto; width:64px; height:64px; border-radius:50%; background:#f4f8fb; border:2px solid currentColor; display:flex; align-items:center; justify-content:center; }
+    .mbonom-dhi .mbi { width:44px; height:44px; margin:0; opacity:.95; color:#1b2631; }
+    .mbonom-dhn { display:flex; align-items:center; gap:.4rem; font-size:1rem; }
+    .mbonom-dhc { color:#5b6573; font-size:.76rem; }
+    .mbonom-dcred { color:#8a97a6; font-size:.68rem; margin-top:.15rem; }
+    .mbonom-dact { display:flex; flex-wrap:wrap; gap:.35rem; }
+    .mbonom-dact button { font:inherit; font-size:.72rem; font-weight:600; color:#04527d; background:#eef5fb; border:1px solid #cfe0ef; border-radius:999px; padding:.18rem .6rem; cursor:pointer; }
+    .mbonom-dact button:hover { background:#dcebf7; }
+    .mbonom-kpis { display:grid; grid-template-columns:repeat(auto-fit, minmax(118px, 1fr)); gap:.4rem; }
+    .mbonom-kpi { border:1px solid #e3e9f2; border-radius:8px; padding:.4rem .55rem; background:#fbfdff; }
+    .mbonom-kpi b { display:block; font-size:1.02rem; color:#04527d; font-variant-numeric:tabular-nums; }
+    .mbonom-kpi span { font-size:.66rem; color:#6b7c8c; text-transform:uppercase; letter-spacing:.3px; }
+    .mbonom-dsec { border-top:1px solid #eef2f6; padding-top:.5rem; }
+    .mbonom-dst { font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.35px; color:#56707f; margin-bottom:.3rem; display:flex; align-items:center; gap:.5rem; }
+    .mbonom-dst label { margin-left:auto; font-weight:400; text-transform:none; letter-spacing:0; cursor:pointer; }
+    details.mbonom-dsec summary { cursor:pointer; }
+    .mbonom-dfocus { background:#fff8e1; border:1px solid #f3dc91; border-radius:8px; padding:.45rem .6rem; }
+    .mbonom-dt { width:100%; border-collapse:collapse; font-size:.74rem; }
+    .mbonom-dt th { text-align:left; font-weight:600; color:#6b7c8c; font-size:.66rem; border-bottom:1px solid #e3e9f2; padding:.2rem .3rem; }
+    .mbonom-dt td { padding:.22rem .3rem; border-bottom:1px solid #f1f4f7; vertical-align:middle; }
+    .mbonom-dt td.n { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+    .mbonom-dt td.b { width:30%; }
+    .mbonom-dt tr[data-st], .mbonom-dt tr[data-sp] { cursor:pointer; }
+    .mbonom-dt tr[data-st]:hover, .mbonom-dt tr[data-sp]:hover { background:#f4f8fb; }
+    .mbonom-dt tr.cur { background:#fff3c4; }
+    .mbonom-db { display:block; height:8px; background:#eef2f6; border-radius:4px; overflow:hidden; }
+    .mbonom-db i { display:block; height:100%; border-radius:4px; opacity:.8; }
+    .mbonom-muted { color:#6b7c8c; font-size:.7rem; font-weight:400; text-transform:none; letter-spacing:0; }
     .mbonom-tip { font-size:12px; line-height:1.4; min-width:190px; }
     .mbonom-tip .t { font-weight:700; font-style:italic; }
     .mbonom-tip .t.grp { font-style:normal; }
@@ -14947,12 +15244,14 @@
   var METRIC_LABEL = { reads: 'Reads', pct: '% of station reads', det: 'Samples detected' };
 
   // ------------------------------------------------------------ data (active run + Filters)
-  function calc() {
+  function calc(noTime) {
     var A = app();
     if (!A) return null;
     var run = A.getActiveRun();
     if (!run) return null;
     var vis = A.samplesForRun(run) || [];
+    // the map timeline's date window (mbon-timeline-v1)
+    if (!noTime && window.MBONTime && window.MBONTime.active()) vis = vis.filter(function (sid) { return !window.MBONTime.outside(sid); });
     var visSet = {}; vis.forEach(function (s) { visSet[s] = 1; });
     var sById = {}; (run.samples || []).forEach(function (s) { if (s && s.sampleId) sById[s.sampleId] = s; });
     var totals = {}, taxa = {}, groups = {};
@@ -15193,9 +15492,11 @@
     panel.querySelector('.mbonom-sel').addEventListener('click', function (e) {
       var row = e.target.closest('.mbonom-row');
       if (!row) return;
+      dismissHint();
       var k = row.getAttribute('data-k');
       if (e.target.closest('button.rm')) { removeItem(k); return; }
       if (e.target.closest('button.fit')) { fitTo(k); return; }
+      if (e.target.closest('button.info')) { var it0 = W.sel.filter(function (x) { return keyOf(x) === k; })[0]; if (it0) openOrg(it0); return; }
       if (e.target.closest('.mbonom-sw') || e.target.closest('b')) {
         if (W.hidden[k]) delete W.hidden[k]; else W.hidden[k] = 1;
         save(); refresh();
@@ -15227,8 +15528,16 @@
   }
 
   // One-off note next to the panel on each page load: the defaults are only a starting point.
+  // Shown once per page load; it goes away for good as soon as the user
+  // clicks an organism (list row) or a dot on the map (2026-10-20).
   var hintClosed = false;
+  function dismissHint() {
+    hintClosed = true;
+    var h = document.querySelector('#mbonom-panel .mbonom-hint');
+    if (h) h.remove();
+  }
   function showHint() {
+    if (hintClosed) return;
     var panel = document.getElementById('mbonom-panel');
     if (!panel || hintClosed || !W.sel.length || panel.querySelector('.mbonom-hint')) return;
     var h = document.createElement('div');
@@ -15256,7 +15565,7 @@
       '<tr><td>% of station reads</td><td class="n">' + fmtPct(s.pct) + '</td></tr>' +
       '<tr><td>Detected in</td><td class="n">' + s.det + ' of ' + s.n + ' sample' + (s.n === 1 ? '' : 's') + '</td></tr>' +
       (cr.length ? '<tr><td colspan="2" class="s">By cruise: ' + cr.map(function (c) { return esc(c) + ' ' + fmt(s.byCruise[c]); }).join(' · ') + '</td></tr>' : '') +
-      '</table><div class="h">Sized by ' + esc(METRIC_LABEL[M].toLowerCase()) + ' · click to open the station</div></div>';
+      '</table><div class="h">Sized by ' + esc(METRIC_LABEL[M].toLowerCase()) + ' · click for this organism’s details</div></div>';
   }
   function draw(C) {
     var m = map();
@@ -15268,9 +15577,16 @@
     var series = W.sel.map(function (it) { return { it: it, k: keyOf(it), S: seriesOf(C, it) }; });
     var shown = series.filter(function (x) { return !W.hidden[x.k] && !x.S.missing; });
     var val = function (s) { return M === 'pct' ? s.pct : M === 'det' ? s.det : s.reads; };
+    // With a time window on, sizes keep the scale of the whole period, so a marker
+    // grows or shrinks as the window moves instead of being re-normalised each step.
+    var Cs = (window.MBONTime && window.MBONTime.active()) ? (calc(true) || C) : C;
     var gmax = 0;
-    shown.forEach(function (x) { x.max = 0; x.S.pts.forEach(function (s) { var v = val(s); if (v > x.max) x.max = v; }); gmax = Math.max(gmax, x.max); });
-    var R0 = 8, R1 = 30;
+    shown.forEach(function (x) {
+      x.max = 0;
+      (Cs === C ? x.S : seriesOf(Cs, x.it)).pts.forEach(function (s) { var v = val(s); if (v > x.max) x.max = v; });
+      gmax = Math.max(gmax, x.max);
+    });
+    var R0 = 8, R1 = 30, fk = orgOpen() ? keyOf(F.it) : null;
     var rad = function (v, mx) { return mx > 0 && v > 0 ? R0 + (R1 - R0) * Math.sqrt(v / mx) : 0; };
     var bounds = [];
     C.pts.forEach(function (p, pi) {
@@ -15294,16 +15610,17 @@
       here.forEach(function (o, i) {
         var a = -Math.PI / 2 + i * 2 * Math.PI / n, dx = Math.cos(a) * ring, dy = Math.sin(a) * ring;
         var d = Math.round(o.r * 2), col = colorOf(o.x.it), rec = iconRec(o.x.it);
+        var fx = fk ? (o.x.k === fk ? (F.st === p.key ? ' focus cur' : ' focus') : ' dim') : '';
         var inner = rec
-          ? '<div class="mbonom-mk ico" style="color:' + col + '"><svg viewBox="' + window.MBONIcons.vb(rec[0]) + '"><use href="#mbi-' + rec[0] + '"></use></svg></div>'
-          : '<div class="mbonom-mk dot" style="background:' + col + ';opacity:.85"></div>';
+          ? '<div class="mbonom-mk ico' + fx + '" style="color:' + col + '"><svg viewBox="' + window.MBONIcons.vb(rec[0]) + '"><use href="#mbi-' + rec[0] + '"></use></svg></div>'
+          : '<div class="mbonom-mk dot' + fx + '" style="background:' + col + '"></div>';
         if (rec && d < 20) { d = 20; }
         var mk = L.marker([p.lat, p.lon], {
           icon: L.divIcon({ className: 'mbonom-mk-wrap', html: inner, iconSize: [d, d], iconAnchor: [d / 2 - dx, d / 2 - dy] }),
           zIndexOffset: 1000 - d * 10, keyboard: false, riseOnHover: true
         });
         mk.bindTooltip(tipHtml(o.x.it, o.s, M), { direction: 'top', offset: [dx, dy - d / 2], opacity: 0.97 });
-        if (stIdx >= 0) mk.on('click', function () { mbonShowStationDock(mbonData.stations[stIdx], stIdx); });
+        mk.on('click', function () { openOrg(o.x.it, p.key); });
         layer.addLayer(mk);
       });
       bounds.push([p.lat, p.lon]);
@@ -15318,6 +15635,268 @@
     var b = seriesOf(C, it).pts.filter(function (s) { return s.reads > 0; }).map(function (s) { return [s.p.lat, s.p.lon]; });
     if (b.length) { try { m.fitBounds(b, { padding: [60, 60], maxZoom: 11 }); } catch (e) { /* ignore */ } }
   }
+
+  // ------------------------------------------------------------ organism details (left panel)
+  // Clicking an organism marker (or ⓘ in the list) fills the map's left panel
+  // with that organism: where, when, at what depth and in which samples it was
+  // found — using the samples in view (Filters panel + timeline window).
+  var F = { it: null, st: null, zeros: false };
+  var DEPTH_ORDER = ['deck', 'surface', 'low', 'shallow', 'mid', 'middle', 'deep', 'bottom'];
+  function dockEl() { return document.getElementById('mbon-station-dock'); }
+  function orgOpen() { var d = dockEl(); return !!(F.it && d && d.style.display !== 'none' && d.classList.contains('mbonom-dock')); }
+  function sTime(s) { return window.MBONTime && window.MBONTime.sampleTime ? window.MBONTime.sampleTime(s) : null; }
+  function dayStr(t) { var d = new Date(t); return d.getUTCFullYear() + '-' + ('0' + (d.getUTCMonth() + 1)).slice(-2) + '-' + ('0' + d.getUTCDate()).slice(-2); }
+  function depthOf(s) { var m = (s && s.meta) || {}; return String(m['Sample Depth'] || m.sample_depth || m.depth || '').trim() || 'Unknown'; }
+  function cruiseOf(s) { var m = (s && s.meta) || {}; return String(m['Cruise Number'] || m.Cruise || m.cruise || '').trim(); }
+  function depthRank(d) {
+    var k = d.toLowerCase(), i = DEPTH_ORDER.indexOf(k);
+    if (i >= 0) return i;
+    var n = parseFloat(d);
+    return isNaN(n) ? (k === 'unknown' ? 999 : 500) : 100 + n;
+  }
+  function bar(v, max, col) {
+    var w = max > 0 ? Math.max(v > 0 ? 2 : 0, Math.round(100 * v / max)) : 0;
+    return '<span class="mbonom-db"><i style="width:' + w + '%;background:' + col + '"></i></span>';
+  }
+  function openOrg(it, stKey) {
+    dismissHint();
+    F.it = { type: it.type, name: it.name, group: it.group || null };
+    F.st = stKey || null;
+    renderOrgDock();
+    refresh();
+  }
+  function closeOrg() {
+    var d = dockEl();
+    F.it = null; F.st = null;
+    if (d) { d.classList.remove('mbonom-dock'); d._organism = null; }
+  }
+  function renderOrgDock() {
+    var dock = dockEl();
+    if (!dock || !F.it) return;
+    var C = lastCalc || calc();
+    if (!C) return;
+    if (typeof mbonWireStationDock === 'function') { try { mbonWireStationDock(dock); } catch (e) { /* older template */ } }
+    if (typeof mbonHideSpeciesOverlay === 'function') { try { mbonHideSpeciesOverlay(); } catch (e) { /* ignore */ } }
+    if (typeof mbonActiveMarker !== 'undefined' && mbonActiveMarker && typeof mbonResetMarker === 'function') { try { mbonResetMarker(mbonActiveMarker); } catch (e) { /* ignore */ } }
+    dock._station = null;                 // station refresh logic leaves this panel alone
+    dock._organism = F.it;
+    dock.classList.add('mbonom-dock');
+    var it = F.it, col = colorOf(it), isG = it.type === 'grp';
+    var nm = isG ? 'All ' + it.name : it.name;
+    var t0 = C.taxa[it.name] || {};
+    var group = isG ? it.name : (t0.group || it.group || '');
+    var S = seriesOf(C, it), ps = perSampleOf(C, it) || {};
+    var ttl = dock.querySelector('.mbon-dock-ttl'), sub = dock.querySelector('.mbon-dock-sub');
+    if (ttl) ttl.innerHTML = (isG ? '' : '<i>') + esc(nm) + (isG ? '' : '</i>');
+    if (sub) {
+      sub.textContent = (group && !isG ? group + ' · ' : '') + (t0.commonName ? t0.commonName + ' · ' : '') +
+        S.stations + ' of ' + C.pts.length + ' stations · ' + S.det + ' of ' + C.vis.length + ' samples · ' + fmt(S.reads) + ' reads';
+      sub.title = sub.textContent;
+    }
+    var allReads = 0; C.vis.forEach(function (sid) { allReads += C.totals[sid] || 0; });
+    // stations
+    var rows = S.pts.map(function (s) { return s; }).filter(function (s) { return F.zeros || s.reads > 0; })
+      .sort(function (a, b) { return (b.reads - a.reads) || String(a.p.station).localeCompare(String(b.p.station)); });
+    var maxSt = rows.reduce(function (m, s) { return Math.max(m, s.reads); }, 0);
+    var peak = S.pts.reduce(function (b, s) { return !b || s.reads > b.reads ? s : b; }, null);
+    // samples
+    var smp = C.vis.filter(function (sid) { return (ps[sid] || 0) > 0; }).map(function (sid) {
+      var s = C.sById[sid] || {}, tot = C.totals[sid] || 0, t = sTime(s);
+      return { sid: sid, s: s, reads: ps[sid], pct: tot ? ps[sid] / tot * 100 : 0, t: t, depth: depthOf(s), cruise: cruiseOf(s) };
+    }).sort(function (a, b) { return b.reads - a.reads; });
+    var meanPct = smp.length ? smp.reduce(function (a, x) { return a + x.pct; }, 0) / smp.length : 0;
+    // over time: the whole period of the Filters panel (timeline window marked)
+    var Cf = (window.MBONTime && window.MBONTime.active()) ? (calc(true) || C) : C, psf = perSampleOf(Cf, it) || {};
+    var byDay = {};
+    Cf.vis.forEach(function (sid) {
+      var t = sTime(Cf.sById[sid]);
+      var k = t == null ? 'undated' : dayStr(t);
+      var o = byDay[k] || (byDay[k] = { k: k, t: t == null ? Infinity : Math.floor(t / 864e5), n: 0, det: 0, reads: 0, tot: 0, inWin: false });
+      o.n++; o.tot += Cf.totals[sid] || 0;
+      if ((psf[sid] || 0) > 0) { o.det++; o.reads += psf[sid]; }
+      if (C.visSet[sid]) o.inWin = true;
+    });
+    var days = Object.keys(byDay).map(function (k) { return byDay[k]; }).sort(function (a, b) { return a.t - b.t; });
+    var maxDay = days.reduce(function (m, d) { return Math.max(m, d.reads); }, 0);
+    var winOn = window.MBONTime && window.MBONTime.active();
+    // depth classes
+    var byDepth = {};
+    C.vis.forEach(function (sid) {
+      var d = depthOf(C.sById[sid]), o = byDepth[d] || (byDepth[d] = { d: d, n: 0, det: 0, reads: 0 });
+      o.n++; if ((ps[sid] || 0) > 0) { o.det++; o.reads += ps[sid]; }
+    });
+    var depths = Object.keys(byDepth).map(function (k) { return byDepth[k]; }).sort(function (a, b) { return depthRank(a.d) - depthRank(b.d) || a.d.localeCompare(b.d); });
+    var maxDepth = depths.reduce(function (m, d) { return Math.max(m, d.reads); }, 0);
+    var focus = F.st ? S.pts.filter(function (s) { return s.p.key === F.st; })[0] : null;
+    var icon = window.mbonIcon ? window.mbonIcon(it.name, group, 'mbonom-dico') : '';
+    var credit = '';
+    if (window.MBONIcons && window.MBONIcons.lookup) {
+      var r = isG ? window.MBONIcons.lookup(it.name, it.name) : window.MBONIcons.lookup(it.name, group);
+      if (r) credit = '<div class="mbonom-dcred">Silhouette: ' + ({ species: 'this organism', genus: 'same genus', lineage: 'related taxon', group: 'group stand-in' }[r[1]] || r[1]) +
+        ' · PhyloPic · <a href="#" data-act="credits">credits</a></div>';
+    }
+    var html = '<div class="mbonom-dock-body">' +
+      '<div class="mbonom-dh"><div class="mbonom-dhi" style="color:' + col + '">' + icon + '</div><div class="mbonom-dht">' +
+        '<div class="mbonom-dhn" data-mbi-skip><span class="mbonom-sw" style="background:' + col + '"></span>' + (isG ? '<b>' + esc(nm) + '</b>' : '<b><i>' + esc(nm) + '</i></b>') + '</div>' +
+        (t0.commonName ? '<div class="mbonom-dhc">' + esc(t0.commonName) + '</div>' : '') +
+        (group && !isG ? '<div class="mbonom-dhc">Group: ' + esc(group) + (t0.rank && t0.rank !== 'species' ? ' · rank: ' + esc(t0.rank) : '') + '</div>' : '') +
+        credit + '</div></div>' +
+      '<div class="mbonom-dact">' +
+        '<button type="button" data-act="zoom">⌖ Zoom to detections</button>' +
+        '<button type="button" data-act="only">' + (onlyThis() ? '◑ Show all organisms' : '◐ Only this on the map') + '</button>' +
+        (W.sel.some(function (x) { return keyOf(x) === keyOf(it); }) ? '' : '<button type="button" data-act="add">+ Add to map</button>') +
+        (focus && stationIndexAt(focus.p.lat, focus.p.lon) >= 0 ? '<button type="button" data-act="station">Open station ' + esc(focus.p.station || '') + ' ↗</button>' : '') +
+      '</div>' +
+      (S.missing ? '<div class="mbonom-note warn">Not in the current run / method.</div>' : '') +
+      '<div class="mbonom-kpis">' +
+        kpi(S.stations + ' / ' + C.pts.length, 'stations') +
+        kpi(S.det + ' / ' + C.vis.length, 'samples · ' + fmtPct(C.vis.length ? S.det / C.vis.length * 100 : 0)) +
+        kpi(fmt(S.reads), 'reads · ' + fmtPct(allReads ? S.reads / allReads * 100 : 0) + ' of all') +
+        kpi(fmtPct(meanPct), 'mean % of sample (where found)') +
+      '</div>' +
+      (focus ? '<div class="mbonom-dsec mbonom-dfocus"><div class="mbonom-dst">At station ' + esc(focus.p.station || focus.p.key) + '</div>' +
+        '<div>' + fmt(focus.reads) + ' reads · ' + fmtPct(focus.pct) + ' of the station’s reads · detected in ' + focus.det + ' of ' + focus.n + ' samples' +
+        (Object.keys(focus.byCruise).length ? '<br><span class="mbonom-muted">By cruise: ' + Object.keys(focus.byCruise).sort().map(function (c) { return esc(c) + ' ' + fmt(focus.byCruise[c]); }).join(' · ') + '</span>' : '') +
+        '</div></div>' : '') +
+      '<div class="mbonom-dsec"><div class="mbonom-dst">By station <label><input type="checkbox" data-act="zeros"' + (F.zeros ? ' checked' : '') + '> include not detected</label></div>' +
+        '<table class="mbonom-dt"><thead><tr><th>Station</th><th>Detected</th><th>Reads</th><th>% of stn</th><th></th></tr></thead><tbody>' +
+        rows.map(function (s) {
+          return '<tr data-st="' + esc(s.p.key) + '"' + (s.p.key === F.st ? ' class="cur"' : '') + (s.reads ? '' : ' style="opacity:.55"') + '><td>' + esc(s.p.station || s.p.key) + '</td><td>' + s.det + '/' + s.n + '</td><td class="n">' + fmt(s.reads) +
+            '</td><td class="n">' + fmtPct(s.pct) + '</td><td class="b">' + bar(s.reads, maxSt, col) + '</td></tr>';
+        }).join('') + (rows.length ? '' : '<tr><td colspan="5" class="mbonom-muted">Not detected in the samples in view.</td></tr>') +
+        '</tbody></table>' + (peak && peak.reads ? '<div class="mbonom-muted">Most reads at station ' + esc(peak.p.station || peak.p.key) + '. Click a row to show it on the map.</div>' : '') + '</div>' +
+      (days.length > 1 || (days[0] && days[0].k !== 'undated') ? '<div class="mbonom-dsec"><div class="mbonom-dst">Over time <span class="mbonom-muted">by sampling date' + (winOn ? ' · highlighted = in the timeline window' : '') + '</span></div>' +
+        '<table class="mbonom-dt"><thead><tr><th>Date</th><th>Detected</th><th>Reads</th><th>% of reads</th><th></th></tr></thead><tbody>' +
+        days.map(function (d) {
+          return '<tr' + (winOn && d.inWin ? ' class="cur"' : '') + (winOn && !d.inWin ? ' style="opacity:.55"' : '') + '><td>' + esc(d.k) + '</td><td>' + d.det + '/' + d.n + '</td><td class="n">' + fmt(d.reads) +
+            '</td><td class="n">' + fmtPct(d.tot ? d.reads / d.tot * 100 : 0) + '</td><td class="b">' + bar(d.reads, maxDay, col) + '</td></tr>';
+        }).join('') + '</tbody></table></div>' : '') +
+      (depths.length > 1 ? '<div class="mbonom-dsec"><div class="mbonom-dst">By sample depth</div>' +
+        '<table class="mbonom-dt"><thead><tr><th>Depth</th><th>Detected</th><th>Reads</th><th></th></tr></thead><tbody>' +
+        depths.map(function (d) {
+          return '<tr><td>' + esc(d.d) + '</td><td>' + d.det + '/' + d.n + ' · ' + fmtPct(d.n ? d.det / d.n * 100 : 0) + '</td><td class="n">' + fmt(d.reads) + '</td><td class="b">' + bar(d.reads, maxDepth, col) + '</td></tr>';
+        }).join('') + '</tbody></table></div>' : '') +
+      (isG ? membersHtml(C, it, col) : '') +
+      '<details class="mbonom-dsec"' + (smp.length <= 12 ? ' open' : '') + '><summary class="mbonom-dst">Samples where detected (' + smp.length + ')</summary>' +
+        '<table class="mbonom-dt"><thead><tr><th>Sample</th><th>Station</th><th>Date</th><th>Depth</th><th>Reads</th><th>% of smp</th></tr></thead><tbody>' +
+        smp.slice(0, 300).map(function (x) {
+          var m = x.s.meta || {};
+          return '<tr><td title="' + esc(m.samp_name || '') + '">' + esc(x.sid) + '</td><td>' + esc(x.s.station || m.Station || '') + '</td><td>' + (x.t != null ? dayStr(x.t) : '—') +
+            '</td><td>' + esc(x.depth) + '</td><td class="n">' + fmt(x.reads) + '</td><td class="n">' + fmtPct(x.pct) + '</td></tr>';
+        }).join('') + '</tbody></table>' + (smp.length > 300 ? '<div class="mbonom-muted">First 300 shown.</div>' : '') + '</details>' +
+      '<div class="mbonom-muted">Counts use the samples in view: run / method, hidden samples, cruises and groups from the Filters panel' + (winOn ? ', and the timeline window' : '') + '.</div>' +
+      '</div>';
+    var body = dock.querySelector('.mbon-dock-body');
+    body.innerHTML = html;
+    dock.style.display = 'flex';
+    if (!body._mbonomWired) {
+      body._mbonomWired = true;
+      body.addEventListener('click', function (e) {
+        if (!orgOpen()) return;
+        var a = e.target.closest('[data-act]');
+        var tr = e.target.closest('tr[data-st]');
+        var sp = e.target.closest('tr[data-sp]');
+        if (sp) { openOrg({ type: 'sp', name: sp.getAttribute('data-sp') }); return; }
+        if (a) {
+          var act = a.getAttribute('data-act');
+          if (act === 'zeros') { F.zeros = a.checked; renderOrgDock(); return; }
+          e.preventDefault();
+          if (act === 'zoom') zoomOrg();
+          else if (act === 'only') { toggleOnly(); }
+          else if (act === 'add') { addItem(F.it); renderOrgDock(); }
+          else if (act === 'credits' && window.MBONIcons) window.MBONIcons.credits();
+          else if (act === 'station') {
+            var f = lastCalc && lastCalc.pts.filter(function (p) { return p.key === F.st; })[0];
+            var idx = f ? stationIndexAt(f.lat, f.lon) : -1;
+            if (idx >= 0) mbonShowStationDock(mbonData.stations[idx], idx);
+          }
+        } else if (tr) {
+          F.st = tr.getAttribute('data-st');
+          var p = lastCalc && lastCalc.pts.filter(function (q) { return q.key === F.st; })[0];
+          var m = map();
+          if (p && m) { try { m.panTo([p.lat, p.lon]); } catch (er) { /* ignore */ } }
+          renderOrgDock();
+          refresh();
+        }
+      });
+    }
+    layoutBar();
+  }
+  function kpi(v, l) { return '<div class="mbonom-kpi"><b>' + v + '</b><span>' + esc(l) + '</span></div>'; }
+  function membersHtml(C, it, col) {
+    var ms = (C.groups[it.name] || []).map(function (t) {
+      var r = 0, d = 0, ps = t.perSample || {};
+      for (var sid in ps) if (C.visSet[sid] && ps[sid] > 0) { r += ps[sid]; d++; }
+      return { t: t, r: r, d: d };
+    }).filter(function (x) { return x.r > 0; }).sort(function (a, b) { return b.r - a.r; });
+    var mx = ms.length ? ms[0].r : 0;
+    return '<div class="mbonom-dsec"><div class="mbonom-dst">Members detected (' + ms.length + ')</div><table class="mbonom-dt"><tbody>' +
+      ms.slice(0, 25).map(function (x) {
+        return '<tr data-sp="' + esc(x.t.species) + '"><td><i>' + esc(x.t.species) + '</i></td><td>' + x.d + ' smp</td><td class="n">' + fmt(x.r) + '</td><td class="b">' + bar(x.r, mx, col) + '</td></tr>';
+      }).join('') + '</tbody></table>' + (ms.length > 25 ? '<div class="mbonom-muted">Top 25 by reads.</div>' : '') + '</div>';
+  }
+  function onlyThis() {
+    if (!F.it) return false;
+    var k = keyOf(F.it);
+    return W.sel.length > 1 && W.sel.every(function (x) { return keyOf(x) === k ? !W.hidden[k] : !!W.hidden[keyOf(x)]; });
+  }
+  function toggleOnly() {
+    var k = keyOf(F.it);
+    if (!W.sel.some(function (x) { return keyOf(x) === k; })) addItem(F.it);
+    if (onlyThis()) W.hidden = {};
+    else { W.hidden = {}; W.sel.forEach(function (x) { if (keyOf(x) !== k) W.hidden[keyOf(x)] = 1; }); }
+    save(); refresh();
+  }
+  function zoomOrg() {
+    var m = map(), C = lastCalc;
+    if (!m || !C || !F.it) return;
+    var b = seriesOf(C, F.it).pts.filter(function (s) { return s.reads > 0; }).map(function (s) { return [s.p.lat, s.p.lon]; });
+    if (b.length) { try { m.fitBounds(b, { padding: [60, 60], maxZoom: 11 }); } catch (e) { /* ignore */ } }
+  }
+  // Organisms panel / regions bar move right of the left panel while it is open.
+  function layoutBar() {
+    var bar = document.getElementById('mbonrg-bar'), d = dockEl();
+    if (!bar) return;
+    var open = W.on && d && d.style.display !== 'none' && d.offsetWidth && !d.classList.contains('mbon-dock-maxed');
+    var left = open ? (d.offsetWidth + 12) + 'px' : '';
+    if (bar.style.left !== left) {
+      bar.style.left = left;
+      fitPanel();
+      if (window.MBONTime && window.MBONTime.layout) window.MBONTime.layout();   // its width changed too
+    }
+  }
+  (function wrapDock() {
+    var go = function () {
+      if (typeof window.mbonShowStationDock === 'function' && !window.mbonShowStationDock.__mbonom) {
+        var show = window.mbonShowStationDock;
+        window.mbonShowStationDock = function () { var had = !!F.it; closeOrg(); var r = show.apply(this, arguments); layoutBar(); if (had) refresh(); return r; };
+        window.mbonShowStationDock.__mbonom = true;
+      }
+      if (typeof window.mbonHideStationDock === 'function' && !window.mbonHideStationDock.__mbonom) {
+        var hide = window.mbonHideStationDock;
+        window.mbonHideStationDock = function () {
+          var had = !!F.it;
+          closeOrg();
+          var r = hide.apply(this, arguments);
+          layoutBar();
+          if (had) refresh();
+          return r;
+        };
+        window.mbonHideStationDock.__mbonom = true;
+      }
+      var d = dockEl();
+      if (d && window.ResizeObserver && !d.__mbonomRO) {
+        d.__mbonomRO = new ResizeObserver(function () {
+          // closed with its own × (display:none): drop the organism focus too
+          if (F.it && d.style.display === 'none') { closeOrg(); refresh(); }
+          layoutBar();
+          if (window.MBONTime && window.MBONTime.layout) window.MBONTime.layout();   // the timeline keeps clear of the panel in both views
+        });
+        d.__mbonomRO.observe(d);
+      }
+    };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go); else go();
+  })();
 
   // ------------------------------------------------------------ panel content
   function renderPanel(C, D) {
@@ -15341,6 +15920,7 @@
           '<span class="mbonom-sw" style="background:' + col + '" title="Show / hide on the map"></span>' +
           (window.mbonIcon ? window.mbonIcon(it.name, it.type === 'grp' ? it.name : it.group) : '') +
           '<span class="nm"><b class="' + (it.type === 'grp' ? 'grp' : '') + '" data-mbi-skip title="Show / hide on the map">' + esc(it.type === 'grp' ? 'All ' + it.name : it.name) + '</b><small>' + esc(stat) + '</small></span>' +
+          '<button type="button" class="info" title="Details in the left panel">ⓘ</button>' +
           '<button type="button" class="fit" title="Zoom to where it was detected">⌖</button>' +
           '<button type="button" class="rm" title="Remove">×</button></div>';
       }).join('');
@@ -15361,11 +15941,22 @@
     var notes = [];
     if (C && C.mixed && M !== 'det') notes.push('<div class="mbonom-note warn">This view mixes Kraken2 and ASV samples, whose read counts aren’t comparable. Pick one run in the Filters panel, or size by samples detected.</div>');
     if (C && C.offMap) notes.push('<div class="mbonom-note">' + C.offMap + ' sample' + (C.offMap === 1 ? '' : 's') + ' in view have no coordinates and are not drawn.</div>');
-    notes.push('<div class="mbonom-note">Uses the samples in view: run / method, hidden samples, cruises and sample groups from the Filters panel. Click a marker to open its station.</div>');
+    notes.push('<div class="mbonom-note">Uses the samples in view: run / method, hidden samples, cruises and sample groups from the Filters panel. Click a marker for that organism’s details (where, when, depth, samples).</div>');
     var nbox = panel.querySelector('.mbonom-notes');
     if (nbox) nbox.innerHTML = notes.join('');
   }
 
+  // keep the panel above the map's bottom edge / the timeline bar
+  function fitPanel() {
+    var pane = document.getElementById('pane-map'), panel = document.getElementById('mbonom-panel');
+    if (!pane || !panel || panel.hidden) return;
+    var pr = pane.getBoundingClientRect(), r = panel.getBoundingClientRect();
+    if (!pr.height) return;
+    var tl = parseFloat(getComputedStyle(pane).getPropertyValue('--mbontl-h')) || 0;
+    var mh = Math.max(160, Math.floor(pr.bottom - r.top - Math.max(tl, 26) - 10)) + 'px';
+    if (panel.style.maxHeight !== mh) panel.style.maxHeight = mh;
+  }
+  window.addEventListener('resize', fitPanel);
   function refresh() {
     if (!ensureUi()) return;
     var m = map();
@@ -15384,10 +15975,15 @@
     lastCalc = C;
     var D = W.on ? draw(C) : draw(null);
     renderPanel(C, D);
+    if (orgOpen()) { if (W.on) renderOrgDock(); else { closeOrg(); if (typeof mbonHideStationDock === 'function') mbonHideStationDock(); } }
+    layoutBar();
+    fitPanel();
   }
 
   window.MBONOrgMap = {
     refresh: refresh,
+    fit: fitPanel,
+    details: function (name) { openOrg({ type: 'sp', name: name }); },
     show: function (names) {
       (Array.isArray(names) ? names : [names]).forEach(function (n) { if (n) addItem({ type: 'sp', name: n }); });
       if (window.MBONApp) window.MBONApp.activatePane('map');
@@ -15448,14 +16044,14 @@
   var DATE_KEYS = ['eventDate', 'CollectionDate', 'collection_date', 'Collection Date', 'collectionDate', 'Date', 'date', 'samp_collect_date', 'sampling_date'];
   var TIME_KEYS = ['eventTime', 'collection_time', 'CollectionTime', 'Time', 'time'];
   var T = (function () {
-    var d = { open: false, mode: 'slide', step: 'date', speed: 1, loop: false, undated: false };
+    var d = { open: false, hidden: false, mode: 'slide', step: 'date', speed: 1, loop: false, undated: false };
     try { var o = JSON.parse(localStorage.getItem(LS) || 'null'); if (o) for (var k in d) if (k in o && k !== 'open') d[k] = o[k]; } catch (e) { /* storage off */ }
     d.on = false; d.s = null; d.e = null; d.v0 = null; d.v1 = null; d.playing = false;
     return d;
   })();
   var timer = null, el = null, dates = null, lastKey = '';
 
-  function save() { try { localStorage.setItem(LS, JSON.stringify({ mode: T.mode, step: T.step, speed: T.speed, loop: T.loop, undated: T.undated })); } catch (e) { /* ignore */ } }
+  function save() { try { localStorage.setItem(LS, JSON.stringify({ hidden: T.hidden, mode: T.mode, step: T.step, speed: T.speed, loop: T.loop, undated: T.undated })); } catch (e) { /* ignore */ } }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 
   // ------------------------------------------------------------ dates (UTC throughout)
@@ -15518,7 +16114,11 @@
   }
 
   // ------------------------------------------------------------ filter API (used by the map)
-  function active() { return !!(T.on && T.s != null && T.e != null); }
+  // A window spanning every date filters nothing (undated samples stay too).
+  function active() {
+    if (!(T.on && T.s != null && T.e != null)) return false;
+    return !(dates && dates.min != null && T.s <= dates.min && T.e >= dates.max);
+  }
   function outside(sid) {
     if (!active()) return false;
     var t = dates && dates.times[sid];
@@ -15565,12 +16165,13 @@
       '<div class="tl-axis"><span class="tl-hint">scroll / drag to pan · ctrl+scroll or pinch to zoom · drag the window or its edges</span><svg></svg></div>';
     pane.appendChild(el);
     if (window.L && L.DomEvent) { L.DomEvent.disableClickPropagation(el); L.DomEvent.disableScrollPropagation(el); L.DomEvent.disableClickPropagation(btn); }
-    btn.addEventListener('click', function () { open(true); });
+    btn.hidden = true;            // shown once the samples turn out to have dates
+    btn.addEventListener('click', function () { T.hidden = false; save(); open(true); });
     el.addEventListener('click', function (e) {
       var b = e.target.closest('[data-a]');
       if (!b) return;
       var a = b.getAttribute('data-a');
-      if (a === 'close') open(false);
+      if (a === 'close') { T.hidden = true; save(); open(false); }
       else if (a === 'play') { if (T.playing) pause(); else play(); }
       else if (a === 'stop') stop();
       else if (a === 'next') { pause(); step(1); }
@@ -15612,22 +16213,21 @@
         fitView();
       }
     }
-    el.hidden = !T.open;
-    document.getElementById('mbontl-open').hidden = T.open;
-    document.getElementById('pane-map').classList.toggle('mbontl-show', T.open);
+    showHide();
     apply();
     layout();
   }
   function layout() {
     var pane = document.getElementById('pane-map');
     if (!pane || !el) return;
-    var h = T.open ? el.offsetHeight + 30 : 0;
+    var h = T.open && !el.hidden ? el.offsetHeight + 30 : 0;
     var v = h + 'px';
     if (pane.style.getPropertyValue('--mbontl-h') !== v) pane.style.setProperty('--mbontl-h', v);
     // keep clear of the station panel when it is open on the left
     var dock = document.getElementById('mbon-station-dock');
     var left = dock && dock.style.display !== 'none' && dock.offsetWidth && !dock.classList.contains('mbon-dock-maxed') ? dock.offsetWidth + 10 : 10;
     if (el.style.left !== left + 'px') el.style.left = left + 'px';
+    if (window.MBONOrgMap && window.MBONOrgMap.fit) window.MBONOrgMap.fit();
   }
 
   // ------------------------------------------------------------ axis (view range v0..v1, window s..e)
@@ -15697,7 +16297,7 @@
     var nIn = 0;
     dates.vis.forEach(function (sid) { if (!outside(sid)) nIn++; });
     sum.innerHTML = '<b>' + nIn + '</b> of ' + dates.n + ' samples · ' + fmtSpan(T.e - T.s + (T.e === T.s ? DAY : 0)) +
-      (dates.undated ? ' · ' + dates.undated + ' undated' + (T.undated ? ' (kept)' : ' (hidden)') : '');
+      (dates.undated ? ' · ' + dates.undated + ' undated' + (T.undated || !active() ? ' (kept)' : ' (hidden)') : '');
     layout();
   }
   function wireAxis(box) {
@@ -15818,23 +16418,49 @@
     apply();
   }
 
+  // Bar shown only when the samples in view carry dates; the 🕒 pill reopens it after ×.
+  function showHide() {
+    if (!el) return;
+    var has = !!(dates && dates.min != null), show = T.open && has;
+    el.hidden = !show;
+    var pill = document.getElementById('mbontl-open');
+    if (pill) pill.hidden = show || !has;
+    var pane = document.getElementById('pane-map');
+    if (pane) pane.classList.toggle('mbontl-show', show);
+    if (!show && pane && pane.style.getPropertyValue('--mbontl-h') !== '0px') pane.style.setProperty('--mbontl-h', '0px');
+    layout();
+  }
+  var autoTried = false;
   // the samples in view changed (run / filters): keep the window, refresh the axis
   function refresh() {
-    if (!T.open) return;
+    if (!build()) return;
+    if (!T.open) {
+      dates = collect();
+      // open by default the first time the map has dated samples (unless closed with ×)
+      if (!T.hidden && !autoTried && dates && dates.min != null) { autoTried = true; open(true); return; }
+      showHide();
+      return;
+    }
     var nd = collect();
     var key = nd ? nd.n + ':' + nd.min + ':' + nd.max + ':' + nd.undated : '';
     dates = nd;
     if (key !== lastKey) {
       lastKey = key;
       if (dates && dates.min != null) {
-        if (T.s == null) { T.s = dates.min; T.e = dates.max; fitView(); }
+        // New sample set (run / method switch): keep the user's window only if it
+        // still overlaps the new dates, otherwise show the whole new span — e.g.
+        // a 2019 Ocean DNA Explorer cruise after a 2026 ASV run.
+        if (T.s == null || T.e == null || T.e < dates.min || T.s > dates.max) {
+          T.s = dates.min; T.e = dates.max; fitView();
+        }
         T.on = true;
       } else T.on = false;
     }
+    showHide();
     draw();
   }
 
-  window.MBONTime = { active: active, outside: outside, refresh: refresh, open: open,
+  window.MBONTime = { active: active, outside: outside, refresh: refresh, open: open, sampleTime: sampleTime, layout: function () { if (T.open) draw(); },
                       play: play, pause: pause, stop: stop, state: function () { return { on: T.on, s: T.s, e: T.e, playing: T.playing, mode: T.mode, step: T.step }; },
                       setWindow: function (s, e) { T.s = parseDate(s); T.e = parseDate(e); ensureVisible(); apply(); } };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build); else build();

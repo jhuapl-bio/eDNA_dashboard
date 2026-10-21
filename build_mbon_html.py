@@ -19,9 +19,11 @@
 build_mbon_html.py — build the interactive, map-based eDNA report (HTML)
 =======================================================================
 
-Reads taxonomic-hit results (Wilderlab ASV workbooks, Kraken2 reports, or
-Wilderlab Samples/Taxa CSV exports) plus per-sample station metadata
-(FAIRe ``sampleMetadata`` sheets) and renders a single self-contained HTML
+Reads taxonomic-hit results (Wilderlab ASV workbooks, Kraken2 reports,
+Ocean DNA Explorer / Tourmaline feature tables + asvTaxaFeatures, or Wilderlab
+Samples/Taxa CSV exports) plus per-sample station metadata (FAIRe
+``sampleMetadata`` sheets as .xlsx, .csv or .tsv — '#' comment rows are skipped;
+``experimentRunMetadata`` links library ids to samples) and renders a single self-contained HTML
 report from ``templates/station_top10_species_map_template.html``.
 
 Inputs are driven by ``report_manifest.xlsx`` inside the projects folder::
@@ -31,6 +33,7 @@ Inputs are driven by ``report_manifest.xlsx`` inside the projects folder::
         <project>/faire/   FAIRe checklist(s)  (station coords + env metadata)
         <project>/kraken2/ Kraken2 reports     (optionally <DATABASE>/<run>/...)
         <project>/wilder/  Wilderlab WLM*.xlsx (metadata / aggregated / full sheets)
+        <project>/tourmaline/ Ocean DNA Explorer table_*.tsv + asvTaxaFeatures_*.tsv
         <project>/meta/    concordance.json    (written by `ingest.py concordance`)
 
 Every default path is RELATIVE TO THIS REPOSITORY (``data/``, ``templates/``,
@@ -107,6 +110,9 @@ SAMPLE_TOOLTIP_FIELDS = {
     'geo_loc_name': 'Location', 'samp_collect_device': 'Collection Device',
     'filter_name': 'Filter', 'size_frac': 'Size Fraction (um)',
     'samp_store_sol': 'Storage Solution', 'Coordinate Note': 'Coordinate Note',
+    # FAIRe / Ocean DNA Explorer extras (shown only when present)
+    'ctd_bottle_number': 'CTD Cast', 'diss_oxygen': 'Dissolved Oxygen',
+    'chlorophyll': 'Chlorophyll', 'assay_name': 'Assay',
 }
 INFO_COLS = ['ScientificName', 'Rank', 'TaxID', 'CommonName', 'Group']
 
@@ -268,10 +274,21 @@ def load_station_map_from_file(fpath):
     workbook. Finds a 'sampleMetadata' sheet (or the first sheet that contains
     a samp_number column) and auto-detects the header row."""
     try:
-        ec.require_file(fpath, 'station metadata workbook', ec.SPREADSHEET_EXT + ('.csv',))
-        if str(fpath).lower().endswith('.csv'):
-            smap = _station_map_from_frame(pd.read_csv(fpath, header=None, dtype=str), fpath)
+        ec.require_file(fpath, 'station metadata workbook', ec.SPREADSHEET_EXT + TEXT_TABLE_EXT)
+        if str(fpath).lower().endswith(TEXT_TABLE_EXT):
+            # CSV / TSV / TXT (e.g. a FAIRe sampleMetadata sheet exported from the
+            # Ocean DNA Explorer). Delimiter is sniffed; '#' comment rows dropped.
+            raw = read_text_table(fpath, header=None)
+            kind = faire_sheet_kind(raw)
+            if kind not in (None, 'sample'):
+                log.info("%s: FAIRe %sMetadata sheet, not sampleMetadata — no station "
+                         "coordinates from it", Path(fpath).name, kind)
+                return {}
+            smap = _station_map_from_frame(raw, fpath)
             _fill_station_coords(smap)
+            log.info("station metadata %s: %d sample(s), %d with coordinates", Path(fpath).name,
+                     len(smap), sum(1 for r in smap.values()
+                                    if _num_or_none(r.get('decimalLatitude')) is not None))
             return smap
         xls = pd.ExcelFile(fpath, engine='openpyxl')
     except (InputError, Exception) as e:
@@ -317,6 +334,12 @@ def _station_map_from_frame(raw, fpath):
     if raw is None or raw.empty:
         log.warning("%s: sample metadata sheet is empty", Path(fpath).name)
         return {}
+    # FAIRe exports (e.g. from the Ocean DNA Explorer) put '# requirement_level_code'
+    # / '# section' rows above the real header: drop every '#' comment row first.
+    raw = _drop_comment_rows(raw)
+    if raw.empty:
+        log.warning("%s: sample metadata has only '#' comment rows", Path(fpath).name)
+        return {}
     # header row is not consistent across files (some exports use row 0, older
     # ones use row 2; the FAIRe checklist uses row 2 under requirement/section
     # rows). Auto-detect the best header row.
@@ -336,10 +359,13 @@ def _station_map_from_frame(raw, fpath):
     # checklist's 'sample_ID'. This lets one loader serve both MBON_Data-style
     # workbooks and FAIRe_checklist sampleMetadata sheets — the universal
     # sample_ID emitted for barcoded runs then joins straight to FAIRe coords.
+    # FAIRe sheets from the Ocean DNA Explorer have neither: they are keyed by
+    # samp_name (which is also what experimentRunMetadata.lib_id maps to).
     keycol = (next((h for h in headers if _norm_colname(h) == 'sampnumber'), None)
-              or next((h for h in headers if _norm_colname(h) == 'sampleid'), None))
+              or next((h for h in headers if _norm_colname(h) == 'sampleid'), None)
+              or next((h for h in headers if _norm_colname(h) == 'sampname'), None))
     if keycol is None:
-        log.warning("%s: sample metadata has no samp_number / sample_ID column "
+        log.warning("%s: sample metadata has no samp_number / sample_ID / samp_name column "
                     "(header row %d: %s)", Path(fpath).name, best_idx, [h for h in headers if h][:12])
         return {}
     body = body.loc[:, [c for c in body.columns if c]]          # drop blank headers
@@ -355,7 +381,50 @@ def _station_map_from_frame(raw, fpath):
     if dupes:
         log.warning("%s: %d duplicate %s value(s) — last occurrence kept",
                     Path(fpath).name, dupes, keycol)
+    if _norm_colname(keycol) == 'sampname':
+        for rec in smap.values():
+            _faire_aliases(rec)
     return smap
+
+
+# FAIRe placeholder values that mean "no value" (FAIRe checklist v1 vocabulary).
+def _faire_blank(v):
+    s = str(v or '').strip().lower()
+    return (not s or s == 'nan' or s.startswith('not applicable') or s.startswith('missing')
+            or s.startswith('not provided') or s.startswith('not collected')
+            or s in ('none', 'na', 'n/a', 'unknown'))
+
+
+_MDY_RE = re.compile(r'^(\d{1,2})/(\d{1,2})/(\d{2}|\d{4})$')
+
+
+def _faire_aliases(rec):
+    """Fill the report's own field names from plain FAIRe columns, for sheets
+    that don't carry the MBON-style columns (Ocean DNA Explorer exports):
+      Station       <- ctd_bottle_number, else station_id / site
+      Cruise Number <- expedition_id
+      Sample Depth  <- depth_category
+    and normalise eventDate 'M/D/YY' to ISO 'YYYY-MM-DD'. Existing values win."""
+    def put(dst, *srcs):
+        if not _faire_blank(rec.get(dst)):
+            return
+        for s in srcs:
+            if not _faire_blank(rec.get(s)):
+                rec[dst] = rec[s]
+                return
+    put('Station', 'ctd_bottle_number', 'station_id', 'site')
+    put('Cruise Number', 'expedition_id', 'cruise_id')
+    put('Sample Depth', 'depth_category')
+    d = str(rec.get('eventDate') or '').strip()
+    m = _MDY_RE.match(d)
+    if m:
+        mo, dy, yr = int(m.group(1)), int(m.group(2)), int(m.group(3))
+        if yr < 100:
+            yr += 2000 if yr < 70 else 1900
+        if 1 <= mo <= 12 and 1 <= dy <= 31:
+            rec['verbatimEventDate'] = rec.get('verbatimEventDate') or d
+            rec['eventDate'] = f'{yr:04d}-{mo:02d}-{dy:02d}'
+    return rec
 
 
 _STATION_CACHE = {}
@@ -821,6 +890,585 @@ def _w02_metadata_only(run_id, label, samples, job_meta, tdf, sources=None):
             'sources': sources or []}
 
 
+# ---------------------------------------------------------------- text tables / FAIRe
+TEXT_TABLE_EXT = ('.csv', '.tsv', '.txt')
+
+
+def _drop_comment_rows(raw):
+    """Drop rows whose first non-blank cell starts with '#' (FAIRe
+    '# requirement_level_code' / '# section' rows) from a header=None frame."""
+    if raw is None or raw.empty:
+        return raw
+    def is_comment(row):
+        for v in row:
+            if v is None or (isinstance(v, float) and np.isnan(v)) or str(v).strip() == '':
+                continue
+            return str(v).lstrip().startswith('#')
+        return False
+    mask = raw.apply(lambda r: is_comment(r.tolist()), axis=1)
+    return raw.loc[~mask].reset_index(drop=True) if mask.any() else raw
+
+
+def read_text_table(path, header='infer'):
+    """Read a CSV / TSV / TXT table as strings. The delimiter is sniffed from the
+    first non-comment line (tab, comma, semicolon or pipe) and every line
+    starting with '#' is skipped, so FAIRe sheets exported from the Ocean DNA
+    Explorer ('# requirement_level_code', '# section' rows) load as-is.
+    header='infer' -> first non-comment row is the header; header=None -> raw grid."""
+    ec.require_file(path, 'table', TEXT_TABLE_EXT)
+    try:
+        with open(path, encoding='utf-8-sig', errors='replace', newline='') as fh:
+            lines = [ln for ln in fh.read().splitlines() if ln.strip()]
+    except OSError as e:
+        raise InputError(f"cannot read {Path(path).name}: {e}") from e
+    body = [ln for ln in lines if not ln.lstrip().startswith('#')]
+    if not body:
+        raise InputError(f"{Path(path).name}: no data rows (only blank / '#' comment lines)")
+    first = body[0]
+    sep = max(['\t', ',', ';', '|'], key=lambda c: first.count(c))
+    if first.count(sep) == 0:
+        sep = '\t'
+    import csv
+    import io
+    rows = list(csv.reader(io.StringIO('\n'.join(body)), delimiter=sep))
+    width = max(len(r) for r in rows)
+    rows = [r + [''] * (width - len(r)) for r in rows]
+    if header is None:
+        return pd.DataFrame(rows, dtype=object).replace({'': None})
+    hdr = [str(h).strip() for h in rows[0]]
+    df = pd.DataFrame(rows[1:], columns=hdr, dtype=object).replace({'': None})
+    return df.loc[:, [c for c in df.columns if c]]
+
+
+def faire_sheet_kind(raw):
+    """Classify a FAIRe sheet (header=None frame, comment rows allowed) as
+    'sample' (sampleMetadata), 'experimentRun' (lib_id -> samp_name),
+    'project' (term_name / project_level rows) or None (unknown)."""
+    if raw is None or raw.empty:
+        return None
+    raw = _drop_comment_rows(raw)
+    toks = set()
+    for i in range(min(4, len(raw))):
+        toks |= {_norm_colname(v) for v in raw.iloc[i].tolist() if v is not None and str(v) != 'nan'}
+    if 'termname' in toks and ('projectlevel' in toks or 'section' in toks):
+        return 'project'
+    if 'libid' in toks and 'sampname' in toks:
+        return 'experimentRun'
+    if toks & {'sampnumber', 'sampleid', 'decimallatitude', 'decimallongitude', 'sampname'}:
+        return 'sample'
+    return None
+
+
+def faire_file_kind(path):
+    """faire_sheet_kind() for a file: text tables by content, workbooks by the
+    sheet names they contain (sampleMetadata wins when several are present)."""
+    path = Path(path)
+    try:
+        if path.suffix.lower() in TEXT_TABLE_EXT:
+            return faire_sheet_kind(read_text_table(path, header=None).head(8))
+        names = {_norm_colname(s) for s in ec.excel_sheet_names(path)}
+    except Exception as e:
+        log.debug("faire_file_kind %s: %s", path.name, e)
+        return None
+    if 'samplemetadata' in names or any(n.startswith('samplesheet') for n in names):
+        return 'sample'
+    if 'experimentrunmetadata' in names:
+        return 'experimentRun'
+    if 'projectmetadata' in names:
+        return 'project'
+    return 'sample'      # MBON_Data-style workbook: let the station loader decide
+
+
+def _faire_frame(path, sheet_hint):
+    """header=None frame of a FAIRe sheet from a text table, or from the
+    workbook sheet whose name matches sheet_hint ('experimentrunmetadata' ...)."""
+    path = Path(path)
+    if path.suffix.lower() in TEXT_TABLE_EXT:
+        return read_text_table(path, header=None)
+    sheets = ec.excel_sheet_names(path)
+    sh = next((s for s in sheets if _norm_colname(s) == sheet_hint), None)
+    if sh is None:
+        return None
+    return pd.read_excel(path, sheet_name=sh, header=None, engine='openpyxl', dtype=object)
+
+
+def load_faire_experiment(path):
+    """FAIRe experimentRunMetadata -> {lib_id: {samp_name, assay_name, seq_run_id, ...}}.
+    lib_id is the library / column name used in sequence-read and feature
+    tables (e.g. 'GU190706-CTD11-220_MiFish_S30' -> samp_name 'GU190706-CTD11-220')."""
+    raw = _faire_frame(path, 'experimentrunmetadata')
+    if raw is None or raw.empty:
+        return {}
+    raw = _drop_comment_rows(raw)
+    hdr = [str(h).strip() if h is not None and str(h) != 'nan' else '' for h in raw.iloc[0].tolist()]
+    norm = {_norm_colname(h): j for j, h in enumerate(hdr) if h}
+    if 'libid' not in norm or 'sampname' not in norm:
+        log.warning("%s: experimentRunMetadata has no lib_id + samp_name columns", Path(path).name)
+        return {}
+    out = {}
+    for _, row in raw.iloc[1:].iterrows():
+        vals = row.tolist()
+        lib = _clean(vals[norm['libid']])
+        sn = _clean(vals[norm['sampname']])
+        if not lib or not sn:
+            continue
+        rec = {h: _clean(vals[j]) for h, j in ((h, j) for j, h in enumerate(hdr) if h)
+               if not _faire_blank(vals[j])}
+        out[lib] = rec
+    log.info("FAIRe experimentRunMetadata %s: %d librar(ies), assays: %s", Path(path).name, len(out),
+             ', '.join(sorted({r.get('assay_name') for r in out.values() if r.get('assay_name')})) or '-')
+    return out
+
+
+# projectMetadata term -> label shown in the report's Metadata tab
+FAIRE_PROJECT_FIELDS = [
+    ('project_name', 'Project name'), ('project_id', 'Project ID'),
+    ('institution', 'Institution'), ('recordedBy', 'Recorded by'),
+    ('project_contact', 'Contact'), ('study_factor', 'Study factor'),
+    ('expedition_id', 'Expedition'), ('woce_sect', 'Cruise / section'),
+    ('assay_type', 'Assay type'), ('target_gene', 'Target gene'),
+    ('target_subfragment', 'Target subfragment'), ('targetTaxonomicAssay', 'Target taxa'),
+    ('pcr_primer_name_forward', 'Forward primer'), ('pcr_primer_name_reverse', 'Reverse primer'),
+    ('platform', 'Platform'), ('instrument', 'Instrument'),
+    ('sequencing_location', 'Sequencing facility'),
+    ('bioproject_accession', 'BioProject'), ('code_repo', 'Code repository'),
+    ('license', 'License'), ('mod_date', 'Metadata modified'),
+]
+
+
+def load_faire_project(path):
+    """FAIRe projectMetadata -> {'project': {term: value}, 'assays': {assay: {term: value}}}.
+    Columns: requirement_level_code, section, term_name, project_level, <assay_name>..."""
+    raw = _faire_frame(path, 'projectmetadata')
+    if raw is None or raw.empty:
+        return {}
+    raw = _drop_comment_rows(raw)
+    hdr = [str(h).strip() if h is not None and str(h) != 'nan' else '' for h in raw.iloc[0].tolist()]
+    norm = [_norm_colname(h) for h in hdr]
+    if 'termname' not in norm:
+        return {}
+    ti = norm.index('termname')
+    pi = norm.index('projectlevel') if 'projectlevel' in norm else ti + 1
+    assay_cols = [(j, h) for j, h in enumerate(hdr) if h and j > pi]
+    proj, assays = {}, {h: {} for _, h in assay_cols}
+    for _, row in raw.iloc[1:].iterrows():
+        vals = row.tolist() + [None] * len(hdr)
+        term = _clean(vals[ti])
+        if not term:
+            continue
+        pv = vals[pi]
+        if not _faire_blank(pv):
+            proj[term] = _clean(pv)
+        for j, h in assay_cols:
+            if not _faire_blank(vals[j]):
+                assays[h][term] = _clean(vals[j])
+    return {'project': proj, 'assays': {k: v for k, v in assays.items() if v}}
+
+
+def faire_project_meta(pm, assay=None):
+    """Flatten load_faire_project() output into report run.meta labels; the
+    per-assay value (when given / present) overrides the project-level one."""
+    if not pm:
+        return {}
+    vals = dict(pm.get('project') or {})
+    av = (pm.get('assays') or {})
+    if assay:
+        hit = av.get(assay) or next((v for k, v in av.items()
+                                     if _norm_colname(k) == _norm_colname(assay)), None)
+        if hit:
+            vals.update(hit)
+    out = {}
+    for term, label in FAIRE_PROJECT_FIELDS:
+        v = vals.get(term)
+        if v and not _faire_blank(v):
+            out[label] = str(v)
+    if vals.get('pcr_primer_forward') and vals.get('pcr_primer_reverse') and len(
+            (vals.get('pcr_primer_forward') or '').split('|')) == 1:
+        out['Primers'] = f"{vals['pcr_primer_forward']} / {vals['pcr_primer_reverse']}"
+    return out
+
+
+# ---------------------------------------------------------------- Ocean DNA Explorer
+# Tourmaline (QIIME 2) outputs downloaded from the Ocean DNA Explorer, filed under
+# data/projects/<project>/tourmaline/ :
+#
+#   table_<analysis>-<random>.tsv            feature table: featureid + one read-count
+#                                            column per library (FAIRe lib_id)
+#   asvTaxaFeatures_<analysis>-<random>.tsv  one row per featureid: dna_sequence,
+#                                            taxonomy (';' lineage), kingdom..species,
+#                                            Confidence
+#
+# The two files of one analysis share <analysis> (e.g. gu1901_mifish_..._241001);
+# only the random download suffix differs. Libraries are linked to samples through
+# the FAIRe experimentRunMetadata (lib_id -> samp_name) and then to the FAIRe
+# sampleMetadata sheet (coordinates, depth, environment) exactly like the other
+# formats. Runs built from these files have kind 'ode' and get their own
+# "Ocean DNA Explorer" entry in the report's method dropdown.
+ODE_KIND = 'ode'
+ODE_METHOD = 'Ocean DNA Explorer (Tourmaline ASV)'
+_ODE_TABLE_RE = re.compile(r'^(?:feature[-_ ]?)?table[-_ ]', re.I)
+_ODE_TAXA_RE = re.compile(r'^asv[-_ ]?taxa[-_ ]?features?[-_ ]', re.I)
+_ODE_RANKS = ['kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species']
+
+
+def _ode_pair_key(name):
+    """Analysis key shared by a feature table and its taxonomy file:
+    'table_gu1901_mifish_v2024.10_241001-T9UVz1….tsv' -> 'gu1901_mifish_v2024.10_241001'."""
+    stem = Path(name).name
+    for ext in ('.tsv', '.txt', '.csv'):
+        if stem.lower().endswith(ext):
+            stem = stem[:-len(ext)]
+    stem = _ODE_TABLE_RE.sub('', stem, count=1)
+    stem = _ODE_TAXA_RE.sub('', stem, count=1)
+    stem = re.sub(r'-[A-Za-z0-9]{16,}$', '', stem)      # random download suffix
+    return stem.lower()
+
+
+def _ode_header(path):
+    try:
+        with open(path, encoding='utf-8-sig', errors='replace') as fh:
+            for ln in fh:
+                if ln.strip() and not ln.lstrip().startswith('#'):
+                    sep = '\t' if ln.count('\t') >= ln.count(',') else ','
+                    return [_norm_colname(c) for c in ln.rstrip('\r\n').split(sep)]
+    except OSError:
+        pass
+    return []
+
+
+def ode_file_role(path):
+    """'table' | 'taxa' | None for a Tourmaline output file (by header, then name)."""
+    path = Path(path)
+    if not path.is_file() or path.suffix.lower() not in TEXT_TABLE_EXT or ec.is_temp_file(path):
+        return None
+    h = _ode_header(path)
+    if h and h[0] in ('featureid', 'featureid1', 'otuid', 'asvid'):
+        if 'taxonomy' in h or 'species' in h or 'dnasequence' in h:
+            return 'taxa'
+        return 'table'
+    if _ODE_TAXA_RE.match(path.name):
+        return 'taxa'
+    if _ODE_TABLE_RE.match(path.name):
+        return 'table'
+    return None
+
+
+def find_ode_pairs(paths):
+    """Pair Tourmaline feature tables with their asvTaxaFeatures file.
+    `paths` may mix files and folders (folders are scanned, not recursively
+    beyond one level). Returns [(table_path, taxa_path_or_None)], one per table.
+    A table is paired with the taxonomy file sharing its analysis key; failing
+    that, with the only taxonomy file in the same folder."""
+    files = []
+    for p in paths:
+        p = Path(p)
+        if p.is_dir():
+            files += [f for f in sorted(p.iterdir()) if f.is_file()]
+            for sub in sorted(d for d in p.iterdir() if d.is_dir() and not d.name.startswith('.')):
+                files += [f for f in sorted(sub.iterdir()) if f.is_file()]
+        elif p.is_file():
+            files.append(p)
+            # pull in the sibling taxonomy file(s) automatically
+            files += [f for f in sorted(p.parent.iterdir()) if f.is_file() and f != p]
+    tables, taxa, seen = [], [], set()
+    for f in files:
+        r = f.resolve()
+        if r in seen:
+            continue
+        seen.add(r)
+        role = ode_file_role(f)
+        if role == 'table':
+            tables.append(f)
+        elif role == 'taxa':
+            taxa.append(f)
+    # only tables that were asked for (when files were named explicitly)
+    named = {Path(p).resolve() for p in paths if Path(p).is_file()}
+    if named:
+        named_tables = [t for t in tables if t.resolve() in named]
+        if named_tables:
+            tables = named_tables
+        else:   # a taxonomy file was named: use the table(s) that pair with it
+            keys = {_ode_pair_key(p) for p in named}
+            tables = [t for t in tables if _ode_pair_key(t) in keys] or tables
+    out = []
+    for t in tables:
+        k = _ode_pair_key(t)
+        hit = next((x for x in taxa if _ode_pair_key(x) == k), None)
+        if hit is None:
+            same_dir = [x for x in taxa if x.parent == t.parent]
+            hit = same_dir[0] if len(same_dir) == 1 else None
+        if hit is None:
+            log.warning("Ocean DNA Explorer: no asvTaxaFeatures file pairs with %s "
+                        "(analysis key '%s') — features will be unclassified", t.name, k)
+        out.append((t, hit))
+    return out
+
+
+def ode_taxon(rec):
+    """Display name / rank / group / lineage for one asvTaxaFeatures row.
+    Uses the finest populated rank; anything coarser than species is labelled
+    like the Kraken2 fallback, e.g. 'Scombriformes (order)'."""
+    vals = {k: (str(rec.get(k) or '').strip()) for k in _ODE_RANKS}
+    vals = {k: ('' if _faire_blank(v) or v.lower() in ('unassigned', 'unclassified') else v)
+            for k, v in vals.items()}
+    if not any(vals.values()):
+        # fall back to the ';' taxonomy string
+        parts = [x.strip() for x in str(rec.get('taxonomy') or '').split(';')
+                 if x.strip() and not re.match(r'^[a-z]__$', x.strip())]
+        parts = [re.sub(r'^[a-z]__', '', x) for x in parts]
+        for k, v in zip(_ODE_RANKS, parts):
+            vals[k] = v
+    finest = next((k for k in reversed(_ODE_RANKS) if vals[k]), None)
+    if finest is None:
+        name, rank = 'Unassigned', 'unassigned'
+    elif finest == 'species':
+        name, rank = vals['species'], 'species'
+        # some references store only the epithet: prefix the genus
+        if ' ' not in name and vals['genus']:
+            name = f"{vals['genus']} {name}"
+    else:
+        name, rank = f"{vals[finest]} ({finest})", finest
+    group = vals['class'] or vals['phylum'] or vals['kingdom'] or 'Unknown'
+    lineage = [vals[k] for k in _ODE_RANKS[:-1] if vals[k]]
+    if finest and finest != 'species':
+        lineage = lineage[:-1] if lineage and lineage[-1] == vals[finest] else lineage
+    is_euk = vals['kingdom'].lower() == 'eukaryota' or (
+        str(rec.get('taxonomy') or '').lower().startswith(('eukaryota', 'd__eukaryota')))
+    try:
+        conf = float(rec.get('Confidence') or rec.get('confidence'))
+    except (TypeError, ValueError):
+        conf = None
+    return {'name': name, 'rank': rank, 'group': group, 'lineage': lineage,
+            'isEuk': bool(is_euk), 'confidence': conf}
+
+
+def read_ode_taxonomy(path):
+    """asvTaxaFeatures -> {featureid: ode_taxon(row) + sequence}."""
+    if path is None:
+        return {}
+    df = read_text_table(path)
+    low = {_norm_colname(c): c for c in df.columns}
+    fid = low.get('featureid') or df.columns[0]
+    seq_c = low.get('dnasequence') or low.get('sequence')
+    out = {}
+    for rec in df.to_dict('records'):
+        f = _clean(rec.get(fid))
+        if not f:
+            continue
+        rec = {(_ODE_RANKS[_ODE_RANKS.index(_norm_colname(k))]
+                if _norm_colname(k) in _ODE_RANKS else k): v for k, v in rec.items()}
+        t = ode_taxon(rec)
+        if seq_c:
+            t['sequence'] = _clean(rec.get(seq_c))
+        out[f] = t
+    return out
+
+
+def read_ode_table(path):
+    """Feature table -> DataFrame (index featureid, one numeric column per library)."""
+    df = read_text_table(path)
+    if df.empty or len(df.columns) < 2:
+        raise InputError(f"{Path(path).name}: feature table has no library columns")
+    fid = df.columns[0]
+    df[fid] = df[fid].map(_clean)
+    df = df.dropna(subset=[fid]).set_index(fid)
+    df.index.name = 'featureid'
+    return df.apply(pd.to_numeric, errors='coerce').fillna(0)
+
+
+_LIB_SUFFIX_RES = [re.compile(r'_S\d+$', re.I),                     # Illumina sample number
+                   re.compile(r'_L\d{3}$', re.I),                    # lane
+                   re.compile(r'[_-](?:MiFish|Riaz|12S|16S|18S|COI|ITS)[A-Za-z0-9]*$', re.I)]
+
+
+def ode_lib_to_sample(lib, lib_map, resolve):
+    """samp_name for a feature-table column (library id): the experimentRunMetadata
+    lib_id mapping first, then the sample sheet itself (via `resolve`), then the
+    id with Illumina '_S##' / lane / assay suffixes stripped. Unknown -> lib."""
+    rec = (lib_map or {}).get(lib)
+    if rec and rec.get('samp_name'):
+        return rec['samp_name'], rec
+    hit = resolve(lib)
+    if hit:
+        return hit, rec or {}
+    s = lib
+    for _ in range(3):
+        for rx in _LIB_SUFFIX_RES:
+            s2 = rx.sub('', s)
+            if s2 != s:
+                s = s2
+                hit = resolve(s)
+                if hit:
+                    return hit, rec or {}
+    return lib, rec or {}
+
+
+def _ode_assay_label(lib_recs, table_path):
+    """Short assay label for a feature table: the FAIRe assay_name of its
+    libraries when unique, else a marker token from the filename."""
+    assays = sorted({r.get('assay_name') for r in lib_recs if r and r.get('assay_name')})
+    if len(assays) == 1:
+        return assays[0]
+    m = re.search(r'(mifish|riaz|12s|16s|18s|coi|its\d?)', Path(table_path).name, re.I)
+    return m.group(1) if m else _ode_pair_key(table_path)
+
+
+def _ode_short_assay(assay):
+    """'Fish-12S-MiFish-Miya-Stoeckle' -> 'MiFish' for run labels (primer-set
+    names win over the gene name, wherever they sit in the assay name)."""
+    for tok in ('MiFish', 'Riaz', 'Leray', 'Folmer', 'Teleo', 'COI', '18S', '16S', '12S'):
+        m = re.search(tok, str(assay), re.I)
+        if m:
+            return str(assay)[m.start():m.end()]
+    m = re.search(r'ITS\d?', str(assay), re.I)
+    return m.group(0) if m else str(assay)
+
+
+def ode_feature_reads(table_path, taxa_path, lib_to_sid):
+    """Parse one Tourmaline pair. Returns (per_sample, tax_meta, info) where
+    per_sample = {sampleId: {taxon: reads}}, tax_meta = {taxon: {...}}, and
+    info = {'libs': n, 'features': n, 'unlinked_libs': [...], 'asvs': {taxon: n}}.
+    `lib_to_sid(lib) -> sampleId`."""
+    tab = read_ode_table(table_path)
+    tax = read_ode_taxonomy(taxa_path) if taxa_path else {}
+    per_sample, tax_meta, asvs = {}, {}, {}
+    unk = {'name': 'Unassigned', 'rank': 'unassigned', 'group': 'Unknown',
+           'lineage': [], 'isEuk': False, 'confidence': None}
+    names = [tax.get(f, unk)['name'] for f in tab.index]
+    for f, nm in zip(tab.index, names):
+        t = tax.get(f, unk)
+        if nm not in tax_meta:
+            tax_meta[nm] = {k: t.get(k) for k in ('rank', 'group', 'lineage', 'isEuk')}
+            tax_meta[nm]['conf'] = []
+        if t.get('confidence') is not None:
+            tax_meta[nm]['conf'].append(t['confidence'])
+    tidx = pd.Index(names, name='taxon')
+    by_taxon = tab.groupby(tidx).sum()
+    # number of distinct ASVs (features) per taxon that carry any reads
+    asvs = (tab > 0).any(axis=1).groupby(tidx).sum().astype(int).to_dict()
+    for lib in by_taxon.columns:
+        sid = lib_to_sid(lib)
+        col = by_taxon[lib]
+        rmap = per_sample.setdefault(sid, {})
+        for nm, v in col.items():
+            if v and v > 0:
+                rmap[nm] = rmap.get(nm, 0) + float(v)
+    for nm, m in tax_meta.items():
+        c = m.pop('conf')
+        m['confidence'] = round(float(np.mean(c)), 4) if c else None
+    return per_sample, tax_meta, {'libs': len(tab.columns), 'features': len(tab.index),
+                                  'asvs': asvs, 'classified': sum(1 for f in tab.index if f in tax)}
+
+
+def load_ode_folder(folder, run_id, label, pairs=None):
+    """Standalone (no-manifest) Ocean DNA Explorer run from a folder holding
+    Tourmaline outputs, with FAIRe sheets looked up in ../faire or the folder."""
+    folder = Path(folder)
+    pairs = pairs or find_ode_pairs([folder])
+    if not pairs:
+        return None
+    faire_dirs = [folder, folder.parent / 'faire', folder.parent]
+    smap, lib_map, pm, srcs = {}, {}, {}, []
+    for d in faire_dirs:
+        if not d.is_dir():
+            continue
+        for f in sorted(d.iterdir()):
+            if not f.is_file() or ec.is_temp_file(f) or f.suffix.lower() not in TEXT_TABLE_EXT + ec.SPREADSHEET_EXT:
+                continue
+            if ode_file_role(f):
+                continue
+            kind = faire_file_kind(f)
+            if kind == 'experimentRun' and not lib_map:
+                lib_map = load_faire_experiment(f); srcs.append((f, kind))
+            elif kind == 'project' and not pm:
+                pm = load_faire_project(f); srcs.append((f, kind))
+            elif kind == 'sample' and not smap and 'samplemetadata' in _norm_colname(f.name):
+                smap = load_station_map_from_file(f); srcs.append((f, kind))
+    name_to_num, station_to_num, loose = _name_station_indexes(smap)
+    resolve = lambda q: (q if q in smap else name_to_num.get(q) or loose.get(_loose_key(q)))
+    runs = []
+    for i, (tp, xp) in enumerate(pairs):
+        lib_recs = {}
+        def l2s(lib):
+            sid, rec = ode_lib_to_sample(lib, lib_map, resolve)
+            lib_recs.setdefault(sid, []).append((lib, rec))
+            return sid
+        per_sample, tax_meta, info = ode_feature_reads(tp, xp, l2s)
+        assay = _ode_assay_label([r for v in lib_recs.values() for _, r in v], tp)
+        samples, coords = [], {}
+        for sid in per_sample:
+            m = smap.get(sid, {})
+            lat, lon = _coerce_latlon(m.get('decimalLatitude'), m.get('decimalLongitude'), sid)
+            meta = {k: v for k, v in m.items() if v is not None}
+            meta['Library'] = ', '.join(l for l, _ in lib_recs.get(sid, []))
+            meta['Assay'] = assay
+            samples.append({'sampleId': sid, 'uid': sid, 'station': m.get('Station'),
+                            'lat': lat, 'lon': lon, 'meta': meta})
+            if lat is not None:
+                coords[sid] = (lat, lon)
+        rid = run_id if len(pairs) == 1 else f'{run_id}_{_slug(_ode_short_assay(assay))}'
+        rl = f'{label} · {_ode_short_assay(assay)}'
+        meta = dict(faire_project_meta(pm, assay), Method=ODE_METHOD, Assay=assay,
+                    **{'Feature table': tp.name, 'ASV features': str(info['features']),
+                       'Libraries': str(info['libs'])})
+        runs.append(_ode_build_run(per_sample, tax_meta, info, samples, coords, smap,
+                                   rid, rl, meta, assay,
+                                   [_ode_sources(tp, xp, info)] + [
+                                       {'file': f.name, 'sheets': [k + 'Metadata'],
+                                        'role': f'FAIRe {k}Metadata', 'samples': 0}
+                                       for f, k in srcs]))
+    return runs
+
+
+def _ode_sources(tp, xp, info):
+    out = {'file': tp.name, 'sheets': ['feature table'],
+           'role': (f"Ocean DNA Explorer feature table → {info['libs']} librar(ies), "
+                    f"{info['features']} ASVs"), 'samples': info['libs']}
+    return [out] + ([{'file': xp.name, 'sheets': ['asvTaxaFeatures'],
+                      'role': f"ASV taxonomy ({info['classified']}/{info['features']} features classified)",
+                      'samples': 0}] if xp else [])
+
+
+def _ode_build_run(per_sample, tax_meta, info, samples, coords, station_map,
+                   rid, label, meta, assay, sources):
+    """species x sample pivot -> build_run_from_matrix(kind='ode') + taxa annotations."""
+    sources = [s for x in sources for s in (x if isinstance(x, list) else [x])]
+    long_df = pd.DataFrame([{'ScientificName': sp, 'sample': sid, 'reads': float(v)}
+                            for sid, rmap in per_sample.items() for sp, v in rmap.items()])
+    if long_df.empty:
+        return {'id': rid, 'label': label, 'builtin': True, 'kind': ODE_KIND,
+                'stations': [], 'samples': samples, 'taxa': [], 'meta': meta,
+                'warning': 'Ocean DNA Explorer feature table parsed but carries no reads.',
+                'sources': sources}
+    pivot = (long_df.pivot_table(index='ScientificName', columns='sample', values='reads',
+                                 aggfunc='sum', fill_value=0).reset_index())
+    gmap = {sp: (tax_meta.get(sp) or {}).get('group') or 'Unknown' for sp in pivot['ScientificName']}
+    pivot.insert(1, 'Rank', 'species')
+    pivot['Group'] = [gmap[sp] for sp in pivot['ScientificName']]
+    target = {sp: _ode_short_assay(assay) for sp in pivot['ScientificName']}
+    run = build_run_from_matrix(pivot, coords, station_map, samples, gmap, target,
+                                rid, label, meta, kind=ODE_KIND)
+    has_euk = False
+    for t in run['taxa']:
+        m = tax_meta.get(t['species']) or {}
+        t['rank'] = m.get('rank') or 'species'
+        t['isEuk'] = bool(m.get('isEuk'))
+        if m.get('lineage'):
+            t['lineage'] = m['lineage']
+        if m.get('confidence') is not None:
+            t['confidence'] = m['confidence']
+        t['asvCount'] = int(info['asvs'].get(t['species'], 0))
+        has_euk = has_euk or t['isEuk']
+    run['hasEuk'] = has_euk
+    run['assay'] = assay
+    run['sources'] = sources
+    if not run['stations']:
+        run['warning'] = ("Ocean DNA Explorer run loaded (taxa/table only) — no library could be "
+                          "linked to a sample with coordinates. Check the FAIRe experimentRunMetadata "
+                          "(lib_id → samp_name) and sampleMetadata sheets.")
+    return run
+
+
 # ---------------------------------------------------------------- Kraken2
 # A Kraken2 report is a 6-column TSV (one file == one sample):
 #   0 pct  1 clade_reads  2 direct_reads  3 rank_code  4 taxid  5 indented_name
@@ -1196,8 +1844,8 @@ def read_manifest_df(manifest_path, quiet=False):
         n_blank = int(sid.isna().sum())
         if n_blank:
             log.warning("manifest: %d row(s) have a blank sample_id and will be ignored", n_blank)
-        if not cmap.get('k2') and not cmap.get('asv'):
-            log.warning("manifest has neither a k2_report nor an asv_report column — "
+        if not cmap.get('k2') and not cmap.get('asv') and not cmap.get('ode'):
+            log.warning("manifest has no k2_report, asv_report or ode_report column — "
                         "no taxonomic data can be loaded from it")
         log.info("manifest %s: %d row(s); recognised columns: %s",
                  ec.rel(manifest_path), len(df), ', '.join(f"{k}={v}" for k, v in cmap.items()))
@@ -1227,6 +1875,10 @@ _MANIFEST_ALIASES = {
                   'k2', 'kraken', 'kraken2'],
     'asv':       ['asvreport', 'asvreports', 'asv', 'wilderreport', 'wilder',
                   'asvworkbook'],
+    # Ocean DNA Explorer / Tourmaline feature table(s) or folder (tourmaline/)
+    'ode':       ['odereport', 'odereports', 'ode', 'oceandnaexplorer',
+                  'oceandnaexplorerreport', 'tourmaline', 'tourmalinereport',
+                  'featuretable', 'featuretables'],
     'metadata':  ['metadata', 'metadatafile', 'mbondata', 'mbondatafile',
                   'stationmetadata', 'samplemetadata', 'metadatareport'],
     'barcodes':  ['barcodes', 'barcode', 'isbarcode', 'barcoded',
@@ -1281,15 +1933,15 @@ def _resolve_report(p, project=None):
     search_roots = []
     if project and str(project).strip() and str(project).lower() != 'nan':
         proj_dir = DATA_PROJECTS / str(project).strip()
-        search_roots += [proj_dir / sub for sub in ("faire", "meta", "kraken2", "wilder")]
+        search_roots += [proj_dir / sub for sub in ("faire", "meta", "kraken2", "wilder", "tourmaline")]
         search_roots.append(proj_dir)
     search_roots += [DATA_DIR, Path('.')]
     # Tolerant resolution: manifest entries sometimes omit the .xlsx extension
     # (e.g. "WLM611810_260307"), which previously caused the file to be
     # silently skipped.
     name_variants = [p]
-    if not str(p).lower().endswith(('.xlsx', '.xls', '.csv')):
-        name_variants += [f'{p}.xlsx', f'{p}.xls']
+    if not str(p).lower().endswith(('.xlsx', '.xls', '.csv', '.tsv', '.txt')):
+        name_variants += [f'{p}.xlsx', f'{p}.xls', f'{p}.tsv', f'{p}.csv']
     for root in search_roots:
         for nv in name_variants:
             o = root / nv
@@ -1308,10 +1960,12 @@ def _resolve_report(p, project=None):
             hits = [h for h in root.rglob(Path(nv).name) if _search_ok(h)]
             if hits:
                 return hits[0]
-        # last resort: prefix match (e.g. "WLM611810_260307" -> "WLM611810_260307_v2.xlsx")
-        hits = sorted(h for h in root.rglob(f'{cand.name}*.xlsx') if _search_ok(h))
-        if hits:
-            return hits[0]
+        # last resort: prefix match (e.g. "WLM611810_260307" -> "WLM611810_260307_v2.xlsx",
+        # or an Ocean DNA Explorer "table_gu1901_mifish_..._241001" -> "...-T9UVz….tsv")
+        for ext in ('xlsx', 'tsv', 'csv'):
+            hits = sorted(h for h in root.rglob(f'{cand.name}*.{ext}') if _search_ok(h))
+            if hits:
+                return hits[0]
     return None
 
 
@@ -1853,6 +2507,7 @@ def _build_manifest_project(gkey, rows, cmap, extra_cols,
     # station-metadata workbook (--station-metadata) when no metadata column / value is given.
     station_map = {}
     seen_meta = set()
+    lib_map, proj_meta = {}, {}      # FAIRe experimentRun (lib_id -> samp_name) / projectMetadata
     if cmap.get('metadata'):
         for r in rows:
             proj_val = (_clean(r[cmap['project_dir']]) if cmap.get('project_dir')
@@ -1865,6 +2520,34 @@ def _build_manifest_project(gkey, rows, cmap, extra_cols,
                 if rp in seen_meta:
                     continue
                 seen_meta.add(rp)
+                # The metadata cell may also list the FAIRe experimentRunMetadata
+                # (library -> sample) and projectMetadata sheets, e.g. the TSVs
+                # exported with an Ocean DNA Explorer project.
+                fkind = faire_file_kind(rp) if rp.is_file() else None
+                if fkind == 'experimentRun':
+                    lm = load_faire_experiment(rp)
+                    for k, v in lm.items():
+                        lib_map.setdefault(k, v)
+                    meta_sources.append({'file': rp.name, 'sheets': ['experimentRunMetadata'],
+                                         'role': f'FAIRe experimentRunMetadata ({len(lm)} libraries)',
+                                         'samples': 0})
+                    continue
+                if fkind == 'project':
+                    proj_meta.update(load_faire_project(rp) or {})
+                    meta_sources.append({'file': rp.name, 'sheets': ['projectMetadata'],
+                                         'role': 'FAIRe projectMetadata', 'samples': 0})
+                    continue
+                if fkind == 'sample' and rp.suffix.lower() in ec.SPREADSHEET_EXT:
+                    # A full FAIRe checklist workbook carries all three sheets.
+                    try:
+                        names = {_norm_colname(s) for s in ec.excel_sheet_names(rp)}
+                        if 'experimentrunmetadata' in names:
+                            for k, v in load_faire_experiment(rp).items():
+                                lib_map.setdefault(k, v)
+                        if 'projectmetadata' in names and not proj_meta:
+                            proj_meta.update(load_faire_project(rp) or {})
+                    except Exception as e:
+                        log.debug("%s: FAIRe experiment/project sheets skipped: %s", rp.name, e)
                 if rp not in station_cache:
                     station_cache[rp] = load_station_map_from_file(rp)
                 sm = station_cache[rp]
@@ -1879,6 +2562,7 @@ def _build_manifest_project(gkey, rows, cmap, extra_cols,
     zero_index = _zero_index(station_map)
     unlinked = []   # samples that carry report data but found no coordinates
     samples_seen = set()   # sampleIds already appended to `samples`
+    ode_targets = {}       # resolved table/folder -> {path, project, rows, run}
 
     def _link_station(qbase, qsid, run_val=None):
         """(lat, lon, station_map_record) for a sample/report id, matching this
@@ -1942,6 +2626,32 @@ def _build_manifest_project(gkey, rows, cmap, extra_cols,
                         loose_index.get(_loose_key(rv)))
         m = station_map.get(snum, {}) if snum else {}
         lat, lon = _coerce_latlon(m.get('decimalLatitude'), m.get('decimalLongitude'), snum or '?')
+
+        # --- Ocean DNA Explorer (Tourmaline) feature tables: workbook-level like
+        # the Wilder ASV files -- one table holds every library of the analysis,
+        # so the row is usually a container (sample_id = the analysis / batch).
+        # Tables may sit in the ode_report column or, for convenience, asv_report.
+        ode_cells = _split_paths(r[cmap['ode']]) if cmap.get('ode') else []
+        wilder_cells = []
+        for ap in (_split_paths(r[cmap['asv']]) if cmap.get('asv') else []):
+            arp = _resolve_report(ap, project=proj_val)
+            if arp is not None and (ode_file_role(arp) or (arp.is_dir() and find_ode_pairs([arp]))):
+                ode_cells.append(ap)
+            else:
+                wilder_cells.append(ap)
+        for op in ode_cells:
+            orp = _resolve_report(op, project=proj_val)
+            if orp is None:
+                log.warning(f"manifest Ocean DNA Explorer table not found: {op}")
+                continue
+            ode_targets.setdefault(orp.resolve(), {'path': orp, 'project': proj_val,
+                                                   'rows': set(), 'run': rv})
+            ode_targets[orp.resolve()]['rows'].add(sid)
+        k2_cells = _split_paths(r[cmap['k2']]) if cmap.get('k2') else []
+        if ode_cells and not snum and not k2_cells and not wilder_cells:
+            # container row: its samples come from the feature table's libraries
+            continue
+
         if lat is not None:
             sample_coords[sid] = (lat, lon)
 
@@ -2054,7 +2764,7 @@ def _build_manifest_project(gkey, rows, cmap, extra_cols,
                                             + (f' [db: {db}]' if db else '')), 'samples': 1})
 
         # --- ASV/Wilder workbook(s) (workbook-level; parsed once below) ---
-        asv_paths = _split_paths(r[cmap['asv']]) if cmap.get('asv') else []
+        asv_paths = wilder_cells          # Tourmaline tables were routed to ode_targets above
         for ap in asv_paths:
             rp = _resolve_report(ap, project=proj_val)
             if rp is None:
@@ -2067,6 +2777,90 @@ def _build_manifest_project(gkey, rows, cmap, extra_cols,
         k2_paths = _split_paths(r[cmap['k2']]) if cmap.get('k2') else []
         if lat is None and (k2_paths or asv_paths):
             unlinked.append(sid)
+
+    # ---- Ocean DNA Explorer (Tourmaline) feature tables --------------------
+    # Parsed once per table. Each library column is linked to a sample through
+    # the FAIRe experimentRunMetadata (lib_id -> samp_name) and then to the
+    # sampleMetadata sheet; libraries of the same sample in one table are summed.
+    ode_results = []      # [(table, taxa, assay, per_sample, tax_meta, info, lib_recs)]
+    if ode_targets:
+        if not lib_map or not proj_meta:
+            # FAIRe sheets not listed in the manifest: look next to the data
+            for tgt in ode_targets.values():
+                pdir = DATA_PROJECTS / str(tgt['project']).strip() if tgt['project'] else None
+                base = Path(tgt['path']) if Path(tgt['path']).is_dir() else Path(tgt['path']).parent
+                for d in ([pdir / 'faire', pdir] if pdir else []) + [base, base.parent / 'faire', base.parent]:
+                    if not d.is_dir():
+                        continue
+                    for f in sorted(d.iterdir()):
+                        if (not f.is_file() or ec.is_temp_file(f) or ode_file_role(f)
+                                or f.suffix.lower() not in TEXT_TABLE_EXT + ec.SPREADSHEET_EXT):
+                            continue
+                        fk = faire_file_kind(f)
+                        if fk == 'experimentRun' and not lib_map:
+                            lib_map.update(load_faire_experiment(f))
+                            meta_sources.append({'file': f.name, 'sheets': ['experimentRunMetadata'],
+                                                 'role': f'FAIRe experimentRunMetadata ({len(lib_map)} '
+                                                         f'libraries, found next to data)', 'samples': 0})
+                        elif fk == 'project' and not proj_meta:
+                            proj_meta.update(load_faire_project(f) or {})
+                            meta_sources.append({'file': f.name, 'sheets': ['projectMetadata'],
+                                                 'role': 'FAIRe projectMetadata (found next to data)',
+                                                 'samples': 0})
+        pairs, seen_tables = [], set()
+        for tgt in ode_targets.values():
+            for tp, xp in find_ode_pairs([tgt['path']]):
+                if tp.resolve() in seen_tables:
+                    continue
+                seen_tables.add(tp.resolve())
+                pairs.append((tp, xp, tgt))
+        if not pairs:
+            log.warning(f"manifest '{gkey}': Ocean DNA Explorer cell(s) name no feature table "
+                        f"(table_*.tsv with a featureid column)")
+        for tp, xp, tgt in pairs:
+            lib_recs = {}
+
+            def _l2s(lib, _recs=lib_recs):
+                sid_, rec_ = ode_lib_to_sample(lib, lib_map, _resolve_snum)
+                _recs.setdefault(sid_, []).append((lib, rec_))
+                return sid_
+            try:
+                per_sample, tax_meta, info = ode_feature_reads(tp, xp, _l2s)
+            except (InputError, Exception) as e:
+                log.error(f"Ocean DNA Explorer table {tp.name} unreadable: {e}")
+                asv_sources.append({'file': tp.name, 'sheets': ['(unreadable)'],
+                                    'role': 'Ocean DNA Explorer feature table (parse failed)',
+                                    'samples': 0})
+                continue
+            assay = _ode_assay_label([rc for v in lib_recs.values() for _, rc in v], tp)
+            for osid, libs in lib_recs.items():
+                if osid not in samples_seen:
+                    o_lat, o_lon, o_m = _link_station(osid, osid)
+                    o_meta = {k: v for k, v in (o_m or {}).items() if v is not None}
+                    o_meta.setdefault('Source', 'Manifest (Ocean DNA Explorer)')
+                    if tgt['project']:
+                        o_meta['Project'] = str(tgt['project'])
+                    seq_runs = sorted({rc.get('seq_run_id') for _, rc in libs if rc.get('seq_run_id')})
+                    o_meta['Run'] = ', '.join(seq_runs) if seq_runs else (tgt.get('run') or tp.stem)
+                    samples.append({'sampleId': osid, 'uid': osid,
+                                    'station': o_m.get('Station') if o_m else None,
+                                    'lat': o_lat, 'lon': o_lon, 'meta': o_meta})
+                    samples_seen.add(osid)
+                    if o_lat is not None:
+                        sample_coords[osid] = (o_lat, o_lon)
+                    elif _sample_category(osid, o_meta) == 'sample':
+                        unlinked.append(osid)
+                s_ = next(x for x in samples if x['sampleId'] == osid)
+                prev = [x for x in str(s_['meta'].get('Library') or '').split(', ') if x]
+                s_['meta']['Library'] = ', '.join(dict.fromkeys(prev + [lb for lb, _ in libs]))
+                prev_a = [x for x in str(s_['meta'].get('Assay') or '').split(', ') if x]
+                s_['meta']['Assay'] = ', '.join(dict.fromkeys(prev_a + [assay]))
+            n_linked = sum(1 for k in lib_recs if k in station_map)
+            log.info(f"Ocean DNA Explorer {tp.name}: {info['libs']} librar(ies) -> "
+                     f"{len(lib_recs)} sample(s), {n_linked} in the FAIRe sheet; "
+                     f"{info['features']} ASVs, {len(tax_meta)} taxa"
+                     + (f" [assay {assay}]" if assay else ""))
+            ode_results.append((tp, xp, assay, per_sample, tax_meta, info, lib_recs))
 
     # ---- Fold unclassified bins into their run's primary station -----------
     # Unclassified demultiplexing bins have no coordinates of their own. Per the
@@ -2230,7 +3024,9 @@ def _build_manifest_project(gkey, rows, cmap, extra_cols,
     k2_dbs = sorted(per_db_reads, key=lambda d: (d is None, str(d)))
     has_k2 = bool(per_db_reads)
     has_asv = bool(asv_long)
-    both = has_k2 and has_asv
+    has_ode = bool(ode_results)
+    # 'both' == more than one method in this project -> method suffix on run ids/labels
+    both = (int(has_k2) + int(has_asv) + int(has_ode)) > 1
     # More than one Kraken2 database for this project means more than one
     # Kraken2 run, so their reads are never pooled and the HTML can filter on
     # the database.
@@ -2307,6 +3103,27 @@ def _build_manifest_project(gkey, rows, cmap, extra_cols,
                                     meta, kind='manifest')
         runs.append(_finish(run, asv_sources + meta_sources))
 
+    # One Ocean DNA Explorer run per feature table (= per assay / analysis), so
+    # reads from different markers are never pooled; the Run selector picks one.
+    multi_ode = len(ode_results) > 1
+    for tp, xp, assay, per_sample, tax_meta, info, lib_recs in ode_results:
+        subs, coords = _subset_samples(per_sample.keys())
+        short = _ode_short_assay(assay)
+        rid = f'{base_id}_ode' if both else base_id
+        if multi_ode:
+            rid = f'{rid}_{_slug(short)}_{_slug(_ode_pair_key(tp))[:24]}'
+        rlabel = f'{base_label} · {short}' if short else base_label
+        if both:
+            rlabel = f'{rlabel} (Ocean DNA Explorer)'
+        meta = dict(job_meta, **faire_project_meta(proj_meta, assay))
+        meta.update({'Method': ODE_METHOD, 'Assay': assay, 'Feature table': tp.name,
+                     'Taxonomy file': xp.name if xp else '(none — features unclassified)',
+                     'ASV features': str(info['features']), 'Libraries': str(info['libs']),
+                     'Sample count': str(len(subs))})
+        run = _ode_build_run(per_sample, tax_meta, info, subs, coords, station_map,
+                             rid, rlabel, meta, assay, _ode_sources(tp, xp, info))
+        runs.append(_finish(run, run['sources'] + meta_sources))
+
     # ---- Coverage gaps -------------------------------------------------------
     # Samples this project knows about that carry NO reads in any run: manifest
     # rows whose reports were missing/empty, and (when the project names its own
@@ -2345,7 +3162,7 @@ def manifest_referenced_reports(manifest_path=MANIFEST):
     for _, r in df.iterrows():
         proj_val = (_clean(r[cmap['project_dir']]) if cmap.get('project_dir')
                     else _clean(r[cmap['project']]) if cmap.get('project') else None)
-        for key in ('k2', 'asv'):
+        for key in ('k2', 'asv', 'ode'):
             if not cmap.get(key):
                 continue
             for p in _split_paths(r[cmap[key]]):
@@ -2353,6 +3170,9 @@ def manifest_referenced_reports(manifest_path=MANIFEST):
                 if rp is None:
                     continue
                 refs.add(rp.resolve())
+                if key in ('asv', 'ode'):
+                    for tp, xp in (find_ode_pairs([rp]) if (rp.is_dir() or ode_file_role(rp)) else []):
+                        refs.update(x.resolve() for x in (tp, xp) if x is not None)
                 # The same filename sometimes exists in more than one place
                 # (e.g. a loose copy plus one inside the project folder).
                 # _resolve_report only returns the first match it finds, but
@@ -2449,6 +3269,10 @@ def detect_and_load(folder, man_refs=frozenset()):
         return None
     if kraken_files_free:
         return load_kraken2(folder, rid, label, files=sorted(kraken_files_free))
+    ode_pairs = [(t, x) for t, x in find_ode_pairs([folder]) if t.resolve() not in man_refs]
+    if ode_pairs:
+        runs = load_ode_folder(folder, rid, label, pairs=ode_pairs)
+        return runs[0] if runs and len(runs) == 1 else (runs or None)
     has_s = any('sample' in p.name.lower() for p in folder.iterdir())
     has_t = any('taxa' in p.name.lower() for p in folder.iterdir())
     if has_s and has_t:
@@ -2465,13 +3289,24 @@ def _run_project(run):
     return (run.get('meta') or {}).get('Project') or run.get('label') or run.get('id') or 'runs'
 
 
-def _sample_category(sid):
+def _sample_category(sid, meta=None):
     """Classify a sample id so unplaceable bins can be flagged in the UI:
     'unclassified' (demux bin that failed barcode assignment), 'control'
-    (negative/no-template controls), or 'sample' (a real biological sample)."""
+    (negative/no-template controls), or 'sample' (a real biological sample).
+    FAIRe metadata wins when present: samp_category 'negative control' /
+    'positive control' or a real neg_cont_type / pos_cont_type value."""
     s = str(sid).lower()
     if 'unclassified' in s:
         return 'unclassified'
+    meta = meta or {}
+    cat = str(meta.get('samp_category') or '').lower()
+    if 'control' in cat or 'blank' in cat:
+        return 'control'
+    for k in ('neg_cont_type', 'pos_cont_type'):
+        if not _faire_blank(meta.get(k)):
+            return 'control'
+    if cat == 'sample':
+        return 'sample'
     if 'lntc' in s or 'ntc' in s or 'neg' in s or 'blank' in s:
         return 'control'
     return 'sample'
@@ -2486,7 +3321,7 @@ def _flag_unmappable(run):
     reaches the map. No effect on the Table/Map totals themselves."""
     samples = run.get('samples') or []
     for s in samples:
-        s['category'] = _sample_category(s.get('sampleId', ''))
+        s['category'] = _sample_category(s.get('sampleId', ''), s.get('meta'))
     mapped = {s['sampleId'] for s in samples if s.get('lat') is not None}
     cat = {s['sampleId']: s['category'] for s in samples}
 
@@ -2692,11 +3527,11 @@ def _gather_runs():
     for folder in ([] if exclusive else sorted([p for p in DATA_DIR.iterdir()
                                                 if p.is_dir() and not ec.is_temp_file(p)])):
         try:
-            run = detect_and_load(folder, man_refs=man_refs)
+            got = detect_and_load(folder, man_refs=man_refs)
         except Exception as e:
             log.error(f"{folder.name}: {e}")
-            run = None
-        if run:
+            got = None
+        for run in (got if isinstance(got, list) else [got] if got else []):
             runs.append(run)
             loaded_wlm |= {p.name for p in folder.glob("WLM*.xlsx")}
             log.info(f"{folder.name}: {len(run['stations'])} stations, "
@@ -2848,7 +3683,8 @@ def validate_inputs(template=None):
             rep.warn(f"manifest row {row_no}: duplicate sample_id/run {key} (also row {seen[key]})")
         seen[key] = row_no
         has_data = False
-        for col, label in (('k2', 'k2_report'), ('asv', 'asv_report'), ('metadata', 'metadata')):
+        for col, label in (('k2', 'k2_report'), ('asv', 'asv_report'), ('ode', 'ode_report'),
+                           ('metadata', 'metadata')):
             if not cmap.get(col):
                 continue
             for ref in _split_paths(r[cmap[col]]):
@@ -2859,11 +3695,29 @@ def validate_inputs(template=None):
                     msg = f"manifest row {row_no} ({sid}): {label} '{ref}' not found"
                     (rep.warn if col == 'metadata' else rep.error)(msg)
                     continue
-                has_data = has_data or col in ('k2', 'asv')
+                has_data = has_data or col in ('k2', 'asv', 'ode')
                 for h in hits:
+                    is_ode = col == 'ode' or (col == 'asv' and (
+                        ode_file_role(h) or (h.is_dir() and find_ode_pairs([h]))))
+                    if is_ode:
+                        pairs = find_ode_pairs([h])
+                        if not pairs:
+                            rep.error(f"manifest row {row_no} ({sid}): {label} '{ref}' holds no "
+                                      f"Ocean DNA Explorer feature table (featureid + library columns)")
+                        for tp, xp in pairs:
+                            try:
+                                read_ode_table(tp)
+                                if xp is None:
+                                    rep.warn(f"manifest row {row_no} ({sid}): no asvTaxaFeatures "
+                                             f"file pairs with {tp.name}")
+                                else:
+                                    read_ode_taxonomy(xp)
+                            except (InputError, Exception) as e:
+                                rep.error(f"manifest row {row_no} ({sid}): {tp.name}: {e}")
+                        continue
                     if h.is_file():
                         try:
-                            ext = (ec.SPREADSHEET_EXT + ('.csv',)) if col != 'k2' else None
+                            ext = (ec.SPREADSHEET_EXT + TEXT_TABLE_EXT) if col != 'k2' else None
                             ec.require_file(h, label, ext)
                             if col == 'asv':
                                 ec.require_sheets(h, ['metadata', 'aggregated'], 'ASV workbook')
@@ -2879,8 +3733,8 @@ def validate_inputs(template=None):
             if cv and cv.lower().endswith(('.xlsx', '.xlsm', '.xls', '.csv')):
                 if _resolve_report(cv, project=proj) is None:
                     rep.error(f"manifest row {row_no} ({sid}): barcodes workbook '{cv}' not found")
-        if not has_data and (cmap.get('k2') or cmap.get('asv')):
-            rep.warn(f"manifest row {row_no} ({sid}): no k2_report / asv_report resolved — "
+        if not has_data and (cmap.get('k2') or cmap.get('asv') or cmap.get('ode')):
+            rep.warn(f"manifest row {row_no} ({sid}): no k2_report / asv_report / ode_report resolved — "
                      f"the sample will carry no taxonomic data")
     return rep
 
@@ -2955,7 +3809,7 @@ def build_parser():
     return p
 
 
-_PROJECT_SUBDIRS = ('faire', 'kraken2', 'wilder', 'meta')
+_PROJECT_SUBDIRS = ('faire', 'kraken2', 'wilder', 'meta', 'tourmaline')
 
 
 def _resolve_projects_root(path, given):

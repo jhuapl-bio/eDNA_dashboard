@@ -165,3 +165,104 @@ def test_committed_example_matches_generator(tmp_path):
         rel = f.relative_to(out / "projects")
         assert (committed / rel).read_text() == f.read_text(), rel
     shutil.rmtree(out)
+
+
+# ---------------------------------------------------------------- Ocean DNA Explorer
+def _write_ode_project(projects):
+    """A tiny Ocean DNA Explorer project: FAIRe TSVs with '#' comment rows plus a
+    Tourmaline feature table / asvTaxaFeatures pair (random download suffixes)."""
+    proj = projects / "ode-demo"
+    (proj / "faire").mkdir(parents=True)
+    (proj / "tourmaline").mkdir()
+    (proj / "faire" / "FAIRe_ode-demo - sampleMetadata-AbCdEfGhIjKlMnOpQr.tsv").write_text(
+        "# requirement_level_code\tM\tM\tO\tO\tM\tM\tO\tO\tO\tO\tO\n"
+        "# section\tSample information\tx\tx\tx\tx\tx\tx\tx\tx\tx\tx\n"
+        "samp_name\tdecimalLatitude\tdecimalLongitude\tctd_bottle_number\texpedition_id"
+        "\tsamp_category\tneg_cont_type\tdepth_category\teventDate\tminimumDepthInMeters"
+        "\tmaximumDepthInMeters\ttemp\n"
+        "S1-CTD1-100\t28.5\t-86.0\tCTD1\tX19-01\tsample\tnot applicable\tBottom\t7/6/19\t100\t100\t15.1\n"
+        "S2-CTD2-50\t28.7\t-86.2\tCTD2\tX19-01\tsample\tnot applicable\tMid-water\t7/8/19\t50\t50\t18.2\n"
+        "S3-CTD2-120\t28.7\t-86.2\tCTD2\tX19-01\tsample\tnot applicable\tBottom\t7/8/19\t120\t120\t14.0\n"
+        "ExtNeg_1\tnot applicable\tnot applicable\tnot applicable\tnot applicable\tnegative control"
+        "\textraction negative\tnot applicable\t9/10/19\tnot applicable\tnot applicable\tnot applicable\n")
+    (proj / "faire" / "FAIRe_ode-demo - experimentRunMetadata-ZyXwVuTsRqPoNmLk (2).tsv").write_text(
+        "# requirement_level_code\tM\tM\tM\n# section\tPCR\tPCR\tLib\n"
+        "samp_name\tassay_name\tlib_id\tseq_run_id\n"
+        "S1-CTD1-100\tFish-12S-MiFish-Miya-Stoeckle\tS1-CTD1-100_MiFish_S1\trun_mifish\n"
+        "S2-CTD2-50\tFish-12S-MiFish-Miya-Stoeckle\tS2-CTD2-50_MiFish_S2\trun_mifish\n"
+        "S3-CTD2-120\tFish-12S-MiFish-Miya-Stoeckle\tS3-CTD2-120_MiFish_S3\trun_mifish\n"
+        "ExtNeg_1\tFish-12S-MiFish-Miya-Stoeckle\tExtNeg_1_MiFish_S4\trun_mifish\n")
+    (proj / "faire" / "FAIRe_ode-demo - projectMetadata-QqWwEeRrTtYyUuIi.tsv").write_text(
+        "requirement_level_code\tsection\tterm_name\tproject_level\tFish-12S-MiFish-Miya-Stoeckle\n"
+        "R\tProject\tproject_name\tDemo cruise\t\n"
+        "HR\tPCR\ttarget_gene\t\t12S rRNA\n")
+    (proj / "tourmaline" / "table_demo_mifish_v1-T9UVz1iHJ3CWCBbyKyVL.tsv").write_text(
+        "featureid\tS1-CTD1-100_MiFish_S1\tS2-CTD2-50_MiFish_S2\tS3-CTD2-120_MiFish_S3\tExtNeg_1_MiFish_S4\n"
+        "aaa\t100\t0\t5\t0\nbbb\t0\t40\t0\t2\nccc\t7\t7\t0\t0\nddd\t3\t0\t0\t0\n")
+    (proj / "tourmaline" / "asvTaxaFeatures_demo_mifish_v1-gSmSC3yZ1DGFSoejVu.tsv").write_text(
+        "featureid\tdna_sequence\ttaxonomy\tverbatimIdentification\tkingdom\tphylum\tclass\torder"
+        "\tfamily\tgenus\tspecies\tConfidence\n"
+        "aaa\tACGT\tEukaryota;Chordata;Actinopteri;Stomiiformes;Sternoptychidae;Maurolicus;Maurolicus weitzmani"
+        "\tx\tEukaryota\tChordata\tActinopteri\tStomiiformes\tSternoptychidae\tMaurolicus\tMaurolicus weitzmani\t0.99\n"
+        "bbb\tACGA\tEukaryota;Chordata;Actinopteri;Scombriformes\tx\tEukaryota\tChordata\tActinopteri"
+        "\tScombriformes\t\t\t\t0.97\n"
+        "ccc\tACGC\tEukaryota;Chordata;Actinopteri;Stomiiformes;Sternoptychidae;Maurolicus;Maurolicus weitzmani"
+        "\tx\tEukaryota\tChordata\tActinopteri\tStomiiformes\tSternoptychidae\tMaurolicus\tMaurolicus weitzmani\t0.98\n"
+        "ddd\tACGG\tBacteria\tx\tBacteria\t\t\t\t\t\t\t0.8\n")
+    man = projects / ec.MANIFEST_NAME
+    df = pd.read_excel(man)
+    row = {c: None for c in df.columns}
+    row.update({"sample_id": "demo_mifish", "run": "run_mifish", "project": "ode-demo",
+                "metadata": "FAIRe_ode-demo - sampleMetadata-AbCdEfGhIjKlMnOpQr.tsv; "
+                            "FAIRe_ode-demo - experimentRunMetadata-ZyXwVuTsRqPoNmLk (2).tsv; "
+                            "FAIRe_ode-demo - projectMetadata-QqWwEeRrTtYyUuIi.tsv",
+                "ode_report": "table_demo_mifish_v1"})
+    if "project_dir" in row:
+        row["project_dir"] = "ode-demo"
+    df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
+    df.to_excel(man, index=False)
+    return proj
+
+
+def test_faire_tsv_with_comment_rows(example):
+    proj = _write_ode_project(example)
+    f = next((proj / "faire").glob("*sampleMetadata*.tsv"))
+    smap = B.load_station_map_from_file(f)
+    assert set(smap) == {"S1-CTD1-100", "S2-CTD2-50", "S3-CTD2-120", "ExtNeg_1"}
+    s1 = smap["S1-CTD1-100"]
+    assert s1["Station"] == "CTD1" and s1["Cruise Number"] == "X19-01"
+    assert s1["Sample Depth"] == "Bottom" and s1["eventDate"] == "2019-07-06"
+    assert B.faire_file_kind(next((proj / "faire").glob("*experimentRun*"))) == "experimentRun"
+    assert B.faire_file_kind(next((proj / "faire").glob("*projectMetadata*"))) == "project"
+
+
+def test_ode_tourmaline_run(example, tmp_path):
+    _write_ode_project(example)
+    out = tmp_path / "r.html"
+    assert _build(example, out) == 0
+    d = _payload(out)
+    kinds = sorted(r["kind"] for r in d["runs"])
+    assert kinds == ["kraken2", "manifest", "ode"]          # other formats still load
+    r = next(r for r in d["runs"] if r["kind"] == "ode")
+    assert "MiFish" in r["label"]
+    assert len(r["stations"]) == 2                          # S2 + S3 share CTD2's position
+    sids = {s["sampleId"]: s for s in r["samples"]}
+    assert set(sids) == {"S1-CTD1-100", "S2-CTD2-50", "S3-CTD2-120", "ExtNeg_1"}
+    assert sids["ExtNeg_1"]["category"] == "control"
+    assert sids["S1-CTD1-100"]["category"] == "sample"
+    assert sids["S1-CTD1-100"]["meta"]["Library"] == "S1-CTD1-100_MiFish_S1"
+    taxa = {t["species"]: t for t in r["taxa"]}
+    # two ASVs collapse into one species; coarser hits are labelled by rank
+    assert taxa["Maurolicus weitzmani"]["reads"] == 119 and taxa["Maurolicus weitzmani"]["asvCount"] == 2
+    assert "Scombriformes (order)" in taxa and "Bacteria (kingdom)" in taxa
+    assert r["meta"]["Project name"] == "Demo cruise" and r["meta"]["Target gene"] == "12S rRNA"
+    assert _build(example, tmp_path / "v.html", "--validate") == 0
+
+
+def test_ode_pairing_and_lib_suffixes(tmp_path):
+    assert B._ode_pair_key("table_gu1901_mifish_v2024.10_241001-T9UVz1iHJ3CWCBbyKyVLMa4ridCZai.tsv") == \
+        B._ode_pair_key("asvTaxaFeatures_gu1901_mifish_v2024.10_241001-gSmSC3yZ1DGFSoejVuxAAKKFDtDGui.tsv")
+    smap = {"GU190706-CTD11-220": {}}
+    res = lambda q: q if q in smap else None
+    assert B.ode_lib_to_sample("GU190706-CTD11-220_MiFish_S30", {}, res)[0] == "GU190706-CTD11-220"
+    assert B._ode_short_assay("Fish-12S-MiFish-Miya-Stoeckle") == "MiFish"

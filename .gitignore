@@ -40,3 +40,6 @@ pytest-cache-files-*/
 ~$*
 *.bak
 *.tmp
+
+# GitHub Pages build output
+_site/

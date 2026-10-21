@@ -1,0 +1,57 @@
+name: Pages
+
+# Rebuild and publish the GitHub Pages site on every push to main.
+# The site is built only from committed files: the synthetic example data in
+# data/example (real project data is git-ignored and never published), plus any
+# extra HTML you commit under pages/.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deploy at a time; a newer push replaces a queued one, never an in-progress one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11", cache: pip }
+      - run: pip install -r requirements-dev.txt
+      - name: Tests
+        run: pytest
+        env: { EDNA_LOG_FILE: "-" }
+      - name: Build example report
+        env: { EDNA_LOG_FILE: "-" }
+        run: |
+          mkdir -p _site
+          python build_mbon_html.py --example --validate
+          python build_mbon_html.py --example -o _site/example_report.html
+      - name: Add extra pages
+        run: |
+          if [ -d pages ]; then cp -R pages/. _site/; fi
+          touch _site/.nojekyll
+      - name: Index page
+        run: python .github/scripts/make_pages_index.py _site
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with: { path: _site }
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

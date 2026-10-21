@@ -11,6 +11,7 @@ data/projects/                      # --projects-dir / EDNA_PROJECTS_DIR
     ├── faire/    FAIRe checklist(s): per-sample metadata, coordinates, environment
     ├── kraken2/  Kraken2 reports  — flat, or kraken2/<DATABASE>/<run>/…
     ├── wilder/   Wilderlab ASV workbooks (WLM*.xlsx)
+    ├── tourmaline/ Ocean DNA Explorer (Tourmaline) table_*.tsv + asvTaxaFeatures_*.tsv
     └── meta/     concordance.json (written by `ingest.py concordance`)
 ```
 
@@ -27,9 +28,10 @@ aliases in brackets are accepted.
 | `project` | recommended | Project name — the builder makes one set of runs per project. |
 | `project_dir` | | Folder under `data/projects/` (defaults to `project`). |
 | `cruise` | | Cruise / collection date (e.g. `20260714`). |
-| `metadata` | recommended | FAIRe checklist filename (searched in `faire/`, `meta/`, the project folder, `wilder/`). |
+| `metadata` | recommended | FAIRe checklist filename (searched in `faire/`, `meta/`, the project folder, `wilder/`, `tourmaline/`). `.xlsx`, `.csv` or `.tsv`. Several files may be listed (`;`): `sampleMetadata`, `experimentRunMetadata` and `projectMetadata` sheets are recognised by their content. |
 | `k2_report` | | Kraken2 report file **or** folder, relative to `kraken2/` (a `<DATABASE>/` level is searched automatically). Several allowed, `;` or `,` separated. |
 | `asv_report` | | Wilder workbook(s) in `wilder/`; the `.xlsx` extension may be omitted. |
+| `ode_report` [ode, tourmaline, feature_table] | | Ocean DNA Explorer feature table(s) in `tourmaline/` — a file name, a name prefix without the random download suffix (`table_gu1901_mifish_…_241001`), or the folder (`tourmaline`) for every table in it. The matching `asvTaxaFeatures_*` file is paired automatically. The row is a container: `sample_id` / `run` just name the analysis; samples come from the table's library columns. |
 | `barcodes` | | `TRUE` to expand a folder of `barcodeNN` reports into one sample per barcode, or the filename of a barcoding workbook (tabs with `Sample` + `Barcode` [+ `sample_ID`] columns). |
 | `disable` | | `TRUE` / `1` / `yes` / `x` skips the row everywhere. |
 | `platform` | | Sequencing platform (Illumina, Oxford Nanopore, …). |
@@ -37,12 +39,18 @@ aliases in brackets are accepted.
 
 Any other columns are carried into the report as per-sample metadata.
 
-## FAIRe checklist (`faire/*.xlsx`)
+## FAIRe checklist (`faire/*.xlsx` / `*.tsv` / `*.csv`)
 
-A `sampleMetadata` sheet. The header row is detected automatically (FAIRe
-templates put requirement-level and section rows above it). Recognised columns:
+A `sampleMetadata` sheet — a workbook tab, or a stand-alone `.tsv` / `.csv` such as
+the ones the Ocean DNA Explorer exports. The header row is detected automatically
+and rows starting with `#` (`# requirement_level_code`, `# section`) are skipped.
+Recognised columns:
 
-* key: `samp_number` (preferred) or `sample_ID`; also `samp_name`, `materialSampleID`, `Station`
+* key: `samp_number` (preferred), `sample_ID`, else `samp_name`; also `materialSampleID`, `Station`
+* sheets keyed by `samp_name` (Ocean DNA Explorer) also fill the report's own fields:
+  `Station` ← `ctd_bottle_number`, `Cruise Number` ← `expedition_id`,
+  `Sample Depth` ← `depth_category`, and `eventDate` `7/6/19` → `2019-07-06`
+* FAIRe placeholders (`not applicable`, `missing: …`, `not provided`) count as empty
 * location: `decimalLatitude`, `decimalLongitude` (decimal degrees; swapped values are
   repaired, `0,0` and out-of-range values are ignored), `geo_loc_name`
 * environment (shown on the map and in Explore): `temp`, `salinity`, `Sample Depth`,
@@ -67,6 +75,41 @@ Only `Rank == species` rows are plotted. UID columns are linked to samples throu
 The older **Wilder_02** export (separate `WilderlabSamples*.csv` + `WilderlabTaxa*.csv`
 [+ a detections table with `SID`, `TaxID`, reads]) is read with
 `--include-unmanifested --include-wilder02`.
+
+### experimentRunMetadata / projectMetadata
+
+* `experimentRunMetadata`: `samp_name`, `assay_name`, **`lib_id`**, `seq_run_id`, … —
+  `lib_id` is the column name used in sequencing outputs, so this is how a feature-table
+  column such as `GU190706-CTD11-220_MiFish_S30` becomes sample `GU190706-CTD11-220`.
+* `projectMetadata`: `term_name` rows with a `project_level` column and one column per
+  assay. Project name, institution, contact, target gene, primers, BioProject, … are
+  shown in the report's Metadata tab (assay-specific values win for that assay's run).
+
+If a manifest row with an `ode_report` doesn't list these two files, they are looked
+for in the project's `faire/` folder.
+
+## Ocean DNA Explorer / Tourmaline (`tourmaline/…`)
+
+Download the Tourmaline outputs for an analysis from the Ocean DNA Explorer:
+
+| File | Content |
+|---|---|
+| `table_<analysis>-<random>.tsv` | Feature table: **`featureid`**, then one read-count column per library (`lib_id`). |
+| `asvTaxaFeatures_<analysis>-<random>.tsv` | One row per **`featureid`**: `dna_sequence`, `taxonomy` (`;` lineage), `verbatimIdentification`, `kingdom` … `species`, `Confidence`. |
+
+The two files of one analysis share `<analysis>`; only the random suffix differs.
+Each feature is named by its finest populated rank — `species` when present, else
+e.g. `Scombriformes (order)`; features that classify to the same name are summed and
+`asvCount` records how many distinct ASVs contributed. `Group` is the class (else
+phylum / kingdom). Library columns link to samples through `experimentRunMetadata`
+(falling back to the column name with `_S##` / assay suffixes stripped), then to
+`sampleMetadata` for coordinates, depth and environment. Each feature table becomes its
+own run of kind `ode`, labelled `<project> · <assay>` (e.g. `noaa-sefsc-gu1901 · MiFish`),
+listed under **Ocean DNA Explorer** in the report's *Report method* dropdown; reads from
+different assays are never pooled.
+
+The same files can also be dropped onto an open report (*Add data*): drop the FAIRe
+`.tsv` sheets together with the two Tourmaline files.
 
 ## Kraken2 reports (`kraken2/…`)
 
@@ -102,5 +145,5 @@ manifest row names a whole folder of reports.
 and `--from-json file.json` renders it again (e.g. after editing titles or merging
 payloads in another tool). Top-level keys: `title`, `isExample`, `generatedAt`,
 `map {center, zoom}`, and `runs[]` — each with `id`, `label`, `kind`
-(`kraken2` / `manifest` / `Wilder_01` …), `stations[]`, `samples[]`, `taxa[]`,
+(`kraken2` / `manifest` / `ode` / `Wilder_01` …), `stations[]`, `samples[]`, `taxa[]`,
 `meta{}`, `sources[]`, `warning`. See `examples/example_payload.json`.
