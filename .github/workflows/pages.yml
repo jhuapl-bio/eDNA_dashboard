@@ -30,12 +30,21 @@ jobs:
       - name: Tests
         run: pytest
         env: { EDNA_LOG_FILE: "-" }
+      - name: Ocean DNA Explorer catalog
+        # Project list for the report's "Import from Ocean DNA Explorer" dialog, fetched
+        # live: metadata only (project names, analyses, file links), no sample data, and
+        # not committed. If ODE is unreachable the report is built without it.
+        continue-on-error: true
+        run: python ode_client.py --cache "" catalog -o "$RUNNER_TEMP/ode_catalog.json"
       - name: Build example report
         env: { EDNA_LOG_FILE: "-" }
+        # --ode-no-store: imports made on the published page stay in the visitor's
+        # memory only (nothing kept in their browser); a reload removes them.
         run: |
           mkdir -p _site
           python build_mbon_html.py --example --validate
-          python build_mbon_html.py --example -o _site/example_report.html
+          python build_mbon_html.py --example --ode-no-store --ode-catalog "$RUNNER_TEMP/ode_catalog.json" \
+            -o _site/example_report.html
       - name: Add extra pages
         run: |
           if [ -d pages ]; then cp -R pages/. _site/; fi
