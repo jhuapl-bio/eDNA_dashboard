@@ -52,6 +52,7 @@ load_dotenv(os.path.join(REPO_ROOT, ".env"))
 
 import connections as conn_store  # noqa: E402  (needs env loaded first)
 from imports import imports_bp    # noqa: E402
+from ode_routes import ode_bp     # noqa: E402  (Ocean DNA Explorer bridge, /api/ode/*)
 
 
 # ── Logging ──────────────────────────────────────────────────────────────────
@@ -156,6 +157,7 @@ def _unhandled(e):
 
 # Browser-side imports (xlsx/csv) — self-contained JSON store, no DB needed.
 app.register_blueprint(imports_bp)
+app.register_blueprint(ode_bp)
 
 
 # ── Database helpers ─────────────────────────────────────────────────────────

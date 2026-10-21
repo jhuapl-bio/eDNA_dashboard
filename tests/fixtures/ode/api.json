@@ -1,0 +1,126 @@
+{
+ "synthetic": true,
+ "seed": 20261021,
+ "projects": [
+  {
+   "id": 902,
+   "project_id": "demo-reef-2025",
+   "project_name": "Synthetic reef eDNA 2025 (demo data)",
+   "institution": "Example Reef Institute (synthetic)",
+   "dateSubmitted": "2026-02-01T00:00:00.000Z",
+   "projectMetadataFileUrl_ODE": "{FILES}/FAIRe-DEMO_demo-reef-2025%2520-%2520projectMetadata-CFEux4jYegex5Lqcwgy7Tip1C8RUzO.tsv",
+   "sampleMetadataFileUrl_ODE": "{FILES}/FAIRe-DEMO_demo-reef-2025%2520-%2520sampleMetadata-7sckTqf1mKUfIUd2VIeAGhuEhrdozf.tsv",
+   "libraryMetadataFileUrl_ODE": "{FILES}/FAIRe-DEMO_demo-reef-2025%2520-%2520experimentRunMetadata-P8sl4AVsklqNbwXb0qjp2bRlxwsCHO.tsv",
+   "_count": {
+    "Samples": 16,
+    "Analyses": 2,
+    "Libraries": 32
+   }
+  },
+  {
+   "id": 901,
+   "project_id": "demo-shelf-2023",
+   "project_name": "Synthetic shelf survey 2023 (demo data)",
+   "institution": "Example Marine Lab (synthetic)",
+   "dateSubmitted": "2026-01-01T00:00:00.000Z",
+   "projectMetadataFileUrl_ODE": "{FILES}/FAIRe_demo-shelf-2023%20-%20projectMetadata-avNQyeehihaYjI4khMYrAElT5dVrBp.tsv",
+   "sampleMetadataFileUrl_ODE": "{FILES}/FAIRe_demo-shelf-2023%20-%20sampleMetadata-4JXWOjWRTOTnhrcGeSp0KhgXSXAL3Z.tsv",
+   "libraryMetadataFileUrl_ODE": "{FILES}/FAIRe_demo-shelf-2023%20-%20experimentRunMetadata-68MJuKyvHqu6vYh1cq0cJymF96UsMp.tsv",
+   "_count": {
+    "Samples": 18,
+    "Analyses": 2,
+    "Libraries": 36
+   }
+  }
+ ],
+ "analyses": [
+  {
+   "id": 9101,
+   "project_id": "demo-shelf-2023",
+   "analysis_run_name": "demo23-mifish-run1",
+   "assay_name": "Fish-12S-MiFish-U-Demo",
+   "trusted": true,
+   "dateSubmitted": "2026-01-02T00:00:00.000Z",
+   "asvFileUrl_ODE": "{FILES}/asvTaxaFeatures_demo23_mifish_v1_260101-BMejVTrBvI80oPQ3NhshWjRcyJqsJ0.tsv",
+   "occurrenceFileUrl_ODE": "{FILES}/table_demo23_mifish_v1_260101-bkOWDBojCEoNK1vhPjJB5ufO4DpPyw.tsv",
+   "analysisMetadataFileUrl_ODE": "{FILES}/analysisMetadata_demo23_mifish_v1_260101-8KfnJ3HoRYHG5K5J7b3YhOBirbZzxh.tsv",
+   "_count": {
+    "Libraries": 18,
+    "Occurrences": 0,
+    "Assignments": 60,
+    "Taxonomies": 0
+   }
+  },
+  {
+   "id": 9102,
+   "project_id": "demo-shelf-2023",
+   "analysis_run_name": "demo23-riaz-run1",
+   "assay_name": "Fish-12S-Riaz-Demo",
+   "trusted": false,
+   "dateSubmitted": "2026-01-02T00:00:00.000Z",
+   "asvFileUrl_ODE": "{FILES}/asvTaxaFeatures_demo23_riaz_v1_260101-hYxoeJJMIZUJ1ygYOMd9T0LmuypIuN.tsv",
+   "occurrenceFileUrl_ODE": "{FILES}/table_demo23_riaz_v1_260101-s57Ggc23ZwlsAmnsm7mu5Quertyk2t.tsv",
+   "analysisMetadataFileUrl_ODE": "{FILES}/analysisMetadata_demo23_riaz_v1_260101-HNZCwBrWgQwoOCphpMRMTyzs4bhMVe.tsv",
+   "_count": {
+    "Libraries": 18,
+    "Occurrences": 0,
+    "Assignments": 40,
+    "Taxonomies": 0
+   }
+  },
+  {
+   "id": 9201,
+   "project_id": "demo-reef-2025",
+   "analysis_run_name": "demoreef-mifish-run1",
+   "assay_name": "Fish-12S-MiFish-Demo-Reef",
+   "trusted": true,
+   "dateSubmitted": "2026-02-02T00:00:00.000Z",
+   "asvFileUrl_ODE": "{FILES}/ps_mifish_taxonomy-qGMNGy0uA6RbWPejP4G61iJz1VWYwg.tsv",
+   "occurrenceFileUrl_ODE": "{FILES}/ps_mifish_ASV_table-m7U9hCxMAAbBXnJAwx9IcLOyyZev3U.tsv",
+   "analysisMetadataFileUrl_ODE": "{FILES}/demoreef-mifish-run1_analysisMetadata-lAbthif8QU1JAEBFA3sql9i8ebNe0n.tsv",
+   "_count": {
+    "Libraries": 16,
+    "Occurrences": 0,
+    "Assignments": 50,
+    "Taxonomies": 0
+   }
+  },
+  {
+   "id": 9202,
+   "project_id": "demo-reef-2025",
+   "analysis_run_name": "demoreef-marver1-run1",
+   "assay_name": "Vertebrates-12S-MarVer1-Demo",
+   "trusted": false,
+   "dateSubmitted": "2026-02-02T00:00:00.000Z",
+   "asvFileUrl_ODE": "{FILES}/ps_marver1_taxonomy-rUvzSqZWLHKXuv38YmDdtTbdDoplHs.tsv",
+   "occurrenceFileUrl_ODE": "{FILES}/ps_marver1_ASV_table-WELN54DWhPriulayp5FJN4siNNdMnX.tsv",
+   "analysisMetadataFileUrl_ODE": "{FILES}/demoreef-marver1-run1_analysisMetadata-jGHOSC3zBSdUwRsOyf0oP4rBkEXKoy.tsv",
+   "_count": {
+    "Libraries": 16,
+    "Occurrences": 0,
+    "Assignments": 30,
+    "Taxonomies": 0
+   }
+  }
+ ],
+ "files": {
+  "FAIRe-DEMO_demo-reef-2025%2520-%2520experimentRunMetadata-P8sl4AVsklqNbwXb0qjp2bRlxwsCHO.tsv": "FAIRe-DEMO_demo-reef-2025_2520-_2520experimentRunMetadata-P8sl4AVsklqNbwXb0qjp2bRlxwsCHO.tsv",
+  "FAIRe-DEMO_demo-reef-2025%2520-%2520projectMetadata-CFEux4jYegex5Lqcwgy7Tip1C8RUzO.tsv": "FAIRe-DEMO_demo-reef-2025_2520-_2520projectMetadata-CFEux4jYegex5Lqcwgy7Tip1C8RUzO.tsv",
+  "FAIRe-DEMO_demo-reef-2025%2520-%2520sampleMetadata-7sckTqf1mKUfIUd2VIeAGhuEhrdozf.tsv": "FAIRe-DEMO_demo-reef-2025_2520-_2520sampleMetadata-7sckTqf1mKUfIUd2VIeAGhuEhrdozf.tsv",
+  "FAIRe_demo-shelf-2023%20-%20experimentRunMetadata-68MJuKyvHqu6vYh1cq0cJymF96UsMp.tsv": "FAIRe_demo-shelf-2023_20-_20experimentRunMetadata-68MJuKyvHqu6vYh1cq0cJymF96UsMp.tsv",
+  "FAIRe_demo-shelf-2023%20-%20projectMetadata-avNQyeehihaYjI4khMYrAElT5dVrBp.tsv": "FAIRe_demo-shelf-2023_20-_20projectMetadata-avNQyeehihaYjI4khMYrAElT5dVrBp.tsv",
+  "FAIRe_demo-shelf-2023%20-%20sampleMetadata-4JXWOjWRTOTnhrcGeSp0KhgXSXAL3Z.tsv": "FAIRe_demo-shelf-2023_20-_20sampleMetadata-4JXWOjWRTOTnhrcGeSp0KhgXSXAL3Z.tsv",
+  "analysisMetadata_demo23_mifish_v1_260101-8KfnJ3HoRYHG5K5J7b3YhOBirbZzxh.tsv": "analysisMetadata_demo23_mifish_v1_260101-8KfnJ3HoRYHG5K5J7b3YhOBirbZzxh.tsv",
+  "analysisMetadata_demo23_riaz_v1_260101-HNZCwBrWgQwoOCphpMRMTyzs4bhMVe.tsv": "analysisMetadata_demo23_riaz_v1_260101-HNZCwBrWgQwoOCphpMRMTyzs4bhMVe.tsv",
+  "asvTaxaFeatures_demo23_mifish_v1_260101-BMejVTrBvI80oPQ3NhshWjRcyJqsJ0.tsv": "asvTaxaFeatures_demo23_mifish_v1_260101-BMejVTrBvI80oPQ3NhshWjRcyJqsJ0.tsv",
+  "asvTaxaFeatures_demo23_riaz_v1_260101-hYxoeJJMIZUJ1ygYOMd9T0LmuypIuN.tsv": "asvTaxaFeatures_demo23_riaz_v1_260101-hYxoeJJMIZUJ1ygYOMd9T0LmuypIuN.tsv",
+  "demoreef-marver1-run1_analysisMetadata-jGHOSC3zBSdUwRsOyf0oP4rBkEXKoy.tsv": "demoreef-marver1-run1_analysisMetadata-jGHOSC3zBSdUwRsOyf0oP4rBkEXKoy.tsv",
+  "demoreef-mifish-run1_analysisMetadata-lAbthif8QU1JAEBFA3sql9i8ebNe0n.tsv": "demoreef-mifish-run1_analysisMetadata-lAbthif8QU1JAEBFA3sql9i8ebNe0n.tsv",
+  "ps_marver1_ASV_table-WELN54DWhPriulayp5FJN4siNNdMnX.tsv": "ps_marver1_ASV_table-WELN54DWhPriulayp5FJN4siNNdMnX.tsv",
+  "ps_marver1_taxonomy-rUvzSqZWLHKXuv38YmDdtTbdDoplHs.tsv": "ps_marver1_taxonomy-rUvzSqZWLHKXuv38YmDdtTbdDoplHs.tsv",
+  "ps_mifish_ASV_table-m7U9hCxMAAbBXnJAwx9IcLOyyZev3U.tsv": "ps_mifish_ASV_table-m7U9hCxMAAbBXnJAwx9IcLOyyZev3U.tsv",
+  "ps_mifish_taxonomy-qGMNGy0uA6RbWPejP4G61iJz1VWYwg.tsv": "ps_mifish_taxonomy-qGMNGy0uA6RbWPejP4G61iJz1VWYwg.tsv",
+  "table_demo23_mifish_v1_260101-bkOWDBojCEoNK1vhPjJB5ufO4DpPyw.tsv": "table_demo23_mifish_v1_260101-bkOWDBojCEoNK1vhPjJB5ufO4DpPyw.tsv",
+  "table_demo23_riaz_v1_260101-s57Ggc23ZwlsAmnsm7mu5Quertyk2t.tsv": "table_demo23_riaz_v1_260101-s57Ggc23ZwlsAmnsm7mu5Quertyk2t.tsv"
+ }
+}

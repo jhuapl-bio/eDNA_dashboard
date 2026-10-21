@@ -1829,6 +1829,232 @@
 }
 
     </style>
+    <style id="mbon-ode-api-css">
+    /* mbon-ode-api-v1 — Ocean DNA Explorer import dialog, project switcher, status pill */
+    :root { --odex: #0f766e; --odex-dk: #0b4f4a; --odex-lt: #e1f5f1; --odex-ink: #1b2631; --odex-mut: #5f7180; --odex-br: #dbe3ea; }
+    .odex-bg { position: fixed; inset: 0; z-index: 3400; background: rgba(12, 28, 40, .52); display: flex; align-items: center; justify-content: center; padding: 18px; }
+    .odex-bg[hidden] { display: none; }
+    .odex { width: min(1040px, 100%); max-height: min(860px, calc(100vh - 36px)); background: #fff; border-radius: 14px; box-shadow: 0 18px 60px rgba(0, 0, 0, .35);
+      display: flex; flex-direction: column; overflow: hidden; color: var(--odex-ink); font-size: .86rem; }
+    .odex-head { display: flex; align-items: center; gap: .7rem; padding: .8rem 1rem .7rem; background: linear-gradient(95deg, #0b4f4a, #0f766e 55%, #138a80); color: #fff; }
+    .odex-logo { font-size: 1.5rem; line-height: 1; }
+    .odex-ttlw { flex: 1; min-width: 0; }
+    .odex-ttl { font-weight: 700; font-size: 1.02rem; letter-spacing: .2px; }
+    .odex-sub { font-size: .74rem; opacity: .86; }
+    .odex-sub a { color: #d6fff7; }
+    .odex-conn { display: inline-flex; align-items: center; gap: .4rem; border: 1px solid rgba(255, 255, 255, .45); background: rgba(255, 255, 255, .12); color: #fff;
+      border-radius: 999px; padding: .22rem .65rem; font: inherit; font-size: .74rem; font-weight: 600; cursor: pointer; white-space: nowrap; }
+    .odex-conn:hover { background: rgba(255, 255, 255, .22); }
+    .odex-conn .dot { width: 8px; height: 8px; border-radius: 50%; background: #9ca3af; box-shadow: 0 0 0 2px rgba(255, 255, 255, .25); }
+    .odex-conn.ok .dot { background: #4ade80; } .odex-conn.warn .dot { background: #fbbf24; } .odex-conn.bad .dot { background: #f87171; }
+    .odex-x { background: none; border: 0; color: #fff; font-size: 1.6rem; line-height: 1; cursor: pointer; padding: 0 .2rem; opacity: .85; }
+    .odex-x:hover { opacity: 1; }
+    .odex-steps { display: flex; gap: 0; margin: 0; padding: 0 1rem; list-style: none; border-bottom: 1px solid var(--odex-br); background: #f7fafb; }
+    .odex-steps li { padding: .5rem .9rem .45rem; font-size: .78rem; color: var(--odex-mut); border-bottom: 2.5px solid transparent; cursor: default; user-select: none; }
+    .odex-steps li b { display: inline-flex; width: 1.25rem; height: 1.25rem; border-radius: 50%; align-items: center; justify-content: center; font-size: .7rem;
+      background: #e5ebf0; color: var(--odex-mut); margin-right: .3rem; }
+    .odex-steps li.on { color: var(--odex-dk); font-weight: 700; border-bottom-color: var(--odex); }
+    .odex-steps li.on b { background: var(--odex); color: #fff; }
+    .odex-steps li.past { color: var(--odex-dk); cursor: pointer; }
+    .odex-steps li.past b { background: var(--odex-lt); color: var(--odex-dk); }
+    .odex-body { flex: 1 1 auto; overflow: auto; padding: .9rem 1rem; min-height: 280px; }
+    .odex-foot { display: flex; align-items: center; gap: .55rem; padding: .65rem 1rem; border-top: 1px solid var(--odex-br); background: #fbfcfd; flex-wrap: wrap; }
+    .odex-foot .sp { flex: 1; }
+    .odex-fhint { font-size: .74rem; color: var(--odex-mut); }
+    .odex-btn { font: inherit; font-size: .8rem; border: 1px solid #cfd9e1; background: #fff; color: var(--odex-ink); border-radius: 8px; padding: .42rem .85rem; cursor: pointer; white-space: nowrap; }
+    .odex-btn:hover:not([disabled]) { border-color: var(--odex); color: var(--odex-dk); }
+    .odex-btn.pri { background: var(--odex); border-color: var(--odex); color: #fff; font-weight: 600; }
+    .odex-btn.pri:hover:not([disabled]) { background: var(--odex-dk); color: #fff; }
+    .odex-btn.danger { color: #b42318; border-color: #f1c4c0; }
+    .odex-btn[disabled] { opacity: .45; cursor: not-allowed; }
+    .odex-btn.sm { font-size: .72rem; padding: .22rem .55rem; border-radius: 6px; }
+    .odex-row { display: flex; gap: .5rem; justify-content: center; margin-top: .7rem; flex-wrap: wrap; }
+    .odex-sbar { display: flex; align-items: center; gap: .5rem; border: 1.5px solid #cfd9e1; border-radius: 10px; padding: .15rem .25rem .15rem .6rem; background: #fff; }
+    .odex-sbar:focus-within { border-color: var(--odex); box-shadow: 0 0 0 3px rgba(15, 118, 110, .13); }
+    .odex-sbar input { flex: 1; border: 0; outline: 0; font: inherit; font-size: .9rem; padding: .45rem 0; min-width: 0; background: transparent; }
+    .odex-sico { opacity: .6; }
+    .odex-seg { display: inline-flex; background: #eef3f6; border-radius: 8px; padding: 2px; }
+    .odex-seg button { font: inherit; font-size: .76rem; border: 0; background: transparent; padding: .3rem .7rem; border-radius: 6px; cursor: pointer; color: var(--odex-mut); }
+    .odex-seg button.on { background: #fff; color: var(--odex-dk); font-weight: 700; box-shadow: 0 1px 2px rgba(0, 0, 0, .12); }
+    .odex-note { margin: .6rem 0 0; font-size: .76rem; border-radius: 8px; padding: .45rem .65rem; background: #f3f8fb; color: #3c5566; }
+    .odex-note.warn { background: #fff8e6; color: #7a5300; border: 1px solid #f3dfa5; }
+    .odex-note a { color: inherit; font-weight: 600; }
+    .odex-results { margin-top: .7rem; }
+    .odex-count { font-size: .72rem; color: var(--odex-mut); margin: 0 0 .35rem .1rem; }
+    .odex-pc { position: relative; display: block; width: 100%; text-align: left; font: inherit; background: #fff; border: 1px solid var(--odex-br); border-radius: 11px;
+      padding: .6rem .8rem .6rem .85rem; margin-bottom: .45rem; cursor: pointer; transition: border-color .12s, box-shadow .12s, transform .12s; color: inherit; }
+    .odex-pc:hover:not([disabled]) { border-color: var(--odex); box-shadow: 0 3px 12px rgba(15, 118, 110, .12); transform: translateY(-1px); }
+    .odex-pc[disabled] { cursor: default; opacity: .62; background: #fafbfc; }
+    .odex-pc .t { display: flex; align-items: baseline; gap: .5rem; flex-wrap: wrap; padding-right: 5.5rem; }
+    .odex-pc .t b { font-size: .92rem; color: var(--odex-dk); }
+    .odex-pc .id, .odex-ph .id { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .74rem; color: var(--odex-mut); }
+    .odex-pc .m { font-size: .74rem; color: var(--odex-mut); margin-top: .1rem; }
+    .odex-pc .c { display: flex; gap: .8rem; font-size: .75rem; margin-top: .3rem; color: #34495a; }
+    .odex-pc .a { display: flex; flex-wrap: wrap; gap: .25rem; margin-top: .35rem; }
+    .odex-pc .go { position: absolute; right: .8rem; top: .65rem; font-size: .75rem; font-weight: 700; color: var(--odex); opacity: 0; transition: opacity .12s; }
+    .odex-pc:hover:not([disabled]) .go, .odex-pc:focus-visible .go { opacity: 1; }
+    .odex-chip { display: inline-block; font-size: .66rem; font-weight: 700; letter-spacing: .02em; padding: .08rem .45rem; border-radius: 999px; border: 1px solid #9fd9cf; color: var(--odex-dk); background: #fff; }
+    .odex-chip.tr { background: var(--odex-lt); border-color: var(--odex-lt); }
+    .odex-chip.more { border-style: dashed; color: var(--odex-mut); }
+    .odex-tag { display: inline-block; font-size: .64rem; font-weight: 600; padding: .05rem .4rem; border-radius: 5px; background: #eef2f5; color: #556776; white-space: nowrap; }
+    .odex-tag.ok { background: #e3f6e8; color: #17603a; } .odex-tag.in { background: #e8f0ff; color: #2647a6; } .odex-tag.ctl { background: #fdf0e1; color: #8a4b00; }
+    .odex-none { font-size: .76rem; color: var(--odex-mut); font-style: italic; padding: .3rem 0; }
+    .odex-state { text-align: center; padding: 2.4rem 1rem 1.6rem; color: var(--odex-mut); }
+    .odex-state .t { font-size: .98rem; font-weight: 700; color: var(--odex-ink); margin-top: .7rem; }
+    .odex-state .m { font-size: .8rem; margin-top: .35rem; line-height: 1.5; }
+    .odex-big { display: inline-flex; width: 46px; height: 46px; border-radius: 50%; align-items: center; justify-content: center; font-size: 1.35rem; font-weight: 800; color: #fff; background: #94a3b8; }
+    .odex-big.ok { background: #16a34a; } .odex-big.bad { background: #dc2626; } .odex-big.info { background: #64748b; }
+    .odex-cmd { display: inline-flex; align-items: center; gap: .5rem; margin-top: .6rem; background: #0f1d2a; color: #d7f6ef; border-radius: 8px; padding: .4rem .45rem .4rem .7rem; }
+    .odex-cmd code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .8rem; }
+    .odex-cmd button { font: inherit; font-size: .7rem; border: 1px solid rgba(255, 255, 255, .3); background: rgba(255, 255, 255, .08); color: #fff; border-radius: 6px; padding: .15rem .5rem; cursor: pointer; }
+    .odex-sg { border: 1px solid var(--odex-br); border-radius: 10px; padding: .5rem .7rem; margin-bottom: .45rem; }
+    .odex-sg .h { display: flex; align-items: center; gap: .4rem; font-size: .8rem; }
+    .odex-sg .h .sp { flex: 1; }
+    .odex-sg .l { display: flex; flex-wrap: wrap; gap: .25rem; margin-top: .35rem; }
+    .odex-sn { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .68rem; background: #f2f6f8; border-radius: 5px; padding: .05rem .35rem; }
+    .odex-sn.more { font-family: inherit; color: var(--odex-mut); }
+    /* preview */
+    .odex-ph { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: .65rem; }
+    .odex-ph .n { font-size: 1.02rem; font-weight: 700; color: var(--odex-dk); }
+    .odex-ph .i { font-size: .76rem; color: var(--odex-mut); margin-top: .1rem; }
+    .odex-ph .i a { color: var(--odex); }
+    .odex-kpis { display: flex; gap: .45rem; flex-wrap: wrap; }
+    .odex-kpis span { font-size: .74rem; background: #f3f7f9; border: 1px solid #e3eaef; border-radius: 7px; padding: .2rem .5rem; color: #3c5566; }
+    .odex-kpis b { color: var(--odex-dk); }
+    .odex-pgrid { display: grid; grid-template-columns: minmax(280px, 0.95fr) 1.25fr; gap: .9rem; min-height: 0; }
+    @media (max-width: 820px) { .odex-pgrid { grid-template-columns: 1fr; } }
+    .odex-map { height: 360px; border-radius: 10px; border: 1px solid var(--odex-br); background: #dbe8ef; overflow: hidden; }
+    .odex-map .odex-none { padding: 1rem; }
+    .odex-maphint { font-size: .72rem; color: var(--odex-mut); margin-top: .3rem; }
+    .odex-maphint a { color: var(--odex); }
+    .odex-h4 { font-size: .8rem; font-weight: 700; color: var(--odex-ink); margin: .1rem 0 .35rem; text-transform: uppercase; letter-spacing: .04em; }
+    .odex-h4 + .odex-alist { margin-bottom: .75rem; }
+    .odex-hint { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--odex-mut); font-size: .72rem; margin-left: .35rem; }
+    .odex-alist { display: flex; flex-direction: column; gap: .3rem; max-height: 210px; overflow: auto; }
+    .odex-arow { display: grid; grid-template-columns: auto auto 1fr auto; align-items: center; gap: .1rem .5rem; padding: .4rem .55rem; border: 1px solid var(--odex-br); border-radius: 9px; cursor: pointer; }
+    .odex-arow.on { border-color: #8ad1c5; background: #f4fbf9; }
+    .odex-arow .nm { min-width: 0; display: flex; flex-direction: column; font-size: .78rem; }
+    .odex-arow .rn { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .66rem; line-height: 1.5; color: var(--odex-mut); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .odex-arow .ct { font-size: .7rem; color: #3c5566; white-space: nowrap; }
+    .odex-arow .odex-tag { grid-column: 3 / span 2; justify-self: start; margin-right: .3rem; }
+    .odex-arow .odex-tag + .odex-tag { grid-column: auto; }
+    .odex-sfilt { display: flex; gap: .35rem; flex-wrap: wrap; }
+    .odex-sfilt input[type=search] { flex: 1 1 160px; min-width: 0; }
+    .odex-sfilt input, .odex-sfilt select { font: inherit; font-size: .76rem; border: 1px solid #cfd9e1; border-radius: 7px; padding: .3rem .45rem; background: #fff; }
+    .odex-dr { display: inline-flex; align-items: center; gap: .2rem; font-size: .74rem; color: var(--odex-mut); }
+    .odex-sacts { display: flex; gap: .3rem; flex-wrap: wrap; margin: .4rem 0; }
+    .odex-slist { border: 1px solid var(--odex-br); border-radius: 9px; max-height: 300px; overflow: auto; }
+    .odex-srow { display: grid; grid-template-columns: auto minmax(0, 1.6fr) 5.6rem minmax(0, 1fr) auto; align-items: center; gap: .45rem; padding: .28rem .55rem; border-bottom: 1px solid #eef2f5; cursor: pointer; font-size: .74rem; }
+    .odex-srow:last-child { border-bottom: 0; }
+    .odex-srow:hover { background: #f6fafb; }
+    .odex-srow.on { background: #f1faf8; }
+    .odex-srow.nolib { opacity: .55; }
+    .odex-srow .sn { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .7rem; line-height: 1.5; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .odex-srow .sd { color: #3c5566; font-variant-numeric: tabular-nums; }
+    .odex-srow .ss { color: var(--odex-mut); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .odex-srow .sa { display: flex; gap: .2rem; justify-content: flex-end; }
+    .odex-dotc { font-size: .6rem; font-weight: 700; border-radius: 4px; padding: .02rem .3rem; background: #eef2f5; color: #7b8b98; }
+    .odex-dotc.u { background: var(--odex-lt); color: var(--odex-dk); }
+    .odex-more { font-size: .72rem; color: var(--odex-mut); padding: .4rem .55rem; }
+    .odex-sum { flex: 1; display: flex; align-items: center; gap: .7rem; flex-wrap: wrap; font-size: .8rem; color: #34495a; }
+    .odex-sum b { color: var(--odex-dk); }
+    .odex-warn { color: #9a4a00; }
+    .odex-opt { display: inline-flex; align-items: center; gap: .25rem; font-size: .74rem; color: var(--odex-mut); cursor: pointer; }
+    .odex-opt.dis { opacity: .5; }
+    /* import */
+    .odex-ih { display: flex; align-items: center; gap: .85rem; margin-bottom: .7rem; }
+    .odex-ih .t { font-size: 1rem; font-weight: 700; }
+    .odex-ih .msg { font-size: .8rem; color: #3c5566; margin-top: .1rem; }
+    .odex-ih .via { font-size: .7rem; color: var(--odex-mut); margin-top: .1rem; }
+    .odex-ih.error .t { color: #b42318; } .odex-ih.done .t { color: #166534; }
+    .odex-ibar { height: 6px; border-radius: 99px; background: #e6edf2; overflow: hidden; margin-bottom: .75rem; }
+    .odex-ibar i { display: block; height: 100%; background: linear-gradient(90deg, #14b8a6, var(--odex)); border-radius: 99px; transition: width .25s ease; }
+    .odex-ibar.ok i { background: #16a34a; } .odex-ibar.bad i { background: #dc2626; }
+    .odex-sl { list-style: none; margin: 0; padding: 0; border: 1px solid var(--odex-br); border-radius: 10px; overflow: hidden; }
+    .odex-sl li { display: grid; grid-template-columns: 1.4rem minmax(0, 1fr) 9rem 7.5rem; align-items: center; gap: .55rem; padding: .45rem .7rem; border-bottom: 1px solid #eef2f5; font-size: .78rem; }
+    .odex-sl li:last-child { border-bottom: 0; }
+    .odex-sl li.waiting { color: #8796a3; }
+    .odex-sl li.running { background: #f4fbf9; }
+    .odex-sl li.error { background: #fff5f4; }
+    .odex-sl .l { min-width: 0; display: flex; flex-direction: column; }
+    .odex-sl .d { font-size: .66rem; line-height: 1.5; color: var(--odex-mut); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .odex-sl li.error .d { color: #b42318; white-space: normal; }
+    .odex-sl .z { font-size: .7rem; color: var(--odex-mut); text-align: right; font-variant-numeric: tabular-nums; grid-column: 4; }
+    .odex-pb { height: 5px; border-radius: 99px; background: #dfe8ee; overflow: hidden; position: relative; }
+    .odex-pb i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--odex); border-radius: 99px; transition: width .15s; }
+    .odex-pb.ind i { animation: odex-ind 1.1s ease-in-out infinite; }
+    @keyframes odex-ind { 0% { left: -35%; } 100% { left: 100%; } }
+    .odex-st { display: inline-flex; width: 1.15rem; height: 1.15rem; border-radius: 50%; align-items: center; justify-content: center; font-size: .68rem; font-weight: 800; color: #fff; }
+    .odex-st.waiting { border: 2px solid #cdd7df; width: .95rem; height: .95rem; }
+    .odex-st.done { background: #16a34a; } .odex-st.error { background: #dc2626; } .odex-st.skipped { background: #94a3b8; } .odex-st.cancelled { background: #94a3b8; }
+    .odex-spin { display: inline-block; width: 1.05rem; height: 1.05rem; border: 2.5px solid #cfe9e4; border-top-color: var(--odex); border-radius: 50%; animation: odex-spin .8s linear infinite; vertical-align: middle; }
+    .odex-spin.sm { width: .8rem; height: .8rem; border-width: 2px; }
+    .odex-conn .odex-spin { border-color: rgba(255, 255, 255, .35); border-top-color: #fff; }
+    .odex-spin.lg { width: 42px; height: 42px; border-width: 4px; }
+    @keyframes odex-spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .odex-spin { animation-duration: 2.4s; } .odex-pb.ind i { animation: none; left: 0; width: 100% !important; opacity: .5; } }
+    .odex-done { margin-top: .75rem; border: 1px solid #bfe6cd; background: #f3fbf5; border-radius: 10px; padding: .5rem .75rem; }
+    .odex-done .r { display: flex; align-items: center; gap: .5rem; flex-wrap: wrap; font-size: .8rem; padding: .25rem 0; }
+    .odex-done .r span:last-child { color: #3c5566; }
+    .odex-done .r.s { font-size: .74rem; color: var(--odex-mut); }
+    .odex-done .w { width: 100%; font-size: .74rem; color: #8a5a00; }
+    .odex-err { margin-top: .75rem; border: 1px solid #f5c2bd; background: #fff6f5; border-radius: 10px; padding: .6rem .8rem; font-size: .8rem; color: #7a1d14; }
+    .odex-err .h { margin-top: .35rem; color: #6b4b45; font-size: .76rem; }
+    .odex-err pre { font-size: .7rem; white-space: pre-wrap; background: #fff; border: 1px solid #f1d6d2; border-radius: 6px; padding: .4rem; }
+    .odex-help { max-width: 520px !important; }
+    .odex-help .odex-hp { font-size: .8rem; color: #3c5566; margin: .3rem 0 .5rem; display: block; }
+    .odex-help input[type=text], .odex-help textarea { display: block; width: 100%; box-sizing: border-box; font: inherit; font-size: .8rem; border: 1px solid #cfd9e1; border-radius: 7px; padding: .35rem .5rem; margin-top: .2rem; }
+    .odex-help textarea { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .72rem; }
+    .odex-help .odex-cmd { margin: 0 0 .4rem; }
+    .odex-pill { position: fixed; left: 16px; bottom: 16px; z-index: 3300; display: inline-flex; align-items: center; gap: .5rem; font: inherit; font-size: .78rem;
+      background: #0f1d2a; color: #e6fffa; border: 0; border-radius: 999px; padding: .45rem .85rem; box-shadow: 0 6px 22px rgba(0, 0, 0, .3); cursor: pointer; }
+    .odex-pill[hidden] { display: none; }
+    .odex-pill .odex-spin { border-color: rgba(255, 255, 255, .25); border-top-color: #5eead4; }
+    /* project switcher (header) */
+    .mbon-proj { display: inline-flex; align-items: stretch; margin-right: .4rem; border: 1px solid rgba(255, 255, 255, .45); border-radius: 8px; overflow: hidden; background: rgba(255, 255, 255, .1); }
+    .mbon-proj button { font: inherit; color: #fff; background: transparent; border: 0; cursor: pointer; }
+    .mbon-proj button:hover:not([disabled]) { background: rgba(255, 255, 255, .18); }
+    .mbon-proj-nav { padding: 0 .4rem; font-size: .95rem; opacity: .85; }
+    .mbon-proj-nav[disabled] { opacity: .3; cursor: default; }
+    .mbon-proj-btn { display: inline-flex; align-items: center; gap: .4rem; padding: .22rem .55rem; border-left: 1px solid rgba(255, 255, 255, .25) !important; border-right: 1px solid rgba(255, 255, 255, .25) !important; max-width: 260px; }
+    .mbon-proj-btn .tx { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.12; min-width: 0; }
+    .mbon-proj-btn .nm { font-size: .78rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 190px; }
+    .mbon-proj-btn .sb { font-size: .62rem; opacity: .8; white-space: nowrap; }
+    .mbon-proj-btn .car { font-size: .7rem; opacity: .8; }
+    .mbon-proj-menu { position: fixed; z-index: 3200; width: 360px; max-width: calc(100vw - 16px); max-height: calc(100vh - 90px); overflow: auto; background: #fff; color: var(--odex-ink);
+      border: 1px solid var(--odex-br); border-radius: 12px; box-shadow: 0 14px 44px rgba(0, 0, 0, .25); padding: .35rem; font-size: .8rem; }
+    .mbon-proj-menu[hidden] { display: none; }
+    .mbon-pm-h { font-size: .66rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--odex-mut); padding: .5rem .55rem .25rem; }
+    .mbon-pm-row { display: flex; align-items: center; gap: .55rem; padding: .42rem .55rem; border-radius: 8px; cursor: pointer; outline: 0; }
+    .mbon-pm-row:hover, .mbon-pm-row:focus-visible { background: #f2f7f9; }
+    .mbon-pm-row.on { background: #eaf6f3; }
+    .mbon-pm-row .rd { flex: 0 0 auto; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #b8c7d2; }
+    .mbon-pm-row.on .rd { border-color: var(--odex); background: radial-gradient(circle, var(--odex) 45%, transparent 50%); }
+    .mbon-pm-row .rd.sv { border-style: dashed; }
+    .mbon-pm-row .tx { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .mbon-pm-row .tx b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .mbon-pm-row .nmx { font-size: .7rem; color: var(--odex-mut); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .mbon-pm-row .mt { font-size: .7rem; color: var(--odex-mut); margin-top: .1rem; }
+    .mbon-pm-row .up { color: #2647a6; font-weight: 600; }
+    .mbon-pm-row .x { border: 0; background: none; color: #8796a3; font-size: 1.05rem; cursor: pointer; padding: 0 .2rem; border-radius: 5px; }
+    .mbon-pm-row .x:hover { color: #b42318; background: #fdeceb; }
+    .mbon-pm-imp { display: block; width: calc(100% - .4rem); margin: .4rem .2rem .25rem; font: inherit; font-size: .8rem; font-weight: 700; text-align: left; color: var(--odex-dk);
+      background: var(--odex-lt); border: 1px dashed #8ad1c5; border-radius: 9px; padding: .5rem .6rem; cursor: pointer; }
+    .mbon-pm-imp:hover { background: #d0efe9; }
+    .mbon-pm-opt { display: flex; align-items: center; gap: .35rem; font-size: .72rem; color: var(--odex-mut); padding: .2rem .55rem; cursor: pointer; }
+    .mbon-pm-k { font-size: .66rem; color: #9aa9b5; padding: .1rem .55rem .35rem; }
+    .mbon-fd-odebtn { display: flex; align-items: center; justify-content: center; gap: .35rem; width: 100%; margin-top: .4rem; font: inherit; font-size: .78rem; font-weight: 600;
+      color: var(--odex-dk); background: var(--odex-lt); border: 1px solid #a7dccf; border-radius: 8px; padding: .4rem .5rem; cursor: pointer; }
+    .mbon-fd-odebtn:hover { background: #d0efe9; }
+    .mbon-ode-panelbtn { display: flex; flex-direction: column; align-items: flex-start; gap: .1rem; width: 100%; margin: 0 0 .7rem; font: inherit; font-size: .84rem; text-align: left;
+      color: var(--odex-dk); background: var(--odex-lt); border: 1px solid #a7dccf; border-radius: 10px; padding: .6rem .75rem; cursor: pointer; }
+    .mbon-ode-panelbtn span { font-size: .74rem; color: #3c6f69; }
+    .mbon-ode-panelbtn:hover { background: #d0efe9; }
+    .mbon-content.odex-swap > .mbon-pane.active:not(#pane-map) { animation: odex-swap .38s ease; }
+    @keyframes odex-swap { from { opacity: .25; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    @media (prefers-reduced-motion: reduce) { .mbon-content.odex-swap > .mbon-pane.active { animation: none; } }
+    @media (max-width: 1180px) { .mbon-proj-btn .sb { display: none; } .mbon-proj-btn .nm { max-width: 120px; } }
+    </style>
 </head>
 <body>
     <style id="mbon-loading-css">
@@ -1998,7 +2224,7 @@
             <div class="mbon-dropzone" id="mbon-dropzone">
                 <strong>Drop spreadsheets or Kraken2 reports here</strong>
                 Or click to choose files
-                <div class="fmt">ASV data: Wilder_01 (.xlsx metadata/aggregated/full) &middot; Wilder_02 (Samples + Taxa) &middot; Ocean DNA Explorer (table_*.tsv + asvTaxaFeatures_*.tsv, with the FAIRe sampleMetadata / experimentRunMetadata .tsv) &middot; Kraken2 reports (.kraken2.report / .txt — one per sample; you’ll pick which sample each belongs to) &middot; Station metadata: MBON_Data (.xlsx with sampleMetadata). Load metadata + data together for station mapping.<br><b>Uploads overwrite</b> any already-loaded sample with the same sample ID (FAIRe template → that sample’s metadata; ASV / Kraken2 report → that sample’s reads). Use <b>Reset to original</b> below to undo.</div>
+                <div class="fmt">ASV data: Wilder_01 (.xlsx metadata/aggregated/full) &middot; Wilder_02 (Samples + Taxa) &middot; Ocean DNA Explorer (table_*.tsv + asvTaxaFeatures_*.tsv, with the FAIRe sampleMetadata / experimentRunMetadata .tsv — or use “Import from Ocean DNA Explorer” above) &middot; Kraken2 reports (.kraken2.report / .txt — one per sample; you’ll pick which sample each belongs to) &middot; Station metadata: MBON_Data (.xlsx with sampleMetadata). Load metadata + data together for station mapping.<br><b>Uploads overwrite</b> any already-loaded sample with the same sample ID (FAIRe template → that sample’s metadata; ASV / Kraken2 report → that sample’s reads). Use <b>Reset to original</b> below to undo.</div>
             </div>
             <input type="file" id="mbon-file-input" accept=".xlsx,.xlsm,.xls,.csv,.tsv,.txt,.report,.kreport,.k2report" multiple style="display:none"/>
             <div id="mbon-source-list"></div>
@@ -8948,6 +9174,8 @@
       sources: r.sources || [],
       noData: r.noData || []   // samples with no reads in any run (Data coverage panel)
     };
+    if (r.ode) run.ode = r.ode;          // Ocean DNA Explorer import provenance (mbon-ode-api-v1)
+    if (r.assay) run.assay = r.assay;
     // Derive taxa from stations if not provided
     if (!run.taxa.length && run.stations.length) run.taxa = deriveTaxa(run.stations);
     // carry hasEuk through; tag each sample with its method class for mixed-kind guards
@@ -9009,7 +9237,8 @@
   // carries data (taxa or samples). Drives the method toggle's enabled state.
   function mbonMethodAvailable(m) {
     return MBON.runs.some(function (r) {
-      return mbonRunKindClass(r) === m && ((r.taxa && r.taxa.length) || (r.samples && r.samples.length));
+      return mbonRunKindClass(r) === m && (!MBON.projectFilter || mbonRunProject(r) === MBON.projectFilter) &&
+        ((r.taxa && r.taxa.length) || (r.samples && r.samples.length));
     });
   }
   window.mbonMixNotice = function (what) { return mbonMixNotice(what); };
@@ -9053,6 +9282,8 @@
   function runsForMethod(m) { m = m || MBON.method;
     return MBON.runs.filter(function (r) {
       if (mbonRunKindClass(r) !== m) return false;
+      // project switcher (mbon-ode-api-v1): only the chosen project's runs
+      if (MBON.projectFilter && mbonRunProject(r) !== MBON.projectFilter) return false;
       // Database filter applies to Kraken2 runs only (ASV runs have no
       // reference database). "__all__" keeps everything.
       if (m !== "kraken2" || MBON.dbFilter === "__all__") return true;
@@ -9248,6 +9479,7 @@
     paintMethodToggle();
     updateEukToggleVisibility();
     fdSyncAll();
+    try { odexPaintSwitcher(); } catch (e) { /* switcher not built yet */ }
   }
 
   function applyActiveRunToMap() {
@@ -12016,7 +12248,8 @@
     if (!rows.length) return null;
     var hdr = rows[0].map(normColName), name = parsed.file.name;
     var has = function (k) { return hdr.indexOf(k) >= 0; };
-    if (["featureid", "otuid", "asvid"].indexOf(hdr[0]) >= 0) {
+    if (["featureid", "otuid", "asvid"].indexOf(hdr[0]) >= 0 ||
+        (hdr[0] === "" && rows.length > 1 && rows[0].length > 2 && /^[0-9a-f]{20,}$/i.test(String(rows[1][0] || "").trim()))) {
       if (has("taxonomy") || has("species") || has("dnasequence")) odePending.taxa = { rows: rows, name: name };
       else odePending.table = { rows: rows, name: name };
       return tryPairODE();
@@ -12058,29 +12291,36 @@
   var ODE_RANKS = ["kingdom", "phylum", "class", "order", "family", "genus", "species"];
   function odeTaxon(rec) {
     var v = {};
+    if (mbonFaireBlank(rec.kingdom)) {   // some analyses call the top rank 'domain'
+      var dom = rec.domain != null ? rec.domain : (rec.Domain != null ? rec.Domain : (rec.superkingdom != null ? rec.superkingdom : rec.Superkingdom));
+      if (!mbonFaireBlank(dom)) rec.kingdom = dom;
+    }
     ODE_RANKS.forEach(function (k) { var x = String(rec[k] == null ? "" : rec[k]).trim();
       v[k] = (mbonFaireBlank(x) || /^unassigned|^unclassified/i.test(x)) ? "" : x; });
     if (!ODE_RANKS.some(function (k) { return v[k]; })) {
       String(rec.taxonomy || "").split(";").map(function (x) { return x.trim().replace(/^[a-z]__/, ""); })
-        .filter(Boolean).forEach(function (x, i) { if (i < ODE_RANKS.length) v[ODE_RANKS[i]] = x; });
+        .filter(function (x) { return x && !/^(unassigned|unclassified)$/i.test(x); }).forEach(function (x, i) { if (i < ODE_RANKS.length) v[ODE_RANKS[i]] = x; });
     }
     var finest = null;
     for (var i = ODE_RANKS.length - 1; i >= 0; i--) if (v[ODE_RANKS[i]]) { finest = ODE_RANKS[i]; break; }
     var name = !finest ? "Unassigned" : finest === "species"
       ? (v.species.indexOf(" ") < 0 && v.genus ? v.genus + " " + v.species : v.species)
       : v[finest] + " (" + finest + ")";
+    var lineage = ODE_RANKS.slice(0, -1).map(function (k) { return v[k]; }).filter(Boolean);
+    if (finest && finest !== "species" && lineage[lineage.length - 1] === v[finest]) lineage.pop();
+    var conf = parseFloat(rec.Confidence != null ? rec.Confidence : rec.confidence);
     return { name: name, rank: finest || "unassigned", group: v["class"] || v.phylum || v.kingdom || "Unknown",
-      isEuk: /^eukaryota/i.test(v.kingdom || String(rec.taxonomy || "")) };
+      isEuk: /^eukaryota/i.test(v.kingdom || String(rec.taxonomy || "")), lineage: lineage, confidence: isNaN(conf) ? null : conf };
   }
   function odeShortAssay(a) {
     var toks = ["MiFish", "Riaz", "Leray", "Folmer", "Teleo", "COI", "18S", "16S", "12S"];
     for (var i = 0; i < toks.length; i++) { var m = new RegExp(toks[i], "i").exec(String(a || "")); if (m) return String(a).substr(m.index, toks[i].length); }
     return String(a || "");
   }
-  function odeLibToSample(lib) {
-    var rec = MBON.odeLibMap[lib];
+  function odeLibToSample(lib, libMap, meta) {
+    var rec = (libMap || MBON.odeLibMap)[lib];
     if (rec && rec.samp_name) return rec.samp_name;
-    var meta = MBON.stationMeta || {};
+    meta = meta || MBON.stationMeta || {};
     if (meta[lib]) return lib;
     var s = lib;
     for (var k = 0; k < 3; k++) {
@@ -12090,7 +12330,11 @@
     return lib;
   }
 
-  function ingestODE(tablePart, taxaPart) {
+  // ctx (optional, used by the Ocean DNA Explorer import dialog): { libMap, sampleMeta,
+  // projectMeta, keep: {samp_name: 1} subset, assay } instead of the drag-and-drop globals.
+  function ingestODE(tablePart, taxaPart, ctx) {
+    ctx = ctx || {};
+    var LM = ctx.libMap || MBON.odeLibMap, SM = ctx.sampleMeta || MBON.stationMeta || {};
     var tx = {}, th = taxaPart.rows[0].map(function (h) { return String(h).trim(); });
     var thn = th.map(normColName);
     taxaPart.rows.slice(1).forEach(function (r) {
@@ -12100,11 +12344,13 @@
     var libs = tablePart.rows[0].slice(1).map(function (h) { return String(h).trim(); });
     var lib2sid = {}, sidLibs = {}, assays = {};
     libs.forEach(function (lib) {
-      var sid = odeLibToSample(lib); lib2sid[lib] = sid; (sidLibs[sid] = sidLibs[sid] || []).push(lib);
-      var lr = MBON.odeLibMap[lib]; if (lr && lr.assay_name) assays[lr.assay_name] = 1;
+      var sid = odeLibToSample(lib, LM, SM);
+      if (ctx.keep && !ctx.keep[sid]) { lib2sid[lib] = null; return; }
+      lib2sid[lib] = sid; (sidLibs[sid] = sidLibs[sid] || []).push(lib);
+      var lr = LM[lib]; if (lr && lr.assay_name) assays[lr.assay_name] = 1;
     });
     var assayKeys = Object.keys(assays);
-    var assay = assayKeys.length === 1 ? assayKeys[0] : ((/(mifish|riaz|12s|16s|18s|coi)/i.exec(tablePart.name) || [])[1] || "");
+    var assay = (ctx.assay || assayKeys.length === 1) ? (ctx.assay || assayKeys[0]) : ((/(mifish|riaz|12s|16s|18s|coi)/i.exec(tablePart.name) || [])[1] || "");
     var target = odeShortAssay(assay) || "Unknown";
     var taxaMap = {}, classified = 0;
     tablePart.rows.slice(1).forEach(function (r) {
@@ -12112,18 +12358,20 @@
       var t = tx[fid]; if (t) classified++;
       t = t || { name: "Unassigned", rank: "unassigned", group: "Unknown", isEuk: false };
       var e = taxaMap[t.name] || (taxaMap[t.name] = { species: t.name, group: t.group, rank: t.rank, target: target,
-        isEuk: t.isEuk, reads: 0, perSample: {}, stations: {}, asvCount: 0 });
+        isEuk: t.isEuk, reads: 0, perSample: {}, stations: {}, asvCount: 0, lineage: t.lineage, _conf: [] });
+      if (t.confidence != null) e._conf.push(t.confidence);
       var any = false;
       for (var j = 1; j < r.length && j <= libs.length; j++) {
         var v = Number(r[j]) || 0; if (v <= 0) continue;
-        var sid = lib2sid[libs[j - 1]]; e.perSample[sid] = (e.perSample[sid] || 0) + v; e.reads += v; any = true;
+        var sid = lib2sid[libs[j - 1]]; if (!sid) continue;
+        e.perSample[sid] = (e.perSample[sid] || 0) + v; e.reads += v; any = true;
       }
       if (any) e.asvCount++;
     });
     Object.keys(taxaMap).forEach(function (k) { if (!taxaMap[k].reads) delete taxaMap[k]; });
     var samples = [], sampleCoords = {}, sampleStation = {};
     Object.keys(sidLibs).forEach(function (sid) {
-      var m = (MBON.stationMeta || {})[sid] || {};
+      var m = SM[sid] || {};
       var la = parseFloat(m.decimalLatitude), lo = parseFloat(m.decimalLongitude);
       var meta = {}; Object.keys(m).forEach(function (k) { meta[k] = m[k]; });
       meta.Library = sidLibs[sid].join(", "); if (assay) meta.Assay = assay;
@@ -12135,14 +12383,16 @@
     var stationSamples = {};
     Object.keys(sampleCoords).forEach(function (sid) { var key = sampleCoords[sid].join(","); (stationSamples[key] = stationSamples[key] || []).push(sid); });
     var stations = buildStationsFromTaxa(taxaMap, stationSamples, sampleCoords, sampleStation);
-    var taxa = Object.keys(taxaMap).map(function (k) { var t = taxaMap[k]; t.stationCount = Object.keys(t.stations).length; delete t.stations; return t; });
-    var pm = MBON.odeProjectMeta || {};
+    var taxa = Object.keys(taxaMap).map(function (k) { var t = taxaMap[k]; t.stationCount = Object.keys(t.stations).length; delete t.stations;
+      if (t._conf && t._conf.length) t.confidence = Math.round(t._conf.reduce(function (a, b) { return a + b; }, 0) / t._conf.length * 1e4) / 1e4;
+      delete t._conf; if (!t.lineage || !t.lineage.length) delete t.lineage; return t; });
+    var pm = ctx.projectMeta || MBON.odeProjectMeta || {};
     var meta = { Method: "Ocean DNA Explorer (Tourmaline ASV)", "Feature table": tablePart.name, "Taxonomy file": taxaPart.name,
       "ASV features": String(tablePart.rows.length - 1), Libraries: String(libs.length) };
     if (assay) meta.Assay = assay;
     [["project_name", "Project name"], ["project_id", "Project ID"], ["institution", "Institution"], ["project_contact", "Contact"],
      ["target_gene", "Target gene"], ["bioproject_accession", "BioProject"]].forEach(function (p) { if (pm[p[0]]) meta[p[1]] = pm[p[0]]; });
-    var linked = samples.filter(function (s) { return (MBON.stationMeta || {})[s.sampleId]; }).length;
+    var linked = samples.filter(function (s) { return SM[s.sampleId]; }).length;
     var warn = stations.length ? null : (Object.keys(MBON.stationMetaSources || {}).length
       ? "No library matched a sample with coordinates — load the FAIRe experimentRunMetadata (lib_id → samp_name) .tsv, then the table again."
       : "No coordinates yet — load the FAIRe sampleMetadata (.tsv/.xlsx) and experimentRunMetadata files to place these samples on the map.");
@@ -13624,6 +13874,1375 @@
     fdSyncAll();
   }
 
+  /* mbon-ode-api-v1 */
+  // ============================================================ Ocean DNA Explorer — live import
+  // "Import from Ocean DNA Explorer" dialog (find → preview & select → import,
+  // with per-file status), the project switcher in the header, and imports
+  // saved in this browser. Talks to a local bridge when one answers
+  // (`python ode_client.py serve` on :5051, or `bash api/run.sh` on :5050 —
+  // both serve /api/ode/*). Without a bridge it lists projects from the
+  // catalog snapshot embedded at build time (payload.odeCatalog) and downloads
+  // the project files straight from the ODE file store, which allows
+  // cross-origin reads (the ODE API itself does not). See ode_client.py.
+  var ODE_SITE = "https://www.oceandnaexplorer.org";
+  var ODEX = {
+    conn: null, connP: null, view: "find", tab: "projects", q: "", list: null, listErr: null, listBusy: false,
+    samples: null, project: null, prev: null, sel: {}, ana: {}, f: { q: "", cruise: "", ctrl: "all", from: "", to: "" },
+    job: null, abort: null, texts: {}, save: false, manifest: false, map: null, mapLayer: null, forceDirect: false,
+    open: false, preselect: null
+  };
+  MBON.projectFilter = MBON.projectFilter || null;
+
+  // ---- small utilities ------------------------------------------------------
+  function odexEsc(s) { return esc(s == null ? "" : s); }
+  function odexBytes(n) {
+    if (n == null || isNaN(n)) return "";
+    if (n < 1024) return n + " B";
+    if (n < 1048576) return (n / 1024).toFixed(n < 10240 ? 1 : 0) + " KB";
+    return (n / 1048576).toFixed(n < 10485760 ? 2 : 1) + " MB";
+  }
+  function odexBase(url) {
+    var n = String(url || "").split("?")[0].split("/").pop();
+    for (var i = 0; i < 3; i++) { try { var d = decodeURIComponent(n); if (d === n) break; n = d; } catch (e) { break; } }
+    return n;
+  }
+  function odexShort(assay) {
+    var s = String(assay || ""), toks = ["MiFish", "Riaz", "Leray", "Folmer", "Teleo", "MarVer1", "MarVer3", "Parada", "COI", "18S", "16S", "12S"];
+    for (var i = 0; i < toks.length; i++) { var m = new RegExp(toks[i], "i").exec(s); if (m) return s.substr(m.index, toks[i].length); }
+    var its = /ITS\d?/i.exec(s); return its ? its[0] : s;
+  }
+  function odexIsoDate(v) {
+    var s = String(v == null ? "" : v).trim(), m = /^(\d{1,2})\/(\d{1,2})\/(\d{2}|\d{4})\b/.exec(s);
+    if (m) { var y = +m[3]; if (y < 100) y += y < 70 ? 2000 : 1900; return y + "-" + ("0" + m[1]).slice(-2) + "-" + ("0" + m[2]).slice(-2); }
+    m = /^(\d{4})-?(\d{2})-?(\d{2})/.exec(s);
+    return m ? m[1] + "-" + m[2] + "-" + m[3] : (s || null);
+  }
+  function odexNum(v) { var f = parseFloat(v); return isNaN(f) || f <= -9000 ? null : f; }
+  // 'noaa-aoml-mire', a project link or '.../explore/sample/<project>/<samp_name>'
+  function odexParseRef(s) {
+    s = String(s || "").trim();
+    var m = /oceandnaexplorer\.org\/(?:explore|search)\/(sample|project|analysis)?\/?([^\/?#]+)(?:\/([^\/?#]+))?/i.exec(s);
+    if (!m) return null;
+    var dec = function (x) { try { return decodeURIComponent(x); } catch (e) { return x; } };
+    return { project_id: dec(m[2]), samp_name: m[1] && m[1].toLowerCase() === "sample" && m[3] ? dec(m[3]) : null };
+  }
+  function odexTimeout(ms) {
+    var ac = typeof AbortController !== "undefined" ? new AbortController() : null;
+    var t = ac ? setTimeout(function () { ac.abort(); }, ms) : null;
+    return { signal: ac ? ac.signal : undefined, done: function () { if (t) clearTimeout(t); } };
+  }
+  function odexErr(msg, status, extra) { var e = new Error(msg); e.status = status || 0; if (extra) e.extra = extra; return e; }
+  function odexJSON(url, opts, ms) {
+    var to = odexTimeout(ms || 20000);
+    opts = Object.assign({ signal: to.signal, cache: "no-store" }, opts || {});
+    return fetch(url, opts).then(function (r) {
+      return r.text().then(function (t) {
+        var j = null; try { j = t ? JSON.parse(t) : null; } catch (e) { /* not JSON */ }
+        if (!r.ok) throw odexErr((j && (j.error || j.message)) || ("HTTP " + r.status + " from " + url.split("?")[0]), r.status, j);
+        return j;
+      });
+    }, function (e) {
+      throw odexErr(e && e.name === "AbortError" ? "timed out contacting " + url.split("/").slice(0, 3).join("/") :
+        "cannot reach " + url.split("/").slice(0, 3).join("/"), 0);
+    }).then(function (j) { to.done(); return j; }, function (e) { to.done(); throw e; });
+  }
+  // Text download with progress: onProg(doneBytes, totalBytesOrNull).
+  function odexStream(url, onProg, signal) {
+    return fetch(url, { signal: signal, cache: "force-cache" }).then(function (r) {
+      if (!r.ok) throw odexErr("HTTP " + r.status + " for " + odexBase(url) +
+        (r.status === 404 || r.status === 403 ? " — the file is gone from Ocean DNA Explorer (the project was probably re-submitted). Refresh the project list or start the bridge." : ""), r.status);
+      var total = +(r.headers.get("content-length") || 0) || null;
+      if (!r.body || !r.body.getReader) return r.text().then(function (t) { if (onProg) onProg(t.length, t.length); return t; });
+      var rd = r.body.getReader(), parts = [], got = 0;
+      return (function pump() {
+        return rd.read().then(function (x) {
+          if (x.done) {
+            var all = new Uint8Array(got), o = 0;
+            parts.forEach(function (p) { all.set(p, o); o += p.length; });
+            if (onProg) onProg(got, got);
+            return new TextDecoder("utf-8").decode(all);
+          }
+          parts.push(x.value); got += x.value.length;
+          if (onProg) onProg(got, total);
+          return pump();
+        });
+      })();
+    }, function (e) {
+      if (e && e.name === "AbortError") throw odexErr("cancelled", -1);
+      throw odexErr("cannot download " + odexBase(url) + " (network or browser blocked the request)", 0);
+    });
+  }
+
+  // ---- connection: bridge → direct API → embedded catalog → offline --------
+  function odexBridgeCandidates() {
+    var out = [], add = function (u) { u = String(u || "").trim().replace(/\/+$/, ""); if (u && out.indexOf(u) < 0) out.push(u); };
+    try { add(localStorage.getItem("mbon.ode.bridge")); } catch (e) { /* storage blocked */ }
+    add((window.mbonData || {}).odeBridge);
+    add("http://127.0.0.1:5051/api/ode"); add("http://127.0.0.1:5050/api/ode");
+    return out;
+  }
+  function odexCatalog() { var c = (window.mbonData || {}).odeCatalog; return c && Array.isArray(c.projects) ? c : null; }
+  function odexConnect(force) {
+    if (ODEX.connP && !force) return ODEX.connP;
+    ODEX.conn = { mode: "checking" }; odexPaintConn();
+    var cands = odexBridgeCandidates(), i = 0;
+    ODEX.connP = new Promise(function (resolve) {
+      function fallback() {
+        odexJSON(ODE_SITE + "/api/tables", null, 4000).then(function () { resolve({ mode: "direct" }); }, function () {
+          var cat = odexCatalog();
+          resolve(cat ? { mode: "catalog", catalog: cat } : { mode: "offline" });
+        });
+      }
+      (function next() {
+        if (i >= cands.length) return fallback();
+        var u = cands[i++];
+        odexJSON(u + "/health", null, 1500).then(function (h) {
+          if (h && h.service === "ode-bridge") resolve({ mode: "bridge", url: u, info: h }); else next();
+        }, function () { next(); });
+      })();
+    }).then(function (c) { ODEX.conn = c; odexPaintConn(); return c; });
+    return ODEX.connP;
+  }
+  function odexConnLabel(c) {
+    c = c || ODEX.conn || { mode: "checking" };
+    if (c.mode === "checking") return { cls: "chk", txt: "Connecting…", tip: "Looking for a local bridge, then the Ocean DNA Explorer API" };
+    if (c.mode === "bridge") return { cls: "ok", txt: "Live · local bridge", tip: "Using the bridge at " + c.url + " (ode_client.py " + ((c.info || {}).version || "") + "). Live project list, sample search, server-side caching" + ((c.info || {}).builder ? ", full report-builder parsing" : "") + "." };
+    if (c.mode === "direct") return { cls: "ok", txt: "Live · direct", tip: "Talking to " + ODE_SITE + " directly." };
+    if (c.mode === "catalog") {
+      var d = String((c.catalog || {}).generatedAt || "").slice(0, 10);
+      return { cls: "warn", txt: "Catalog · " + (d || "snapshot"), tip: "Project list saved when this report was built (" + (d || "unknown date") + "). Files still download live from Ocean DNA Explorer. For live search, start the bridge: python ode_client.py serve" };
+    }
+    return { cls: "bad", txt: "Offline", tip: "No bridge, no catalog in this report, and the Ocean DNA Explorer API can't be called from this page." };
+  }
+  function odexPaintConn() {
+    var el = document.getElementById("odex-conn"); if (!el) return;
+    var L = odexConnLabel();
+    el.className = "odex-conn " + L.cls; el.title = L.tip;
+    el.innerHTML = (L.cls === "chk" ? '<span class="odex-spin sm"></span>' : '<span class="dot"></span>') + odexEsc(L.txt);
+  }
+
+  // ---- data access (same shapes as ode_client.py) --------------------------
+  function odexNormAnalysis(a) {
+    var c = a._count || {};
+    return { id: a.id, project_id: a.project_id, analysis_run_name: a.analysis_run_name, assay_name: a.assay_name,
+      short: odexShort(a.assay_name), trusted: !!a.trusted, dateSubmitted: a.dateSubmitted,
+      counts: { libraries: c.Libraries, occurrences: c.Occurrences, assignments: c.Assignments, taxonomies: c.Taxonomies },
+      files: { table: a.occurrenceFileUrl_ODE, taxonomy: a.asvFileUrl_ODE, analysisMetadata: a.analysisMetadataFileUrl_ODE } };
+  }
+  function odexNormProject(p, anas) {
+    var c = p._count || {};
+    return { id: p.id, project_id: p.project_id, project_name: p.project_name, institution: p.institution,
+      dateSubmitted: p.dateSubmitted, url: ODE_SITE + "/explore/project/" + encodeURIComponent(p.project_id),
+      counts: { samples: c.Samples, analyses: c.Analyses, libraries: c.Libraries },
+      files: { projectMetadata: p.projectMetadataFileUrl_ODE, sampleMetadata: p.sampleMetadataFileUrl_ODE, libraryMetadata: p.libraryMetadataFileUrl_ODE },
+      analyses: anas || [] };
+  }
+  function odexDirectProjects() {
+    var pf = "id,project_id,project_name,institution,dateSubmitted,projectMetadataFileUrl_ODE,sampleMetadataFileUrl_ODE,libraryMetadataFileUrl_ODE";
+    var af = "id,project_id,analysis_run_name,assay_name,trusted,dateSubmitted,asvFileUrl_ODE,occurrenceFileUrl_ODE,analysisMetadataFileUrl_ODE";
+    return Promise.all([
+      odexJSON(ODE_SITE + "/api/project?fields=" + pf + "&relCounts=samples,analyses,libraries&orderBy=project_id,asc"),
+      odexJSON(ODE_SITE + "/api/analysis?fields=" + af + "&relCounts=libraries,occurrences,assignments,taxonomies&orderBy=analysis_run_name,asc")
+    ]).then(function (r) {
+      var by = {};
+      (r[1].result || []).forEach(function (a) { (by[a.project_id] = by[a.project_id] || []).push(odexNormAnalysis(a)); });
+      return (r[0].result || []).map(function (p) { return odexNormProject(p, by[p.project_id]); });
+    });
+  }
+  function odexFilterProjects(list, q) {
+    q = String(q || "").trim().toLowerCase();
+    if (!q) return list;
+    return list.filter(function (p) {
+      return [p.project_id, p.project_name, p.institution].concat((p.analyses || []).map(function (a) { return a.assay_name + " " + a.analysis_run_name; }))
+        .join(" ").toLowerCase().indexOf(q) >= 0; });
+  }
+  function odexAllProjects() {
+    return odexConnect().then(function (c) {
+      if (c.mode === "bridge") return odexJSON(c.url + "/projects").then(function (r) { return r.projects || []; });
+      if (c.mode === "direct") return odexDirectProjects();
+      if (c.mode === "catalog") return c.catalog.projects;
+      throw odexErr("Ocean DNA Explorer can't be reached from this page.", 0);
+    });
+  }
+  function odexGetProject(pid) {
+    return odexConnect().then(function (c) {
+      if (c.mode === "bridge") return odexJSON(c.url + "/projects/" + encodeURIComponent(pid)).then(function (r) { return r.project; });
+      return odexAllProjects().then(function (list) {
+        var p = list.filter(function (x) { return x.project_id === pid; })[0] ||
+          list.filter(function (x) { return String(x.project_id).toLowerCase() === String(pid).toLowerCase(); })[0];
+        if (!p) throw odexErr("No Ocean DNA Explorer project “" + pid + "”" + (c.mode === "catalog" ? " in this report's catalog snapshot — it may be newer than the report. Start the bridge for a live list." : "."), 404);
+        return p;
+      });
+    });
+  }
+  function odexSearchSamples(q) {
+    return odexConnect().then(function (c) {
+      if (c.mode === "bridge") return odexJSON(c.url + "/samples?q=" + encodeURIComponent(q)).then(function (r) { return r.samples || []; });
+      if (c.mode === "direct") return odexJSON(ODE_SITE + "/api/sample?search=" + encodeURIComponent(q) +
+        "&fields=project_id,samp_name,decimalLatitude,decimalLongitude,eventDate,station_id,geo_loc_name,samp_category&limit=300").then(function (r) { return r.result || []; });
+      throw odexErr("Searching samples across projects needs the live API. Start the bridge (python ode_client.py serve), or open a project and filter its samples in the preview.", 0);
+    });
+  }
+  // project / analysis file text, cached for the session (preview → import reuses it)
+  function odexFetchText(url, onProg, signal) {
+    if (!url) return Promise.reject(odexErr("Ocean DNA Explorer lists no file for this", 404));
+    if (ODEX.texts[url] != null) { var t = ODEX.texts[url]; if (onProg) onProg(t.length, t.length, true); return Promise.resolve(t); }
+    var c = ODEX.conn || {};
+    var tries = c.mode === "bridge" ? [c.url + "/file?url=" + encodeURIComponent(url), url] : [url];
+    var k = 0;
+    function attempt(err) {
+      if (k >= tries.length || (signal && signal.aborted)) return Promise.reject(err);
+      return odexStream(tries[k++], onProg, signal).catch(function (e) { if (e.status === -1) throw e; return attempt(e); });
+    }
+    return attempt(odexErr("no source", 0)).then(function (t) { ODEX.texts[url] = t; return t; });
+  }
+
+  // ---- FAIRe parsing (browser side) -----------------------------------------
+  function odexRecords(text) {
+    var rows = mbonParseDelimited(text);
+    if (!rows.length) return [];
+    var hdr = rows[0].map(function (h) { return String(h == null ? "" : h).trim(); });
+    return rows.slice(1).map(function (r) {
+      var o = {}; hdr.forEach(function (h, i) { if (h) o[h] = String(r[i] == null ? "" : r[i]).trim(); }); return o; });
+  }
+  function odexSampleMap(text) {
+    var m = {};
+    odexRecords(text).forEach(function (r) {
+      var sn = r.samp_name || r.samp_number || r.sample_ID; if (!sn || m[sn]) return;
+      var rec = {}; Object.keys(r).forEach(function (k) { if (r[k] !== "") rec[k] = r[k]; });
+      m[sn] = mbonFaireAliases(rec);
+    });
+    return m;
+  }
+  function odexLibMap(text) {
+    var m = {};
+    odexRecords(text).forEach(function (r) {
+      if (!r.lib_id || !r.samp_name) return;
+      var rec = {}; Object.keys(r).forEach(function (k) { if (!mbonFaireBlank(r[k])) rec[k] = r[k]; });
+      m[r.lib_id] = rec;
+    });
+    return m;
+  }
+  function odexProjectMeta(text) {
+    var rows = mbonParseDelimited(text || ""), pm = {};
+    if (!rows.length) return pm;
+    var h = rows[0].map(normColName), ti = h.indexOf("termname"), pi = h.indexOf("projectlevel");
+    if (pi < 0) pi = h.indexOf("values");
+    if (ti < 0) ti = 0; if (pi < 0) pi = ti + 1;
+    rows.slice(1).forEach(function (r) { var t = String(r[ti] || "").trim(); if (t && !mbonFaireBlank(r[pi])) pm[t] = String(r[pi]).trim(); });
+    return pm;
+  }
+  function odexSummarize(sampleText, libText) {
+    var libs = odexRecords(libText || ""), bySamp = {}, out = [], seen = {};
+    libs.forEach(function (l) {
+      if (!l.samp_name || !l.lib_id) return;
+      var a = l.assay_name || "?"; ((bySamp[l.samp_name] = bySamp[l.samp_name] || {})[a] = bySamp[l.samp_name][a] || []).push(l.lib_id);
+    });
+    odexRecords(sampleText || "").forEach(function (s) {
+      var sn = s.samp_name || s.samp_number || s.sample_ID; if (!sn || seen[sn]) return; seen[sn] = 1;
+      var pick = function () { for (var i = 0; i < arguments.length; i++) { var v = s[arguments[i]]; if (v != null && !mbonFaireBlank(v)) return v; } return null; };
+      var cat = s.samp_category || "", neg = s.neg_cont_type || "";
+      var mn = odexNum(s.minimumDepthInMeters), mx = odexNum(s.maximumDepthInMeters);
+      var la = odexNum(s.decimalLatitude), lo = odexNum(s.decimalLongitude);
+      out.push({ samp_name: sn, lat: la, lon: lo, date: odexIsoDate(pick("eventDate", "collection_date", "verbatimEventDate")),
+        station: pick("station_id", "ctd_bottle_number", "site", "Station", "locality"), cruise: pick("expedition_id", "cruise_id", "Cruise Number"),
+        place: pick("geo_loc_name"), category: cat || null,
+        control: /control|blank/i.test(cat) || (!!neg && !mbonFaireBlank(neg)),
+        depth: mn != null && mx != null ? (mn + mx) / 2 : (mn != null ? mn : mx), depthClass: pick("depth_category"),
+        libs: bySamp[sn] || {} });
+    });
+    Object.keys(bySamp).forEach(function (sn) {
+      if (!seen[sn]) out.push({ samp_name: sn, lat: null, lon: null, date: null, station: null, cruise: null, place: null,
+        category: null, control: false, depth: null, depthClass: null, libs: bySamp[sn], notInSheet: true });
+    });
+    return out;
+  }
+
+  // ---- runs already in the report (duplicate detection, project switcher) ---
+  function mbonRunProject(r) {
+    if (!r) return null;
+    var m = r.meta || {};
+    return (r.ode && r.ode.project_id) || m["Project ID"] || m.Project || m.Group || (r.builtin ? "Report data" : "Uploaded files");
+  }
+  function mbonRunProjectName(r) {
+    var m = (r && r.meta) || {};
+    return (r && r.ode && r.ode.project_name) || m["Project name"] || null;
+  }
+  function odexLoadedFor(a, pid) {
+    return MBON.runs.filter(function (r) {
+      if (mbonRunKindClass(r) !== "ode") return false;
+      if (r.ode && r.ode.analysis_run_name) return r.ode.analysis_run_name === a.analysis_run_name && r.ode.project_id === pid;
+      var m = r.meta || {};
+      if (m["Feature table"] && odexBase(a.files.table) && m["Feature table"] === odexBase(a.files.table)) return true;
+      return mbonRunProject(r) === pid && (r.assay || m.Assay) === a.assay_name;
+    });
+  }
+  function odexProjectLoaded(pid) { return MBON.runs.some(function (r) { return mbonRunProject(r) === pid; }); }
+
+  // ---- dialog shell -----------------------------------------------------------
+  function odexEnsureDialog() {
+    var bg = document.getElementById("odex");
+    if (bg) return bg;
+    bg = document.createElement("div"); bg.id = "odex"; bg.className = "odex-bg"; bg.hidden = true;
+    bg.innerHTML =
+      '<div class="odex" role="dialog" aria-modal="true" aria-labelledby="odex-ttl">' +
+        '<div class="odex-head">' +
+          '<div class="odex-logo" aria-hidden="true">🌊</div>' +
+          '<div class="odex-ttlw"><div id="odex-ttl" class="odex-ttl">Import from Ocean DNA Explorer</div>' +
+            '<div class="odex-sub">FAIRe sample metadata + Tourmaline ASV tables from <a href="' + ODE_SITE + '" target="_blank" rel="noopener">oceandnaexplorer.org</a></div></div>' +
+          '<button type="button" id="odex-conn" class="odex-conn chk"></button>' +
+          '<button type="button" class="odex-x" title="Close (Esc)" aria-label="Close">×</button>' +
+        '</div>' +
+        '<ol class="odex-steps"><li data-v="find"><b>1</b> Find</li><li data-v="preview"><b>2</b> Preview &amp; select</li><li data-v="import"><b>3</b> Import</li></ol>' +
+        '<div class="odex-body" id="odex-body"></div>' +
+        '<div class="odex-foot" id="odex-foot"></div>' +
+      '</div>';
+    document.body.appendChild(bg);
+    bg.addEventListener("mousedown", function (e) { if (e.target === bg) bg._downOnBg = true; });
+    bg.addEventListener("click", function (e) { if (e.target === bg && bg._downOnBg) odexClose(); bg._downOnBg = false; });
+    bg.querySelector(".odex-x").addEventListener("click", odexClose);
+    bg.querySelector("#odex-body").addEventListener("click", function (e) {
+      var cp = e.target.closest("[data-copy]");
+      if (cp) {
+        var t = cp.getAttribute("data-copy");
+        try { navigator.clipboard.writeText(t).then(function () { cp.textContent = "Copied ✓"; setTimeout(function () { cp.textContent = "Copy"; }, 1400); },
+          function () { window.prompt("Copy:", t); }); } catch (x) { window.prompt("Copy:", t); }
+        return;
+      }
+      if (ODEX.view === "find") odexFindClick(e);
+    });
+    bg.querySelector("#odex-conn").addEventListener("click", function () { odexShowConnHelp(); });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && ODEX.open && !document.querySelector(".mbon-confirm-bg")) odexClose(); });
+    bg.querySelector(".odex-steps").addEventListener("click", function (e) {
+      var li = e.target.closest("li"); if (!li) return;
+      if (li.dataset.v === "find" && ODEX.view !== "import") { ODEX.view = "find"; odexRender(); }
+      else if (li.dataset.v === "preview" && ODEX.project && ODEX.view === "find") { ODEX.view = "preview"; odexRender(); }
+    });
+    return bg;
+  }
+  function mbonOdeOpen(opts) {
+    opts = opts || {};
+    var bg = odexEnsureDialog();
+    bg.hidden = false; ODEX.open = true;
+    document.body.classList.add("odex-open");
+    odexHidePill();
+    odexConnect(!!opts.reconnect);
+    if (opts.project) { odexOpenProject(opts.project, { select: opts.samples }); }
+    else if (ODEX.view === "import" && ODEX.job && ODEX.job.state !== "running") { ODEX.view = ODEX.project ? "preview" : "find"; }
+    odexRender();
+    setTimeout(function () { var i = document.getElementById("odex-q"); if (i && ODEX.view === "find") i.focus(); }, 30);
+  }
+  function odexClose() {
+    var bg = document.getElementById("odex"); if (!bg) return;
+    bg.hidden = true; ODEX.open = false; document.body.classList.remove("odex-open");
+    if (ODEX.job && ODEX.job.state === "running") odexShowPill();
+  }
+  window.mbonOdeOpen = mbonOdeOpen;
+
+  function odexRender() {
+    var bg = odexEnsureDialog();
+    Array.prototype.forEach.call(bg.querySelectorAll(".odex-steps li"), function (li) {
+      var order = ["find", "preview", "import"], i = order.indexOf(li.dataset.v), cur = order.indexOf(ODEX.view);
+      li.className = i === cur ? "on" : (i < cur ? "past" : "");
+    });
+    odexPaintConn();
+    if (ODEX.view === "preview") return odexRenderPreview();
+    if (ODEX.view === "import") return odexRenderImport();
+    return odexRenderFind();
+  }
+  function odexFoot(html) { var f = document.getElementById("odex-foot"); f.innerHTML = html; return f; }
+  function odexShowConnHelp() {
+    var c = ODEX.conn || {}, L = odexConnLabel(c), cur = c.mode === "bridge" ? c.url : "";
+    var bg = document.createElement("div"); bg.className = "mbon-confirm-bg";
+    bg.innerHTML = '<div class="mbon-confirm odex-help"><h4>Connection · ' + odexEsc(L.txt) + '</h4><p>' + odexEsc(L.tip) + '</p>' +
+      '<p class="odex-hp">The Ocean DNA Explorer API can’t be called directly from a report file, so live search goes through a small local bridge. Start it in a terminal in the <code>eDNA_processing</code> folder:</p>' +
+      '<div class="odex-cmd"><code>python3 ode_client.py serve</code><button type="button" data-copy="python3 ode_client.py serve">Copy</button></div>' +
+      '<p class="odex-hp">(<code>bash api/run.sh</code> serves the same routes on port 5050.) Without it, this report uses the project catalog saved when it was built and downloads files directly.</p>' +
+      '<label class="odex-hp">Bridge URL <input type="text" id="odex-burl" value="' + odexEsc(cur || (function () { try { return localStorage.getItem("mbon.ode.bridge") || ""; } catch (e) { return ""; } })()) + '" placeholder="http://127.0.0.1:5051/api/ode"></label>' +
+      '<div class="row"><button class="cancel">Close</button><button class="primary">Reconnect</button></div></div>';
+    document.body.appendChild(bg);
+    bg.querySelector(".cancel").addEventListener("click", function () { bg.remove(); });
+    bg.addEventListener("click", function (e) { if (e.target === bg) bg.remove(); });
+    odexWireCopy(bg);
+    bg.querySelector(".primary").addEventListener("click", function () {
+      var v = bg.querySelector("#odex-burl").value.trim();
+      try { if (v) localStorage.setItem("mbon.ode.bridge", v); else localStorage.removeItem("mbon.ode.bridge"); } catch (e) { /* ignore */ }
+      bg.remove(); ODEX.list = null; ODEX.listErr = null;
+      odexConnect(true).then(function () { if (ODEX.view === "find") odexLoadList(); else odexRender(); });
+      odexRender();
+    });
+  }
+  function odexWireCopy(root) {
+    Array.prototype.forEach.call(root.querySelectorAll("[data-copy]"), function (b) {
+      b.addEventListener("click", function () {
+        var t = b.getAttribute("data-copy");
+        var ok = function () { b.textContent = "Copied ✓"; setTimeout(function () { b.textContent = "Copy"; }, 1400); };
+        try { navigator.clipboard.writeText(t).then(ok, function () { window.prompt("Copy:", t); }); } catch (e) { window.prompt("Copy:", t); }
+      });
+    });
+  }
+
+  // ---- step 1: find ---------------------------------------------------------
+  function odexLoadList() {
+    ODEX.listBusy = true; ODEX.listErr = null; odexRender();
+    return odexAllProjects().then(function (list) { ODEX.list = list; ODEX.listBusy = false; odexRender(); },
+      function (e) { ODEX.listErr = e; ODEX.listBusy = false; odexRender(); });
+  }
+  function odexRenderFind() {
+    var body = document.getElementById("odex-body");
+    odexDestroyMap();
+    var c = ODEX.conn || { mode: "checking" };
+    if (!ODEX.list && !ODEX.listBusy && !ODEX.listErr) {
+      if (c.mode === "checking") { (ODEX.connP || odexConnect()).then(function () { if (ODEX.view === "find" && !ODEX.list) odexLoadList(); }); }
+      else { setTimeout(odexLoadList, 0); }
+    }
+    var html = '<div class="odex-find">' +
+      '<div class="odex-sbar"><span class="odex-sico">🔍</span><input id="odex-q" type="search" autocomplete="off" value="' + odexEsc(ODEX.q) + '" ' +
+        'placeholder="Project name or id, a sample name, or paste an oceandnaexplorer.org link"/>' +
+        '<div class="odex-seg" role="tablist"><button type="button" data-tab="projects" class="' + (ODEX.tab === "projects" ? "on" : "") + '">Projects</button>' +
+        '<button type="button" data-tab="samples" class="' + (ODEX.tab === "samples" ? "on" : "") + '">Samples</button></div></div>';
+    if (c.mode === "catalog") {
+      html += '<div class="odex-note warn">📒 Project list from the catalog saved when this report was built (' + odexEsc(String(c.catalog.generatedAt || "").slice(0, 10)) +
+        '). Files are still downloaded live. <a href="#" data-act="help">Live search & sample search →</a></div>';
+    }
+    html += '<div id="odex-results" class="odex-results">' + (ODEX.tab === "samples" ? odexSamplesHtml() : odexProjectsHtml()) + '</div></div>';
+    body.innerHTML = html;
+    var q = body.querySelector("#odex-q");
+    q.addEventListener("input", function () {
+      ODEX.q = q.value;
+      var ref = odexParseRef(q.value);
+      if (ref) { ODEX.q = ""; odexOpenProject(ref.project_id, { select: ref.samp_name ? [ref.samp_name] : null }); return; }
+      if (ODEX.tab === "projects") { body.querySelector("#odex-results").innerHTML = odexProjectsHtml(); }
+      else { clearTimeout(ODEX._st); ODEX._st = setTimeout(odexRunSampleSearch, 350); }
+    });
+    q.addEventListener("keydown", function (e) {
+      if (e.key !== "Enter") return;
+      if (ODEX.tab === "samples") { odexRunSampleSearch(); return; }
+      var first = body.querySelector(".odex-pc:not([disabled])"); if (first) first.click();
+    });
+    body.querySelectorAll(".odex-seg button").forEach(function (b) {
+      b.addEventListener("click", function () { ODEX.tab = b.dataset.tab; odexRender(); if (ODEX.tab === "samples" && ODEX.q.trim().length >= 2) odexRunSampleSearch();
+        var qi = document.getElementById("odex-q"); if (qi) qi.focus(); }); });
+    odexFoot('<span class="odex-fhint">Tip: paste a sample link from oceandnaexplorer.org to jump straight to it.</span>' +
+      '<span class="sp"></span><button type="button" class="odex-btn" data-act="close">Close</button>');
+    document.getElementById("odex-foot").querySelector('[data-act="close"]').addEventListener("click", odexClose);
+  }
+  function odexFindClick(e) {
+    var a = e.target.closest("[data-act]");
+    if (a && a.dataset.act === "help") { e.preventDefault(); odexShowConnHelp(); return; }
+    if (a && a.dataset.act === "retry") { ODEX.list = null; ODEX.listErr = null; odexConnect(true).then(odexLoadList); odexRender(); return; }
+    var pc = e.target.closest(".odex-pc");
+    if (pc && !pc.disabled) { odexOpenProject(pc.dataset.pid, {}); return; }
+    var sg = e.target.closest("[data-sgroup]");
+    if (sg) { var g = ODEX.samples && ODEX.samples.groups[sg.dataset.sgroup]; if (g) odexOpenProject(sg.dataset.sgroup, { select: g.map(function (s) { return s.samp_name; }) }); }
+  }
+  function odexStateHtml(kind, title, msg, extra) {
+    return '<div class="odex-state ' + kind + '">' + (kind === "busy" ? '<span class="odex-spin lg"></span>' :
+      '<span class="odex-big ' + kind + '">' + (kind === "bad" ? "✕" : kind === "ok" ? "✓" : "i") + '</span>') +
+      '<div class="t">' + odexEsc(title) + '</div>' + (msg ? '<div class="m">' + msg + '</div>' : "") + (extra || "") + '</div>';
+  }
+  function odexOfflineHtml(err) {
+    return odexStateHtml("bad", "Can’t reach Ocean DNA Explorer", odexEsc(err && err.message || "") +
+      '<br>Start the local bridge in the <code>eDNA_processing</code> folder, then retry:',
+      '<div class="odex-cmd"><code>python3 ode_client.py serve</code><button type="button" data-copy="python3 ode_client.py serve">Copy</button></div>' +
+      '<div class="odex-row"><button type="button" class="odex-btn pri" data-act="retry">↻ Retry</button><button type="button" class="odex-btn" data-act="help">Connection settings</button></div>');
+  }
+  function odexProjectsHtml() {
+    var c = ODEX.conn || {};
+    if (c.mode === "checking" || ODEX.listBusy) return odexStateHtml("busy", c.mode === "checking" ? "Connecting…" : "Loading projects…", "Contacting Ocean DNA Explorer");
+    if (ODEX.listErr || c.mode === "offline") return odexOfflineHtml(ODEX.listErr || odexErr("No bridge and no catalog are available."));
+    if (!ODEX.list) return odexStateHtml("busy", "Loading projects…", "");
+    var list = odexFilterProjects(ODEX.list, ODEX.q);
+    if (!list.length) return odexStateHtml("info", "No project matches “" + ODEX.q + "”", "Try part of the name or id — or switch to <b>Samples</b> to search sample names.");
+    return '<div class="odex-count">' + list.length + " of " + ODEX.list.length + ' projects</div>' + list.map(function (p) {
+      var n = p.analyses || [], loaded = odexProjectLoaded(p.project_id);
+      var byShort = {}, order = [];
+      n.forEach(function (a) { var k = a.short || a.assay_name; if (!byShort[k]) { byShort[k] = []; order.push(k); } byShort[k].push(a); });
+      var chips = order.map(function (k) {
+        var g = byShort[k], tr = g.filter(function (a) { return a.trusted; }).length;
+        return '<span class="odex-chip' + (tr ? " tr" : "") + '" title="' + odexEsc(g.map(function (a) { return a.analysis_run_name + " · " + a.assay_name + (a.trusted ? " · reviewed" : " · not yet reviewed"); }).join("\n")) + '">' +
+          odexEsc(k) + (g.length > 1 ? " ×" + g.length : "") + "</span>"; }).join("");
+      var cnt = p.counts || {};
+      return '<button type="button" class="odex-pc" data-pid="' + odexEsc(p.project_id) + '"' + (n.length ? "" : " disabled") + '>' +
+        '<div class="t"><b>' + odexEsc(p.project_name || p.project_id) + '</b><span class="id">' + odexEsc(p.project_id) + "</span>" +
+          (loaded ? '<span class="odex-tag in">in this report</span>' : "") + "</div>" +
+        '<div class="m">' + odexEsc(p.institution || "") + (p.dateSubmitted ? " · submitted " + odexEsc(String(p.dateSubmitted).slice(0, 10)) : "") + "</div>" +
+        '<div class="c"><span>' + fmt(cnt.samples || 0) + " samples</span><span>" + fmt(cnt.libraries || 0) + " libraries</span><span>" + n.length + " analys" + (n.length === 1 ? "is" : "es") + "</span></div>" +
+        '<div class="a">' + (n.length ? chips : '<span class="odex-none">No analyses on Ocean DNA Explorer yet — nothing to import</span>') + "</div>" +
+        '<span class="go">Preview ›</span></button>';
+    }).join("");
+  }
+  function odexRunSampleSearch() {
+    var q = (ODEX.q || "").trim();
+    if (q.length < 2) { ODEX.samples = null; var r0 = document.getElementById("odex-results"); if (r0) r0.innerHTML = odexSamplesHtml(); return; }
+    ODEX.samples = { busy: true, q: q };
+    var r = document.getElementById("odex-results"); if (r) r.innerHTML = odexSamplesHtml();
+    odexSearchSamples(q).then(function (rows) {
+      if (ODEX.q.trim() !== q) return;
+      var groups = {};
+      rows.forEach(function (s) { (groups[s.project_id] = groups[s.project_id] || []).push(s); });
+      ODEX.samples = { q: q, rows: rows, groups: groups };
+      var r2 = document.getElementById("odex-results"); if (r2) r2.innerHTML = odexSamplesHtml();
+    }, function (e) {
+      ODEX.samples = { q: q, err: e };
+      var r3 = document.getElementById("odex-results"); if (r3) r3.innerHTML = odexSamplesHtml();
+    });
+  }
+  function odexSamplesHtml() {
+    var S = ODEX.samples;
+    if (!S) return odexStateHtml("info", "Search samples across every project", "Type part of a sample name, station or place (2+ characters), e.g. <i>Horseshoe</i> or <i>CTD23</i>.");
+    if (S.busy) return odexStateHtml("busy", "Searching samples for “" + S.q + "”…", "");
+    if (S.err) return odexStateHtml("bad", "Sample search unavailable", odexEsc(S.err.message),
+      '<div class="odex-cmd"><code>python3 ode_client.py serve</code><button type="button" data-copy="python3 ode_client.py serve">Copy</button></div>');
+    var keys = Object.keys(S.groups);
+    if (!keys.length) return odexStateHtml("info", "No sample matches “" + S.q + "”", "");
+    return '<div class="odex-count">' + S.rows.length + " sample(s) in " + keys.length + " project(s)" + (S.rows.length >= 300 ? " (first 300)" : "") + "</div>" +
+      keys.map(function (pid) {
+        var g = S.groups[pid], ds = g.map(function (s) { return String(s.eventDate || "").slice(0, 10); }).filter(Boolean).sort();
+        return '<div class="odex-sg"><div class="h"><b>' + odexEsc(pid) + "</b> · " + g.length + " sample(s)" +
+          (ds.length ? " · " + odexEsc(ds[0]) + (ds[ds.length - 1] !== ds[0] ? " → " + odexEsc(ds[ds.length - 1]) : "") : "") +
+          '<span class="sp"></span><button type="button" class="odex-btn sm pri" data-sgroup="' + odexEsc(pid) + '">Preview these ›</button></div>' +
+          '<div class="l">' + g.slice(0, 10).map(function (s) { return '<span class="odex-sn">' + odexEsc(s.samp_name) + "</span>"; }).join("") +
+          (g.length > 10 ? '<span class="odex-sn more">+' + (g.length - 10) + " more</span>" : "") + "</div></div>";
+      }).join("");
+  }
+
+  // ---- step 2: preview & select ---------------------------------------------
+  function odexOpenProject(pid, opts) {
+    opts = opts || {};
+    ODEX.view = "preview"; ODEX.project = null; ODEX.prev = { busy: true, pid: pid, step: "Looking up " + pid + "…" };
+    ODEX.preselect = opts.select && opts.select.length ? opts.select.slice() : null;
+    ODEX.f = { q: "", cruise: "", ctrl: "all", from: "", to: "" };
+    if (ODEX.open) odexRender();
+    var tok = ODEX._ptok = {};
+    odexGetProject(pid).then(function (p) {
+      if (ODEX._ptok !== tok) return;
+      ODEX.project = p;
+      ODEX.prev = { busy: true, pid: pid, step: "Loading sample sheet…", bytes: 0 };
+      if (ODEX.open && ODEX.view === "preview") odexRender();
+      var prog = function (n) { ODEX.prev.bytes = n; var s = document.getElementById("odex-pstep"); if (s) s.textContent = ODEX.prev.step + " " + odexBytes(n); };
+      var f = p.files || {};
+      return Promise.all([
+        odexFetchText(f.sampleMetadata, prog),
+        odexFetchText(f.libraryMetadata, prog).catch(function () { return ""; }),
+        f.projectMetadata ? odexFetchText(f.projectMetadata).catch(function () { return ""; }) : ""
+      ]).then(function (t) {
+        if (ODEX._ptok !== tok) return;
+        var samples = odexSummarize(t[0], t[1]);
+        ODEX.prev = { pid: pid, samples: samples, pm: odexProjectMeta(t[2]), libCount: Object.keys(odexLibMap(t[1])).length };
+        // default selection: every sample (or the ones asked for), every analysis not already loaded
+        ODEX.sel = {};
+        var pre = ODEX.preselect ? ODEX.preselect.reduce(function (o, s) { o[s] = 1; return o; }, {}) : null;
+        samples.forEach(function (s) { if (!pre || pre[s.samp_name]) ODEX.sel[s.samp_name] = 1; });
+        // analyses: the reviewed ("trusted") ones not loaded yet — what the ODE website shows by
+        // default; with none reviewed, all of them when there are only a few, else let the user pick
+        ODEX.ana = {};
+        var fresh = (p.analyses || []).filter(function (a) { return !odexLoadedFor(a, pid).length; });
+        var pickA = fresh.filter(function (a) { return a.trusted; });
+        if (!pickA.length && fresh.length <= 4) pickA = fresh;
+        if (!pickA.length && pre && (p.analyses || []).length <= 4) pickA = p.analyses;
+        pickA.forEach(function (a) { ODEX.ana[a.analysis_run_name] = 1; });
+        if (ODEX.open && ODEX.view === "preview") odexRender();
+      });
+    }).catch(function (e) {
+      if (ODEX._ptok !== tok) return;
+      ODEX.prev = { pid: pid, err: e };
+      if (ODEX.open && ODEX.view === "preview") odexRender();
+    });
+  }
+  function odexFiltered() {
+    var P = ODEX.prev, f = ODEX.f, q = f.q.trim().toLowerCase();
+    return (P.samples || []).filter(function (s) {
+      if (f.cruise && s.cruise !== f.cruise) return false;
+      if (f.ctrl === "no" && s.control) return false;
+      if (f.ctrl === "only" && !s.control) return false;
+      if (f.from && (!s.date || s.date < f.from)) return false;
+      if (f.to && (!s.date || s.date.slice(0, 10) > f.to)) return false;
+      if (q && [s.samp_name, s.station, s.place, s.cruise, s.date, s.depthClass].join(" ").toLowerCase().indexOf(q) < 0) return false;
+      return true;
+    });
+  }
+  function odexChosenAnalyses() { return ((ODEX.project || {}).analyses || []).filter(function (a) { return ODEX.ana[a.analysis_run_name]; }); }
+  function odexChosenSamples() { return ((ODEX.prev || {}).samples || []).filter(function (s) { return ODEX.sel[s.samp_name]; }); }
+  function odexLibsFor(s, anas) {
+    var n = 0, seen = {};
+    anas.forEach(function (a) { if (seen[a.assay_name]) return; seen[a.assay_name] = 1; n += ((s.libs || {})[a.assay_name] || []).length; });
+    return n;
+  }
+  function odexRenderPreview() {
+    var body = document.getElementById("odex-body"), P = ODEX.prev || {}, p = ODEX.project;
+    odexDestroyMap();
+    if (P.err) {
+      body.innerHTML = odexStateHtml("bad", "Couldn’t open " + (P.pid || "project"), odexEsc(P.err.message),
+        '<div class="odex-row"><button type="button" class="odex-btn pri" data-act="retryp">↻ Retry</button><button type="button" class="odex-btn" data-act="help">Connection settings</button></div>');
+      body.querySelector('[data-act="retryp"]').addEventListener("click", function () { ODEX.texts = {}; odexOpenProject(P.pid, { select: ODEX.preselect }); });
+      body.querySelector('[data-act="help"]').addEventListener("click", odexShowConnHelp);
+      odexFoot('<button type="button" class="odex-btn" data-act="back">‹ Projects</button><span class="sp"></span>').querySelector('[data-act="back"]')
+        .addEventListener("click", function () { ODEX.view = "find"; odexRender(); });
+      return;
+    }
+    if (P.busy || !p) {
+      body.innerHTML = odexStateHtml("busy", p ? (p.project_name || p.project_id) : (P.pid || ""), '<span id="odex-pstep">' + odexEsc(P.step || "Loading…") + (P.bytes ? " " + odexBytes(P.bytes) : "") + "</span>");
+      odexFoot('<button type="button" class="odex-btn" data-act="back">‹ Projects</button><span class="sp"></span>').querySelector('[data-act="back"]')
+        .addEventListener("click", function () { ODEX._ptok = null; ODEX.view = "find"; odexRender(); });
+      return;
+    }
+    var anas = p.analyses || [], samples = P.samples || [];
+    var cruises = Object.keys(samples.reduce(function (o, s) { if (s.cruise) o[s.cruise] = 1; return o; }, {})).sort();
+    var dates = samples.map(function (s) { return s.date; }).filter(Boolean).sort();
+    var withXY = samples.filter(function (s) { return s.lat != null && s.lon != null; }).length;
+    var html = '<div class="odex-ph"><div class="ti"><div class="n">' + odexEsc(p.project_name || p.project_id) + '</div>' +
+        '<div class="i"><span class="id">' + odexEsc(p.project_id) + "</span>" + (p.institution ? " · " + odexEsc(p.institution) : "") +
+        ' · <a href="' + odexEsc(p.url || (ODE_SITE + "/explore/project/" + encodeURIComponent(p.project_id))) + '" target="_blank" rel="noopener">open on Ocean DNA Explorer ↗</a></div></div>' +
+        '<div class="odex-kpis"><span><b>' + fmt(samples.length) + "</b> samples</span><span><b>" + fmt(withXY) + "</b> mapped</span>" +
+        "<span><b>" + fmt(samples.filter(function (s) { return s.control; }).length) + "</b> controls</span>" +
+        (dates.length ? "<span><b>" + odexEsc(dates[0]) + "</b> → <b>" + odexEsc(dates[dates.length - 1]) + "</b></span>" : "") + "</div></div>" +
+      '<div class="odex-pgrid"><div class="odex-pleft"><div id="odex-map" class="odex-map"></div>' +
+        '<div class="odex-maphint">Click a dot to toggle its samples · <a href="#" data-act="inview">select samples in view</a></div></div>' +
+      '<div class="odex-pright">' +
+        '<div class="odex-h4">Analyses <span class="odex-hint">one report layer each</span></div><div class="odex-alist">' +
+        (anas.length ? anas.map(function (a) {
+          var lo = odexLoadedFor(a, p.project_id), c = a.counts || {};
+          return '<label class="odex-arow' + (ODEX.ana[a.analysis_run_name] ? " on" : "") + '"><input type="checkbox" data-ana="' + odexEsc(a.analysis_run_name) + '"' + (ODEX.ana[a.analysis_run_name] ? " checked" : "") + ">" +
+            '<span class="odex-chip' + (a.trusted ? " tr" : "") + '">' + odexEsc(a.short || "?") + '</span><span class="nm"><b>' + odexEsc(a.assay_name) + '</b><span class="rn">' + odexEsc(a.analysis_run_name) + "</span></span>" +
+            '<span class="ct">' + fmt(c.libraries || 0) + " libs · " + fmt(c.assignments || 0) + " ASVs · " + fmt(c.taxonomies || 0) + " taxa</span>" +
+            (a.trusted ? '<span class="odex-tag ok" title="Reviewed for contamination by Ocean DNA Explorer">reviewed</span>' : '<span class="odex-tag" title="Not yet reviewed by Ocean DNA Explorer (the website hides it by default)">not reviewed</span>') +
+            (lo.length ? '<span class="odex-tag in" title="' + odexEsc(lo.map(function (r) { return r.label; }).join(", ") + " — ticking it re-imports this analysis and replaces that layer") + '">already loaded' + (lo.some(function (r) { return r.builtin; }) ? " (built-in)" : "") + " · tick to replace</span>" : "") +
+            "</label>"; }).join("") : '<div class="odex-none">This project has no analyses on Ocean DNA Explorer yet.</div>') + "</div>" +
+        '<div class="odex-h4">Samples <span id="odex-scount" class="odex-hint"></span></div>' +
+        '<div class="odex-sfilt"><input type="search" id="odex-sq" placeholder="Filter: name, station, place, date…" value="' + odexEsc(ODEX.f.q) + '">' +
+          (cruises.length > 1 ? '<select id="odex-scr"><option value="">All cruises</option>' + cruises.map(function (c) { return '<option' + (ODEX.f.cruise === c ? " selected" : "") + ">" + odexEsc(c) + "</option>"; }).join("") + "</select>" : "") +
+          '<select id="odex-sct"><option value="all">Samples + controls</option><option value="no"' + (ODEX.f.ctrl === "no" ? " selected" : "") + '>No controls</option><option value="only"' + (ODEX.f.ctrl === "only" ? " selected" : "") + ">Controls only</option></select>" +
+          (dates.length > 1 ? '<span class="odex-dr"><input type="date" id="odex-sfrom" value="' + odexEsc(ODEX.f.from) + '" min="' + odexEsc(dates[0]) + '" max="' + odexEsc(dates[dates.length - 1]) + '" title="From date">–<input type="date" id="odex-sto" value="' + odexEsc(ODEX.f.to) + '" min="' + odexEsc(dates[0]) + '" max="' + odexEsc(dates[dates.length - 1]) + '" title="To date"></span>' : "") +
+        '</div><div class="odex-sacts"><button type="button" class="odex-btn sm" data-sact="all">Select shown</button><button type="button" class="odex-btn sm" data-sact="none">Clear shown</button>' +
+          '<button type="button" class="odex-btn sm" data-sact="only">Only shown</button><button type="button" class="odex-btn sm" data-sact="invert">Invert</button>' +
+          '<button type="button" class="odex-btn sm" data-sact="paste">Paste names…</button></div>' +
+        '<div id="odex-slist" class="odex-slist"></div></div></div>';
+    body.innerHTML = html;
+    body.querySelectorAll("[data-ana]").forEach(function (cb) {
+      cb.addEventListener("change", function () { if (cb.checked) ODEX.ana[cb.dataset.ana] = 1; else delete ODEX.ana[cb.dataset.ana];
+        cb.closest(".odex-arow").classList.toggle("on", cb.checked); odexPaintSamples(); odexPaintPreviewFoot(); }); });
+    var on = function (id, ev, fn) { var el = body.querySelector(id); if (el) el.addEventListener(ev, fn); };
+    on("#odex-sq", "input", function (e) { ODEX.f.q = e.target.value; odexPaintSamples(); });
+    on("#odex-scr", "change", function (e) { ODEX.f.cruise = e.target.value; odexPaintSamples(); });
+    on("#odex-sct", "change", function (e) { ODEX.f.ctrl = e.target.value; odexPaintSamples(); });
+    on("#odex-sfrom", "change", function (e) { ODEX.f.from = e.target.value; odexPaintSamples(); });
+    on("#odex-sto", "change", function (e) { ODEX.f.to = e.target.value; odexPaintSamples(); });
+    body.querySelector(".odex-sacts").addEventListener("click", function (e) {
+      var b = e.target.closest("[data-sact]"); if (!b) return;
+      var shown = odexFiltered(), act = b.dataset.sact;
+      if (act === "paste") return odexPasteNames();
+      if (act === "only") ODEX.sel = {};
+      shown.forEach(function (s) {
+        if (act === "all" || act === "only") ODEX.sel[s.samp_name] = 1;
+        else if (act === "none") delete ODEX.sel[s.samp_name];
+        else if (act === "invert") { if (ODEX.sel[s.samp_name]) delete ODEX.sel[s.samp_name]; else ODEX.sel[s.samp_name] = 1; }
+      });
+      odexPaintSamples(); odexPaintPreviewFoot();
+    });
+    body.querySelector("#odex-slist").addEventListener("click", function (e) {
+      var row = e.target.closest("[data-sn]"); if (!row) return;
+      var sn = row.dataset.sn;
+      if (e.target.tagName !== "INPUT") { var cb = row.querySelector("input"); cb.checked = !cb.checked; }
+      if (row.querySelector("input").checked) ODEX.sel[sn] = 1; else delete ODEX.sel[sn];
+      row.classList.toggle("on", !!ODEX.sel[sn]);
+      odexPaintCount(); odexPaintMap(); odexPaintPreviewFoot();
+    });
+    on('[data-act="inview"]', "click", function (e) {
+      e.preventDefault(); if (!ODEX.map) return;
+      var b = ODEX.map.getBounds();
+      odexFiltered().forEach(function (s) { if (s.lat != null && s.lon != null) { if (b.contains([s.lat, s.lon])) ODEX.sel[s.samp_name] = 1; else delete ODEX.sel[s.samp_name]; } });
+      odexPaintSamples(); odexPaintPreviewFoot();
+    });
+    odexPaintSamples();
+    odexInitMap();
+    odexPaintPreviewFoot();
+  }
+  function odexPaintCount() {
+    var el = document.getElementById("odex-scount"); if (!el) return;
+    var all = (ODEX.prev.samples || []).length, sel = odexChosenSamples().length, shown = odexFiltered().length;
+    el.textContent = sel + " of " + all + " selected" + (shown !== all ? " · " + shown + " shown" : "");
+  }
+  function odexPaintSamples() {
+    var host = document.getElementById("odex-slist"); if (!host) return;
+    var rows = odexFiltered(), anas = odexChosenAnalyses(), cap = 600;
+    host.innerHTML = rows.length ? rows.slice(0, cap).map(function (s) {
+      var on = !!ODEX.sel[s.samp_name], nl = odexLibsFor(s, anas);
+      var assays = Object.keys(s.libs || {}).map(function (a) {
+        var used = anas.some(function (x) { return x.assay_name === a; });
+        return '<span class="odex-dotc' + (used ? " u" : "") + '" title="' + odexEsc(a + ": " + s.libs[a].join(", ")) + '">' + odexEsc(odexShort(a)) + "</span>"; }).join("");
+      return '<label class="odex-srow' + (on ? " on" : "") + (nl || !anas.length ? "" : " nolib") + '" data-sn="' + odexEsc(s.samp_name) + '"><input type="checkbox"' + (on ? " checked" : "") + ">" +
+        '<span class="sn">' + odexEsc(s.samp_name) + (s.control ? ' <span class="odex-tag ctl">control</span>' : "") + (s.notInSheet ? ' <span class="odex-tag">not in sample sheet</span>' : "") + "</span>" +
+        '<span class="sd">' + odexEsc(s.date || "") + "</span>" + '<span class="ss">' + odexEsc(s.station || s.place || "") + (s.depthClass ? " · " + odexEsc(s.depthClass) : "") + "</span>" +
+        '<span class="sa">' + (assays || '<span class="odex-dotc">no libraries</span>') + "</span></label>"; }).join("") +
+      (rows.length > cap ? '<div class="odex-more">Showing ' + cap + " of " + rows.length + " — filter to see the rest (selection still applies to all).</div>" : "")
+      : '<div class="odex-none">No sample matches the filter.</div>';
+    odexPaintCount(); odexPaintMap();
+  }
+  function odexPasteNames() {
+    var bg = document.createElement("div"); bg.className = "mbon-confirm-bg";
+    bg.innerHTML = '<div class="mbon-confirm odex-help"><h4>Select samples by name</h4><p>One per line (or separated by commas / tabs). Library ids work too.</p>' +
+      '<textarea id="odex-paste" rows="9" placeholder="MIRe_10A_Horseshoe_CB-1_2024-05-23"></textarea>' +
+      '<label class="odex-hp"><input type="checkbox" id="odex-paste-rep" checked> Replace the current selection</label>' +
+      '<div class="row"><button class="cancel">Cancel</button><button class="primary">Select</button></div></div>';
+    document.body.appendChild(bg);
+    bg.querySelector(".cancel").addEventListener("click", function () { bg.remove(); });
+    bg.querySelector(".primary").addEventListener("click", function () {
+      var names = bg.querySelector("#odex-paste").value.split(/[\n,\t;]+/).map(function (x) { return x.trim(); }).filter(Boolean);
+      var want = names.reduce(function (o, n) { o[n] = 1; return o; }, {}), hit = 0;
+      if (bg.querySelector("#odex-paste-rep").checked) ODEX.sel = {};
+      (ODEX.prev.samples || []).forEach(function (s) {
+        var libs = []; Object.keys(s.libs || {}).forEach(function (a) { libs = libs.concat(s.libs[a]); });
+        if (want[s.samp_name] || libs.some(function (l) { return want[l]; })) { ODEX.sel[s.samp_name] = 1; hit++; }
+      });
+      bg.remove(); odexPaintSamples(); odexPaintPreviewFoot();
+      mbonToast("Samples selected", hit + " of " + names.length + " pasted name(s) matched a sample in " + ODEX.project.project_id + ".", hit ? "metadata" : "warn");
+    });
+    setTimeout(function () { bg.querySelector("#odex-paste").focus(); }, 20);
+  }
+  function odexPaintPreviewFoot() {
+    var anas = odexChosenAnalyses(), samps = odexChosenSamples(), c = ODEX.conn || {};
+    var libs = samps.reduce(function (n, s) { return n + odexLibsFor(s, anas); }, 0);
+    var all = samps.length === (ODEX.prev.samples || []).length;
+    var ok = anas.length && samps.length && libs;
+    var why = !anas.length ? "Pick at least one analysis" : !samps.length ? "Pick at least one sample" : !libs ? "None of the selected samples has a library in the selected analyses" : "";
+    var f = odexFoot('<button type="button" class="odex-btn" data-act="back">‹ Projects</button>' +
+      '<div class="odex-sum">' + (ok ? "<b>" + anas.length + "</b> analys" + (anas.length === 1 ? "is" : "es") + " × <b>" + samps.length + "</b> sample" + (samps.length === 1 ? "" : "s") +
+        (all ? " (all)" : "") + " · up to <b>" + libs + "</b> libraries" : '<span class="odex-warn">' + odexEsc(why) + "</span>") +
+        (c.mode === "bridge" ? '<label class="odex-opt" title="Also write the FAIRe sheets + Tourmaline tables into data/projects/' + odexEsc(ODEX.project.project_id) + '/ so build_mbon_html.py can include them in built reports"><input type="checkbox" id="odex-save"' + (ODEX.save ? " checked" : "") + "> save to data/projects</label>" +
+          '<label class="odex-opt' + (ODEX.save ? "" : " dis") + '" title="Add rows to data/projects/report_manifest.xlsx (a backup is made first)"><input type="checkbox" id="odex-man"' + (ODEX.manifest ? " checked" : "") + (ODEX.save ? "" : " disabled") + "> + manifest</label>" : "") +
+      '</div><button type="button" class="odex-btn pri" data-act="import"' + (ok ? "" : " disabled") + ">Import ›</button>");
+    f.querySelector('[data-act="back"]').addEventListener("click", function () { ODEX.view = "find"; odexRender(); });
+    f.querySelector('[data-act="import"]').addEventListener("click", odexStartImport);
+    var sv = f.querySelector("#odex-save"), mn = f.querySelector("#odex-man");
+    if (sv) sv.addEventListener("change", function () { ODEX.save = sv.checked; if (!sv.checked) ODEX.manifest = false; odexPaintPreviewFoot(); });
+    if (mn) mn.addEventListener("change", function () { ODEX.manifest = mn.checked; });
+  }
+  // mini map of sample locations (one dot per coordinate)
+  function odexDestroyMap() { if (ODEX.map) { try { ODEX.map.remove(); } catch (e) { /* ignore */ } ODEX.map = null; ODEX.mapLayer = null; } }
+  function odexInitMap() {
+    var el = document.getElementById("odex-map");
+    if (!el || typeof L === "undefined") { if (el) el.innerHTML = '<div class="odex-none">Map unavailable (Leaflet not loaded)</div>'; return; }
+    var pts = (ODEX.prev.samples || []).filter(function (s) { return s.lat != null && s.lon != null; });
+    if (!pts.length) { el.innerHTML = '<div class="odex-none">No sample has coordinates in the sample sheet.</div>'; return; }
+    var map = ODEX.map = L.map(el, { zoomControl: true, attributionControl: true, preferCanvas: true, worldCopyJump: true });
+    L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}",
+      { maxNativeZoom: 13, maxZoom: 16, attribution: "Tiles &copy; Esri" }).addTo(map);
+    ODEX.mapLayer = L.layerGroup().addTo(map);
+    var b = L.latLngBounds(pts.map(function (s) { return [s.lat, s.lon]; }));
+    map.fitBounds(b.pad(0.15), { maxZoom: 10 });
+    setTimeout(function () { try { map.invalidateSize(); map.fitBounds(b.pad(0.15), { maxZoom: 10 }); } catch (e) { /* ignore */ } }, 60);
+    odexPaintMap();
+  }
+  function odexPaintMap() {
+    if (!ODEX.map || !ODEX.mapLayer) return;
+    ODEX.mapLayer.clearLayers();
+    var shown = {}; odexFiltered().forEach(function (s) { shown[s.samp_name] = 1; });
+    var by = {};
+    (ODEX.prev.samples || []).forEach(function (s) {
+      if (s.lat == null || s.lon == null) return;
+      var k = s.lat.toFixed(4) + "," + s.lon.toFixed(4); (by[k] = by[k] || []).push(s); });
+    Object.keys(by).forEach(function (k) {
+      var g = by[k], sel = g.filter(function (s) { return ODEX.sel[s.samp_name]; }).length, vis = g.some(function (s) { return shown[s.samp_name]; });
+      var ll = k.split(",").map(Number);
+      var mk = L.circleMarker(ll, { radius: Math.min(14, 5 + Math.sqrt(g.length) * 2), weight: 1.5,
+        color: sel ? "#0b4f4a" : "#6b7f8e", fillColor: sel ? "#14b8a6" : "#ffffff", fillOpacity: vis ? (sel ? 0.85 : 0.75) : 0.25, opacity: vis ? 1 : 0.35 });
+      var st = g.map(function (s) { return s.station; }).filter(Boolean)[0];
+      var ds = g.map(function (s) { return s.date; }).filter(Boolean).sort();
+      mk.bindTooltip("<b>" + odexEsc(st || k) + "</b><br>" + sel + " / " + g.length + " sample(s) selected" +
+        (ds.length ? "<br>" + odexEsc(ds[0]) + (ds[ds.length - 1] !== ds[0] ? " → " + odexEsc(ds[ds.length - 1]) : "") : ""), { direction: "top", sticky: true });
+      mk.on("click", function () {
+        var turnOn = sel < g.length;
+        g.forEach(function (s) { if (!shown[s.samp_name] && turnOn) return; if (turnOn) ODEX.sel[s.samp_name] = 1; else delete ODEX.sel[s.samp_name]; });
+        odexPaintSamples(); odexPaintPreviewFoot();
+      });
+      ODEX.mapLayer.addLayer(mk);
+    });
+  }
+
+  // ---- step 3: import -------------------------------------------------------
+  function odexPlan(p, anas) {
+    var out = [], f = p.files || {};
+    [["projectMetadata", "Project metadata (FAIRe)"], ["sampleMetadata", "Sample metadata (FAIRe)"], ["libraryMetadata", "Library ↔ sample links (experimentRunMetadata)"]].forEach(function (x) {
+      if (f[x[0]]) out.push({ key: x[0], label: x[1], url: f[x[0]], kind: "faire" }); });
+    anas.forEach(function (a) {
+      out.push({ key: "table:" + a.analysis_run_name, label: (a.short || a.assay_name) + " feature table (ASV reads)", url: a.files.table, kind: "table" });
+      out.push({ key: "taxonomy:" + a.analysis_run_name, label: (a.short || a.assay_name) + " ASV taxonomy", url: a.files.taxonomy, kind: "taxonomy" });
+    });
+    return out;
+  }
+  function odexStartImport() {
+    var p = ODEX.project, anas = odexChosenAnalyses(), samps = odexChosenSamples();
+    if (!p || !anas.length || !samps.length) return;
+    if (ODEX.job && ODEX.job.state === "running") { ODEX.view = "import"; odexRender(); return; }
+    var all = samps.length === (ODEX.prev.samples || []).length;
+    var keep = all ? null : samps.map(function (s) { return s.samp_name; });
+    var c = ODEX.conn || {}, viaBridge = c.mode === "bridge" && !ODEX.forceDirect;
+    ODEX.job = { state: "running", pid: p.project_id, name: p.project_name || p.project_id, via: viaBridge ? "bridge" : "browser",
+      message: "Starting…", steps: [], started: Date.now(), keep: keep, anas: anas, project: p, error: null, runs: null };
+    ODEX.view = "import"; odexRender();
+    (viaBridge ? odexImportViaBridge(p, anas, keep) : odexImportDirect(p, anas, keep)).then(function (runs) {
+      odexFinish(runs);
+    }, function (e) {
+      var J = ODEX.job; if (!J) return;
+      J.state = e && e.status === -1 ? "cancelled" : "error"; J.error = e; J.message = J.state === "cancelled" ? "Import cancelled" : (e && e.message) || String(e);
+      J.steps.forEach(function (s) { if (s.state === "running") s.state = J.state === "cancelled" ? "cancelled" : "error"; });
+      var bad = J.steps.filter(function (s) { return s.state === "error"; })[0];
+      J.headline = J.state === "error" ? (bad ? "Stopped at “" + bad.label + "” — nothing was added to the report." : "Nothing was added to the report.") : "Nothing was added to the report.";
+      odexRenderImportIfOpen(); odexHidePill();
+      if (J.state === "error") mbonToast("Ocean DNA Explorer import failed", J.name + " — " + J.message, "error");
+    });
+  }
+  function odexStep(key, patch) {
+    var J = ODEX.job, s = J.steps.filter(function (x) { return x.key === key; })[0];
+    if (!s) { s = { key: key, label: key, state: "waiting", done: 0, total: null, detail: "" }; J.steps.push(s); }
+    Object.keys(patch || {}).forEach(function (k) { if (patch[k] !== undefined) s[k] = patch[k]; });
+    return s;
+  }
+  function odexImportViaBridge(p, anas, keep) {
+    var c = ODEX.conn, J = ODEX.job;
+    var body = { project_id: p.project_id, analyses: anas.map(function (a) { return a.analysis_run_name; }), samples: keep, build: true,
+      save: !!ODEX.save, manifest: !!(ODEX.save && ODEX.manifest) };
+    J.message = "Asking the bridge to start the import…";
+    return odexJSON(c.url + "/jobs", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }, 15000).then(function (r) {
+      J.remote = r.job.id;
+      return new Promise(function (resolve, reject) {
+        var fails = 0;
+        (function poll() {
+          if (J !== ODEX.job) return reject(odexErr("superseded", -1));
+          odexJSON(c.url + "/jobs/" + J.remote, null, 10000).then(function (x) {
+            fails = 0;
+            var j = x.job;
+            J.steps = j.steps.map(function (s) { return { key: s.key, label: s.label, state: s.state, done: s.done, total: s.total, detail: s.detail }; });
+            J.message = j.message;
+            odexRenderImportIfOpen(); odexPaintPill();
+            if (j.state === "done") {
+              return odexJSON(c.url + "/jobs/" + J.remote + "/result", null, 60000).then(function (rr) {
+                var res = rr.result || {};
+                if (res.saved) J.saved = res.saved;
+                if (res.manifestAdded != null) J.manifestAdded = res.manifestAdded;
+                if (res.runs && res.runs.length) {
+                  return res.runs.map(function (run) {
+                    var an = anas.filter(function (a) { return a.analysis_run_name === (run.ode || {}).analysis_run_name; })[0];
+                    run.ode = Object.assign({}, run.ode || {}, { via: "bridge", project_name: p.project_name, url: p.url,
+                      table: an ? odexBase(an.files.table) : null });
+                    return run; });
+                }
+                // the bridge couldn't build runs (no pandas): parse its files here
+                odexStep("build", { label: "Build report layers in the browser", state: "running", detail: "" });
+                odexRenderImportIfOpen();
+                return odexBuildInBrowser(p, anas, odexTextsFromBridge(p, anas, res.files || {}), keep);
+              }).then(resolve, reject);
+            }
+            if (j.state === "error") return reject(odexErr((j.error && j.error.error) || j.message || "the bridge reported an error", (j.error && j.error.status) || 500));
+            if (j.state === "cancelled") return reject(odexErr("cancelled", -1));
+            setTimeout(poll, 350);
+          }, function (e) {
+            if (++fails >= 4) return reject(odexErr("Lost contact with the bridge (" + e.message + "). Is `ode_client.py serve` still running?", 0));
+            setTimeout(poll, 800);
+          });
+        })();
+      });
+    });
+  }
+  function odexTextsFromBridge(p, anas, files) {
+    var t = {}; Object.keys(files).forEach(function (k) { t[k] = files[k]; }); return t;
+  }
+  function odexImportDirect(p, anas, keep) {
+    var J = ODEX.job, plan = odexPlan(p, anas), texts = {};
+    var ac = ODEX.abort = typeof AbortController !== "undefined" ? new AbortController() : null;
+    plan.forEach(function (x) { odexStep(x.key, { label: x.label, detail: odexBase(x.url) }); });
+    odexStep("build", { label: "Build report layers (stations, taxa)" });
+    odexRenderImportIfOpen();
+    var chain = Promise.resolve();
+    plan.forEach(function (x) {
+      chain = chain.then(function () {
+        if (J !== ODEX.job) throw odexErr("superseded", -1);
+        J.message = "Downloading " + x.label + "…";
+        odexStep(x.key, { state: "running" }); odexRenderImportIfOpen();
+        var last = 0;
+        return odexFetchText(x.url, function (n, tot, cached) {
+          odexStep(x.key, { done: n, total: tot, detail: (cached ? "cached · " : "") + odexBase(x.url) });
+          var now = Date.now(); if (now - last > 120) { last = now; odexPaintImportSteps(); odexPaintPill(); }
+        }, ac ? ac.signal : undefined).then(function (t) {
+          texts[x.key] = t; odexStep(x.key, { state: "done", done: t.length, total: t.length }); odexPaintImportSteps();
+        }, function (e) {
+          if (x.key === "projectMetadata" && e.status !== -1) { odexStep(x.key, { state: "skipped", detail: "unavailable — continuing without it" }); return; }
+          odexStep(x.key, { state: e.status === -1 ? "cancelled" : "error", detail: e.message });
+          throw e;
+        });
+      });
+    });
+    return chain.then(function () {
+      odexStep("build", { state: "running" }); J.message = "Building report layers…"; odexRenderImportIfOpen();
+      return new Promise(function (res) { setTimeout(res, 30); });   // let the spinner paint first
+    }).then(function () { return odexBuildInBrowser(p, anas, texts, keep); });
+  }
+  // Tourmaline + FAIRe texts -> report runs, using the drag-and-drop parser (ingestODE)
+  function odexBuildInBrowser(p, anas, texts, keep) {
+    var sm = odexSampleMap(texts.sampleMetadata || ""), lm = odexLibMap(texts.libraryMetadata || ""), pm = odexProjectMeta(texts.projectMetadata || "");
+    if (!pm.project_id) pm.project_id = p.project_id;
+    if (!pm.project_name && p.project_name) pm.project_name = p.project_name;
+    if (!pm.institution && p.institution) pm.institution = p.institution;
+    var keepSet = keep ? keep.reduce(function (o, s) { o[s] = 1; return o; }, {}) : null;
+    var shorts = {}; anas.forEach(function (a) { (shorts[a.short || a.assay_name] = shorts[a.short || a.assay_name] || []).push(a); });
+    var runs = anas.map(function (a) {
+      var tk = "table:" + a.analysis_run_name, xk = "taxonomy:" + a.analysis_run_name;
+      if (texts[tk] == null) throw odexErr("missing feature table for " + a.analysis_run_name, 500);
+      var tab = { rows: mbonParseDelimited(texts[tk]), name: odexBase(a.files.table) };
+      var tax = { rows: texts[xk] != null ? mbonParseDelimited(texts[xk]) : [["featureid"]], name: odexBase(a.files.taxonomy) };
+      var res = ingestODE(tab, tax, { libMap: lm, sampleMeta: sm, projectMeta: pm, keep: keepSet, assay: a.assay_name });
+      var run = res.run, short = a.short || a.assay_name;
+      var sub = keep ? "_s" + odexHash(keep.slice().sort().join("|")) : "";
+      run.id = ("ode_" + p.project_id + "_" + a.analysis_run_name).replace(/[^A-Za-z0-9]+/g, "_").toLowerCase() + sub;
+      run.label = p.project_id + ((shorts[short] || []).length > 1 ? " (" + a.analysis_run_name + ")" : "") + " · " + short +
+        (keep ? " · " + keep.length + " sample" + (keep.length === 1 ? "" : "s") : "");
+      run.builtin = false; run.assay = a.assay_name;
+      run.meta = Object.assign(run.meta || {}, { "Project ID": p.project_id, Source: "Ocean DNA Explorer (live import)",
+        Analysis: a.analysis_run_name, "Reviewed (trusted)": a.trusted ? "yes" : "no" });
+      run.ode = { project_id: p.project_id, project_name: p.project_name, analysis_run_name: a.analysis_run_name, assay_name: a.assay_name,
+        trusted: !!a.trusted, url: p.url, table: odexBase(a.files.table), samples: keep, importedAt: new Date().toISOString(), via: "browser" };
+      return run;
+    });
+    odexStep("build", { state: "done", detail: runs.length + " layer(s) · " + runs.reduce(function (n, r) { return n + r.taxa.length; }, 0) + " taxa" });
+    return runs;
+  }
+  function odexHash(s) { var h = 5381; for (var i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) >>> 0; return h.toString(36).slice(0, 6); }
+
+  // add (or replace) imported runs and move the view onto them
+  function odexAddRuns(runs, opts) {
+    opts = opts || {};
+    var added = [];
+    runs.forEach(function (raw) {
+      // one layer per project + analysis: an import replaces an earlier import or the
+      // built-in layer of the same analysis (Reset brings built-in layers back)
+      var o = raw.ode || {}, replaced = [];
+      MBON.runs = MBON.runs.filter(function (r) {
+        var m = r.meta || {};
+        var same = r.id === raw.id || (r.ode && r.ode.project_id === o.project_id && r.ode.analysis_run_name === o.analysis_run_name) ||
+          (!r.ode && mbonRunKindClass(r) === "ode" && o.project_id && mbonRunProject(r) === o.project_id &&
+           ((o.table && m["Feature table"] === o.table) || (r.assay || m.Assay) === o.assay_name));
+        if (same && r.id !== raw.id) replaced.push(r);
+        return !same;
+      });
+      replaced.forEach(function (r) { if (MBON.activeRunId === r.id) MBON.activeRunId = raw.id; });
+      var run = normRun(raw, raw.id);
+      run.builtin = false;
+      MBON.runs.push(run);
+      added.push(run);
+      if (!opts.restoring) {
+        MBON.uploads.forEach(function (u) { if (u.runId === run.id) u.removed = true; });
+        mbonRecordUpload({ file: (run.ode && run.ode.project_id) + " · " + (run.ode && run.ode.analysis_run_name), type: "Ocean DNA Explorer import",
+          overwritten: [], runs: [], runId: run.id, added: (run.samples || []).length,
+          note: "new run “" + run.label + "”" + (replaced.length ? " (replaces " + replaced.map(function (r) {
+            return "“" + r.label + "”" + (r.builtin ? " built-in" : ""); }).join(", ") + ")" : "") });
+      } else {
+        mbonRecordUpload({ file: run.label, type: "Ocean DNA Explorer import (saved in this browser)", overwritten: [], runs: [], runId: run.id,
+          added: (run.samples || []).length, note: "restored" });
+      }
+    });
+    mbonRefreshGroupScale();
+    return added;
+  }
+  function odexFinish(runs) {
+    var J = ODEX.job; if (!J) return;
+    var added = odexAddRuns(runs);
+    added.forEach(function (r) { odexSaveRun(r); });
+    J.state = "done"; J.runs = added; J.finished = Date.now();
+    J.message = added.length + " layer" + (added.length === 1 ? "" : "s") + " added · " +
+      fmt(added.reduce(function (n, r) { return n + (r.samples || []).length; }, 0)) + " sample rows · " +
+      fmt(added.reduce(function (n, r) { return n + r.taxa.length; }, 0)) + " taxa · now showing " + J.pid;
+    var pid = J.pid;
+    MBON.method = "ode";
+    odexSetProject(pid, { runId: added.length === 1 ? added[0].id : "__all__", quiet: true });
+    renderSourceList();
+    odexRenderImportIfOpen(); odexHidePill();
+    var warn = added.filter(function (r) { return r.warning; });
+    mbonToast("Ocean DNA Explorer import complete", J.name + " — " + added.map(function (r) {
+      return odexShort((r.ode && r.ode.assay_name) || r.assay) + ": " + (r.samples || []).length + " samples, " + r.taxa.length + " taxa"; }).join("; ") +
+      (warn.length ? " (" + warn.length + " warning" + (warn.length > 1 ? "s" : "") + ")" : ""), warn.length ? "warn" : "metadata");
+  }
+  function odexRenderImportIfOpen() { if (ODEX.open && ODEX.view === "import") odexRenderImport(); }
+  function odexStepIcon(st) {
+    if (st === "running") return '<span class="odex-spin"></span>';
+    return '<span class="odex-st ' + st + '">' + ({ done: "✓", error: "✕", skipped: "↷", cancelled: "–" }[st] || "") + "</span>";
+  }
+  function odexStepsHtml() {
+    var J = ODEX.job;
+    return J.steps.map(function (s) {
+      var pct = s.total ? Math.min(100, s.done / s.total * 100) : null;
+      var bar = s.state === "running" ? '<span class="odex-pb' + (pct == null ? " ind" : "") + '"><i style="width:' + (pct == null ? 35 : pct.toFixed(1)) + '%"></i></span>' : "";
+      var size = s.done ? odexBytes(s.done) + (s.total && s.state === "running" ? " / " + odexBytes(s.total) : "") : "";
+      return '<li class="' + s.state + '">' + odexStepIcon(s.state) + '<span class="l">' + odexEsc(s.label) +
+        (s.detail ? '<span class="d" title="' + odexEsc(s.detail) + '">' + odexEsc(s.detail) + "</span>" : "") + "</span>" + bar +
+        '<span class="z">' + odexEsc(s.state === "waiting" ? "waiting" : size) + "</span></li>"; }).join("");
+  }
+  function odexOverall() {
+    var J = ODEX.job, n = J.steps.length || 1, d = 0;
+    J.steps.forEach(function (s) { if (s.state === "done" || s.state === "skipped") d += 1; else if (s.state === "running" && s.total) d += Math.min(1, s.done / s.total) * 0.9; });
+    return J.state === "done" ? 100 : Math.max(2, d / n * 100);
+  }
+  function odexPaintImportSteps() {
+    var ul = document.getElementById("odex-sl"); if (!ul || !ODEX.job) return;
+    ul.innerHTML = odexStepsHtml();
+    var b = document.querySelector("#odex-body .odex-ibar i"); if (b) b.style.width = odexOverall().toFixed(1) + "%";
+    var m = document.querySelector("#odex-body .odex-ih .msg"); if (m && ODEX.job.state === "running") m.textContent = ODEX.job.message || "";
+  }
+  function odexRenderImport() {
+    var body = document.getElementById("odex-body"), J = ODEX.job;
+    odexDestroyMap();
+    if (!J) { ODEX.view = "find"; return odexRender(); }
+    var icon = J.state === "running" ? '<span class="odex-spin lg"></span>' : '<span class="odex-big ' + (J.state === "done" ? "ok" : J.state === "cancelled" ? "info" : "bad") + '">' + (J.state === "done" ? "✓" : J.state === "cancelled" ? "–" : "✕") + "</span>";
+    var ttl = J.state === "running" ? "Importing " + J.name : J.state === "done" ? "Imported " + J.name : J.state === "cancelled" ? "Import cancelled" : "Import failed";
+    var html = '<div class="odex-ih ' + J.state + '">' + icon + '<div><div class="t">' + odexEsc(ttl) + '</div><div class="msg">' + odexEsc((J.state === "error" || J.state === "cancelled") && J.headline ? J.headline : (J.message || "")) + "</div>" +
+      '<div class="via">' + (J.via === "bridge" ? "via the local bridge" : "downloading in this browser") + (J.keep ? " · " + J.keep.length + " selected sample(s)" : " · all samples") + "</div></div></div>" +
+      '<div class="odex-ibar' + (J.state === "error" ? " bad" : J.state === "done" ? " ok" : "") + '"><i style="width:' + odexOverall().toFixed(1) + '%"></i></div>' +
+      '<ul id="odex-sl" class="odex-sl">' + odexStepsHtml() + "</ul>";
+    if (J.state === "done") {
+      html += '<div class="odex-done">' + (J.runs || []).map(function (r) {
+        return '<div class="r"><span class="odex-chip tr">' + odexEsc((r.ode && odexShort(r.ode.assay_name)) || "ODE") + '</span><b>' + odexEsc(r.label) + "</b><span>" +
+          fmt((r.samples || []).length) + " samples · " + fmt(r.stations.length) + " stations · " + fmt(r.taxa.length) + " taxa</span>" +
+          (r.warning ? '<div class="w">⚠️ ' + odexEsc(r.warning) + "</div>" : "") + "</div>"; }).join("") +
+        (J.saved ? '<div class="r s">💾 Saved to <code>' + odexEsc(J.saved.dir) + "</code>" + (J.manifestAdded != null ? " · " + J.manifestAdded + " manifest row(s) added" : "") + "</div>" : "") +
+        '<div class="r s">Kept in this browser — it reopens with this report. Switch projects from the 📁 menu in the header.</div></div>';
+    }
+    if (J.state === "error") {
+      var det = J.error && (J.error.extra || J.error.status) ? JSON.stringify({ status: J.error.status, detail: J.error.extra || null }, null, 1) : "";
+      html += '<div class="odex-err"><b>What went wrong</b><div>' + odexEsc(J.message) + "</div>" +
+        (J.via === "bridge" ? '<div class="h">You can retry, or download straight from Ocean DNA Explorer in this browser instead of through the bridge.</div>' : "") +
+        (det ? '<details><summary>Details</summary><pre>' + odexEsc(det) + "</pre></details>" : "") + "</div>";
+    }
+    body.innerHTML = html;
+    var foot;
+    if (J.state === "running") {
+      foot = odexFoot('<span class="odex-fhint">You can close this window — the import keeps going and a status pill shows progress.</span><span class="sp"></span>' +
+        '<button type="button" class="odex-btn" data-act="hide">Run in background</button><button type="button" class="odex-btn danger" data-act="cancel">Cancel</button>');
+      foot.querySelector('[data-act="hide"]').addEventListener("click", odexClose);
+      foot.querySelector('[data-act="cancel"]').addEventListener("click", odexCancel);
+    } else if (J.state === "done") {
+      foot = odexFoot('<button type="button" class="odex-btn" data-act="another">＋ Import another</button><span class="sp"></span>' +
+        '<button type="button" class="odex-btn" data-act="xs">Cross-Sample</button><button type="button" class="odex-btn pri" data-act="map">Show on map ›</button>');
+      foot.querySelector('[data-act="another"]').addEventListener("click", function () { ODEX.job = null; ODEX.view = "find"; odexRender(); });
+      foot.querySelector('[data-act="map"]').addEventListener("click", function () { odexClose(); activatePane("map"); setTimeout(odexFlyToView, 160); });
+      foot.querySelector('[data-act="xs"]').addEventListener("click", function () { odexClose(); activatePane("xs"); });
+    } else {
+      foot = odexFoot('<button type="button" class="odex-btn" data-act="back">‹ Back to preview</button><span class="sp"></span>' +
+        (J.error ? '<button type="button" class="odex-btn" data-act="copy">Copy error</button>' : "") +
+        (J.via === "bridge" ? '<button type="button" class="odex-btn" data-act="direct">Try direct download</button>' : "") +
+        '<button type="button" class="odex-btn pri" data-act="retry">↻ Retry</button>');
+      foot.querySelector('[data-act="back"]').addEventListener("click", function () { ODEX.job = null; ODEX.view = "preview"; odexRender(); });
+      foot.querySelector('[data-act="retry"]').addEventListener("click", function () { ODEX.job = null; ODEX.texts = {}; odexStartImport(); });
+      var dd = foot.querySelector('[data-act="direct"]');
+      if (dd) dd.addEventListener("click", function () { ODEX.job = null; ODEX.forceDirect = true; odexStartImport(); ODEX.forceDirect = false; });
+      var cp = foot.querySelector('[data-act="copy"]');
+      if (cp) cp.addEventListener("click", function () {
+        var t = "Ocean DNA Explorer import of " + J.pid + " failed: " + J.message + "\n" + J.steps.map(function (s) { return s.state + "\t" + s.label + "\t" + (s.detail || ""); }).join("\n");
+        try { navigator.clipboard.writeText(t); cp.textContent = "Copied ✓"; } catch (e) { window.prompt("Copy:", t); }
+      });
+    }
+  }
+  function odexCancel() {
+    var J = ODEX.job; if (!J || J.state !== "running") return;
+    if (ODEX.abort) try { ODEX.abort.abort(); } catch (e) { /* ignore */ }
+    if (J.via === "bridge" && J.remote && ODEX.conn && ODEX.conn.url) odexJSON(ODEX.conn.url + "/jobs/" + J.remote, { method: "DELETE" }, 5000).catch(function () {});
+    J.message = "Cancelling…"; odexRenderImportIfOpen();
+  }
+  // floating status pill while the dialog is closed
+  function odexShowPill() {
+    var p = document.getElementById("odex-pill");
+    if (!p) { p = document.createElement("button"); p.type = "button"; p.id = "odex-pill"; p.className = "odex-pill"; document.body.appendChild(p);
+      p.addEventListener("click", function () { mbonOdeOpen(); }); }
+    p.hidden = false; odexPaintPill();
+  }
+  function odexPaintPill() {
+    var p = document.getElementById("odex-pill"); if (!p || p.hidden || !ODEX.job) return;
+    p.innerHTML = '<span class="odex-spin sm"></span><span>Importing <b>' + odexEsc(ODEX.job.pid) + "</b> · " + Math.round(odexOverall()) + "%</span>";
+  }
+  function odexHidePill() { var p = document.getElementById("odex-pill"); if (p) p.hidden = true; }
+
+  // ---- project switcher -----------------------------------------------------
+  function odexProjectGroups() {
+    var by = {}, order = [];
+    MBON.runs.forEach(function (r) {
+      if (!((r.taxa && r.taxa.length) || (r.samples && r.samples.length))) return;
+      var k = mbonRunProject(r);
+      if (!by[k]) { by[k] = { key: k, name: mbonRunProjectName(r), runs: [], kinds: {}, samples: {}, imported: false, builtin: false }; order.push(k); }
+      var g = by[k]; g.runs.push(r); g.kinds[mbonRunKindClass(r)] = 1;
+      if (!g.name) g.name = mbonRunProjectName(r);
+      (r.samples || []).forEach(function (s) { g.samples[s.sampleId] = 1; });
+      if (r.builtin) g.builtin = true; else g.imported = true;
+    });
+    return order.map(function (k) { by[k].nSamples = Object.keys(by[k].samples).length; return by[k]; });
+  }
+  function odexSetProject(key, opts) {
+    opts = opts || {};
+    var groups = odexProjectGroups();
+    if (key && !groups.some(function (g) { return g.key === key; })) key = null;
+    MBON.projectFilter = key || null;
+    if (opts.runId && opts.runId !== "__all__") { var rr = mbonRunById(opts.runId); if (rr) MBON.method = mbonRunKindClass(rr); }
+    if (!mbonMethodAvailable(MBON.method)) ensureValidMethod();
+    MBON.activeRunId = opts.runId && mbonRunById(opts.runId) ? opts.runId : "__all__";
+    populateRunSelect();
+    $("#mbon-run-select").value = MBON.activeRunId;
+    try { localStorage.setItem("mbon.project:" + odexPageKey(), MBON.projectFilter || ""); } catch (e) { /* ignore */ }
+    odexTransition();
+    odexPaintSwitcher();
+  }
+  window.mbonSetProject = function (k) { odexSetProject(k); };
+  function odexTransition() {
+    var content = document.querySelector(".mbon-content");
+    if (content) { content.classList.remove("odex-swap"); void content.offsetWidth; content.classList.add("odex-swap");
+      setTimeout(function () { content.classList.remove("odex-swap"); }, 420); }
+    var onMap = MBON.activePane === "map" && mbonMapInstance;
+    if (onMap) {
+      applyActiveRunToMap();
+      mbonRenderMarkers(true);
+      odexFlyToView();
+      rendered = {};
+      fdSyncAll();
+    } else {
+      MBON._mapNeedsRefresh = true;
+      onRunChange(MBON.activeRunId);
+    }
+  }
+  function odexFlyToView() {
+    var m = mbonMapInstance; if (!m) return;
+    var pts = (window.mbonData.stations || []).filter(function (s) { return s && s.lat != null && s.lon != null; }).map(function (s) { return [s.lat, s.lon]; });
+    if (!pts.length) return;
+    try {
+      m.invalidateSize();
+      var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (pts.length === 1) { if (reduce) m.setView(pts[0], 9); else m.flyTo(pts[0], 9, { duration: 1.0 }); }
+      else if (reduce) m.fitBounds(pts, { padding: [40, 40], maxZoom: 11 });
+      else m.flyToBounds(pts, { padding: [40, 40], maxZoom: 11, duration: 1.1 });
+    } catch (e) { /* ignore */ }
+  }
+  function odexSwitcherLabel() {
+    var k = MBON.projectFilter;
+    if (!k) return { nm: "All projects", sub: odexProjectGroups().length + " in report" };
+    var g = odexProjectGroups().filter(function (x) { return x.key === k; })[0];
+    return { nm: k, sub: g ? g.nSamples + " samples" : "" };
+  }
+  function odexPaintSwitcher() {
+    var host = document.getElementById("mbon-proj"); if (!host) return;
+    var L = odexSwitcherLabel(), groups = odexProjectGroups();
+    host.querySelector(".nm").textContent = L.nm;
+    host.querySelector(".sb").textContent = L.sub;
+    host.title = "Project: " + L.nm + " — switch projects or import one from Ocean DNA Explorer";
+    host.querySelectorAll(".mbon-proj-nav").forEach(function (b) { b.disabled = groups.length < 2; });
+    var fd = document.getElementById("fd-project");
+    if (fd) {
+      fd.innerHTML = '<option value="">All projects (' + groups.length + ")</option>" + groups.map(function (g) {
+        return '<option value="' + odexEsc(g.key) + '">' + odexEsc(g.key) + " · " + Object.keys(g.kinds).map(mbonKindLabel).join(" + ") + (g.imported && !g.builtin ? " ↑" : "") + "</option>"; }).join("");
+      fd.value = MBON.projectFilter || "";
+    }
+    var menu = document.getElementById("mbon-proj-menu");
+    if (menu && !menu.hidden) odexRenderMenu();
+  }
+  function odexCycleProject(dir) {
+    var keys = [null].concat(odexProjectGroups().map(function (g) { return g.key; }));
+    var i = keys.indexOf(MBON.projectFilter || null);
+    odexSetProject(keys[(i + dir + keys.length) % keys.length]);
+  }
+  function odexRenderMenu() {
+    var menu = document.getElementById("mbon-proj-menu"), groups = odexProjectGroups(), cur = MBON.projectFilter || null;
+    var row = function (g) {
+      var kinds = Object.keys(g.kinds).map(mbonKindChip).join(" ");
+      var removable = g.imported && !g.builtin;
+      return '<div class="mbon-pm-row' + (cur === g.key ? " on" : "") + '" data-pk="' + odexEsc(g.key) + '" role="menuitemradio" aria-checked="' + (cur === g.key) + '" tabindex="0">' +
+        '<span class="rd"></span><span class="tx"><b>' + odexEsc(g.key) + "</b>" + (g.name && g.name !== g.key ? '<span class="nmx">' + odexEsc(g.name) + "</span>" : "") +
+        '<span class="mt">' + kinds + " " + fmt(g.nSamples) + " samples · " + g.runs.length + " layer" + (g.runs.length === 1 ? "" : "s") +
+        (removable ? ' · <span class="up">imported</span>' : "") + "</span></span>" +
+        (removable ? '<button type="button" class="x" data-rm="' + odexEsc(g.key) + '" title="Remove this imported project from the report">×</button>' : "") + "</div>";
+    };
+    var html = '<div class="mbon-pm-h">Projects in this report</div>' +
+      '<div class="mbon-pm-row' + (cur ? "" : " on") + '" data-pk="" role="menuitemradio" aria-checked="' + !cur + '" tabindex="0"><span class="rd"></span><span class="tx"><b>All projects</b><span class="mt">' +
+        groups.length + " project(s) · " + MBON.runs.length + " layer(s)</span></span></div>" + groups.map(row).join("");
+    var saved = (ODEX.saved || []).filter(function (s) { return !mbonRunById(s.runId); });
+    if (saved.length) {
+      html += '<div class="mbon-pm-h">Saved in this browser · not loaded</div>' + saved.map(function (s) {
+        return '<div class="mbon-pm-row sv"><span class="rd sv"></span><span class="tx"><b>' + odexEsc(s.label) + '</b><span class="mt">saved ' + odexEsc(String(s.savedAt || "").slice(0, 16).replace("T", " ")) + "</span></span>" +
+          '<button type="button" class="odex-btn sm" data-restore="' + odexEsc(s.key) + '">Load</button><button type="button" class="x" data-forget="' + odexEsc(s.key) + '" title="Forget">×</button></div>'; }).join("");
+    }
+    html += '<button type="button" class="mbon-pm-imp" data-act="import">🌊 Import from Ocean DNA Explorer…</button>' +
+      '<label class="mbon-pm-opt"><input type="checkbox" id="mbon-pm-restore"' + (odexAutoRestore() ? " checked" : "") + "> Reopen my imports when this report loads</label>" +
+      '<div class="mbon-pm-k">Tip: ‹ › beside the menu step through projects.</div>';
+    menu.innerHTML = html;
+  }
+  function odexToggleMenu(force) {
+    var menu = document.getElementById("mbon-proj-menu"), btn = document.getElementById("mbon-proj-btn");
+    var show = force != null ? force : menu.hidden;
+    if (show) {
+      odexRenderMenu(); menu.hidden = false; btn.setAttribute("aria-expanded", "true");
+      var r = btn.getBoundingClientRect();
+      menu.style.top = Math.round(r.bottom + 6) + "px";
+      menu.style.left = Math.round(Math.max(8, Math.min(window.innerWidth - menu.offsetWidth - 8, r.left))) + "px";
+    } else { menu.hidden = true; btn.setAttribute("aria-expanded", "false"); }
+  }
+  function odexInitSwitcher() {
+    var anchor = document.getElementById("mbon-method");
+    if (!anchor || document.getElementById("mbon-proj")) return;
+    var host = document.createElement("div"); host.id = "mbon-proj"; host.className = "mbon-proj";
+    host.innerHTML = '<button type="button" class="mbon-proj-nav" data-dir="-1" aria-label="Previous project" title="Previous project">‹</button>' +
+      '<button type="button" class="mbon-proj-btn" id="mbon-proj-btn" aria-haspopup="menu" aria-expanded="false"><span class="ic">📁</span><span class="tx"><span class="nm">All projects</span><span class="sb"></span></span><span class="car">▾</span></button>' +
+      '<button type="button" class="mbon-proj-nav" data-dir="1" aria-label="Next project" title="Next project">›</button>';
+    anchor.parentNode.insertBefore(host, anchor);
+    var menu = document.createElement("div"); menu.id = "mbon-proj-menu"; menu.className = "mbon-proj-menu"; menu.hidden = true; menu.setAttribute("role", "menu");
+    document.body.appendChild(menu);
+    host.querySelector("#mbon-proj-btn").addEventListener("click", function (e) { e.stopPropagation(); odexToggleMenu(); });
+    host.querySelectorAll(".mbon-proj-nav").forEach(function (b) { b.addEventListener("click", function () { odexCycleProject(+b.dataset.dir); }); });
+    menu.addEventListener("click", function (e) {
+      e.stopPropagation();
+      var rm = e.target.closest("[data-rm]"), rs = e.target.closest("[data-restore]"), fg = e.target.closest("[data-forget]");
+      if (rm) { var k = rm.dataset.rm; confirmDialog("Remove imported project?", "This removes every layer imported for “" + k + "” from this report and from this browser's saved imports. You can import it again any time.", "Remove", "danger", function () { odexRemoveProject(k); }); return; }
+      if (rs) { odexRestoreSaved([rs.dataset.restore]); return; }
+      if (fg) { odexForget(fg.dataset.forget).then(function () { odexRenderMenu(); }); return; }
+      if (e.target.closest('[data-act="import"]')) { odexToggleMenu(false); mbonOdeOpen(); return; }
+      if (e.target.id === "mbon-pm-restore") { try { localStorage.setItem("mbon.ode.restore", e.target.checked ? "1" : "0"); } catch (x) { /* ignore */ } return; }
+      var row = e.target.closest("[data-pk]");
+      if (row) { odexToggleMenu(false); odexSetProject(row.dataset.pk || null); }
+    });
+    menu.addEventListener("keydown", function (e) {
+      var row = e.target.closest && e.target.closest("[data-pk]");
+      if (row && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); odexToggleMenu(false); odexSetProject(row.dataset.pk || null); }
+      if (e.key === "Escape") { odexToggleMenu(false); document.getElementById("mbon-proj-btn").focus(); }
+    });
+    document.addEventListener("click", function () { if (!menu.hidden) odexToggleMenu(false); });
+    window.addEventListener("resize", function () { if (!menu.hidden) odexToggleMenu(false); });
+    // Filters dock: project select + import button
+    var runSec = document.getElementById("fd-run-select");
+    if (runSec && runSec.parentNode && !document.getElementById("fd-project")) {
+      var sec = document.createElement("div"); sec.className = "mbon-fd-sec";
+      sec.innerHTML = '<label for="fd-project">Project</label><select id="fd-project"></select>';
+      var methodSec = document.getElementById("fd-method");
+      var before = methodSec ? methodSec.closest(".mbon-fd-sec") : runSec.parentNode;
+      before.parentNode.insertBefore(sec, before);
+      sec.querySelector("select").addEventListener("change", function (e) { odexSetProject(e.target.value || null); });
+    }
+    var dz = document.getElementById("mbon-fd-dropzone");
+    if (dz && !document.getElementById("fd-ode-import")) {
+      var b2 = document.createElement("button"); b2.type = "button"; b2.id = "fd-ode-import"; b2.className = "mbon-fd-odebtn";
+      b2.innerHTML = '<span>🌊</span> Import from Ocean DNA Explorer…'; dz.parentNode.insertBefore(b2, dz.nextSibling);
+      b2.addEventListener("click", function () { mbonOdeOpen(); });
+    }
+    var pdz = document.getElementById("mbon-dropzone");
+    if (pdz && !document.getElementById("mbon-ode-import")) {
+      var b3 = document.createElement("button"); b3.type = "button"; b3.id = "mbon-ode-import"; b3.className = "mbon-ode-panelbtn";
+      b3.innerHTML = "🌊 <b>Import from Ocean DNA Explorer</b><span>search a project, preview its samples, pull its ASV tables + FAIRe metadata</span>";
+      pdz.parentNode.insertBefore(b3, pdz);
+      b3.addEventListener("click", function () { closePanel(); mbonOdeOpen(); });
+    }
+    odexPaintSwitcher();
+  }
+  function odexRemoveProject(key) {
+    var gone = MBON.runs.filter(function (r) { return !r.builtin && mbonRunProject(r) === key; });
+    gone.forEach(function (r) { MBON.uploads.forEach(function (u) { if (u.runId === r.id) u.removed = true; }); odexForgetRun(r.id); });
+    MBON.runs = MBON.runs.filter(function (r) { return gone.indexOf(r) < 0; });
+    if (MBON.projectFilter === key) MBON.projectFilter = null;
+    if (MBON.activeRunId !== "__all__" && !mbonRunById(MBON.activeRunId)) MBON.activeRunId = "__all__";
+    ensureValidMethod();
+    mbonRefreshAfterDataChange(MBON.activeRunId);
+    odexPaintSwitcher();
+  }
+
+  // ---- imports saved in this browser (IndexedDB; best effort) ---------------
+  function odexPageKey() { try { return decodeURIComponent((location.pathname || "").split("/").pop()) || "report"; } catch (e) { return "report"; } }
+  function odexAutoRestore() { try { return localStorage.getItem("mbon.ode.restore") !== "0"; } catch (e) { return true; } }
+  function odexDb() {
+    return new Promise(function (res, rej) {
+      try {
+        if (!window.indexedDB) return rej(new Error("no IndexedDB"));
+        var rq = indexedDB.open("mbon-ode-imports", 1);
+        rq.onupgradeneeded = function () { if (!rq.result.objectStoreNames.contains("runs")) rq.result.createObjectStore("runs", { keyPath: "key" }); };
+        rq.onsuccess = function () { res(rq.result); };
+        rq.onerror = function () { rej(rq.error || new Error("IndexedDB open failed")); };
+        rq.onblocked = function () { rej(new Error("IndexedDB blocked")); };
+      } catch (e) { rej(e); }
+    });
+  }
+  function odexTx(mode, fn) {
+    return odexDb().then(function (db) {
+      return new Promise(function (res, rej) {
+        var tx = db.transaction("runs", mode), st = tx.objectStore("runs"), out;
+        try { out = fn(st); } catch (e) { rej(e); return; }
+        tx.oncomplete = function () { db.close(); res(out && out.result !== undefined ? out.result : out); };
+        tx.onerror = function () { db.close(); rej(tx.error); };
+        tx.onabort = function () { db.close(); rej(tx.error || new Error("aborted")); };
+      });
+    });
+  }
+  function odexSaveRun(run) {
+    var rec = { key: odexPageKey() + "|" + run.id, page: odexPageKey(), runId: run.id, label: run.label,
+      project: mbonRunProject(run), savedAt: new Date().toISOString(), run: JSON.parse(JSON.stringify(run)) };
+    return odexTx("readwrite", function (st) { st.put(rec); }).then(odexRefreshSaved, function (e) { console.warn("ODE import not saved in this browser:", e); });
+  }
+  function odexForget(key) { return odexTx("readwrite", function (st) { st.delete(key); }).then(odexRefreshSaved, function () {}); }
+  function odexForgetRun(runId) { return odexForget(odexPageKey() + "|" + runId); }
+  function odexListSaved() {
+    return odexTx("readonly", function (st) { return st.getAll(); }).then(function (all) {
+      return (all || []).filter(function (r) { return r.page === odexPageKey(); }); }, function () { return []; });
+  }
+  function odexRefreshSaved() {
+    return odexListSaved().then(function (list) {
+      ODEX.saved = list.map(function (r) { return { key: r.key, runId: r.runId, label: r.label, project: r.project, savedAt: r.savedAt }; });
+      var menu = document.getElementById("mbon-proj-menu"); if (menu && !menu.hidden) odexRenderMenu();
+      return list;
+    });
+  }
+  function odexRestoreSaved(keys, quiet) {
+    return odexListSaved().then(function (list) {
+      var want = keys ? list.filter(function (r) { return keys.indexOf(r.key) >= 0; }) : list;
+      want = want.filter(function (r) { return r.run && !mbonRunById(r.runId); });
+      if (!want.length) return 0;
+      var added = odexAddRuns(want.map(function (r) { return r.run; }), { restoring: true });
+      ensureValidMethod();
+      var keepProj = MBON.projectFilter;
+      if (!quiet) { MBON.method = "ode"; odexSetProject(added[0] ? mbonRunProject(added[0]) : keepProj, { quiet: true }); }
+      else { populateRunSelect(); onRunChange(MBON.activeRunId); }
+      renderSourceList(); odexPaintSwitcher();
+      mbonToast("Ocean DNA Explorer imports restored", added.length + " layer(s) saved in this browser: " + mbonShortList(added.map(function (r) { return r.label; }), 3) +
+        ". Manage them from the 📁 project menu.", "metadata");
+      return added.length;
+    });
+  }
+  // removing an imported run from the Data panel also forgets it here
+  var _odexRemoveRun = removeRun;
+  removeRun = function (id) { odexForgetRun(id); _odexRemoveRun(id); odexPaintSwitcher(); };
+  var _odexReset = mbonResetToOriginal;
+  mbonResetToOriginal = function () {
+    MBON.projectFilter = null;
+    _odexReset();
+    odexListSaved().then(function (list) { return Promise.all(list.map(function (r) { return odexForget(r.key); })); }).then(odexPaintSwitcher, odexPaintSwitcher);
+  };
+
+  // ---- boot -------------------------------------------------------------------
+  function mbonOdeInit() {
+    odexInitSwitcher();
+    var refresh = function () { odexPaintSwitcher(); };
+    var sel = document.getElementById("mbon-run-select"); if (sel) sel.addEventListener("change", refresh);
+    // remembered project for this report file
+    try {
+      var k = localStorage.getItem("mbon.project:" + odexPageKey());
+      if (k && odexProjectGroups().some(function (g) { return g.key === k; })) { MBON.projectFilter = k; ensureValidMethod(); populateRunSelect(); applyActiveRunToMap(); }
+    } catch (e) { /* ignore */ }
+    odexPaintSwitcher();
+    odexRefreshSaved().then(function (list) {
+      if (list.length && odexAutoRestore()) return odexRestoreSaved(null, true).then(function () {
+        try {
+          var k2 = localStorage.getItem("mbon.project:" + odexPageKey());
+          if (k2 && k2 !== (MBON.projectFilter || "") && odexProjectGroups().some(function (g) { return g.key === k2; })) odexSetProject(k2);
+        } catch (e) { /* ignore */ }
+      });
+    }).catch(function () {});
+    // deep link: report.html#ode=<project_id>[/<samp_name>] opens the dialog on that project
+    var h = /[#&]ode=([^&]+)/.exec(location.hash || "");
+    if (h) { var parts = decodeURIComponent(h[1]).split("/"); setTimeout(function () { mbonOdeOpen({ project: parts[0], samples: parts[1] ? [parts[1]] : null }); }, 400); }
+    window.MBONOde = { open: mbonOdeOpen, connect: function () { return odexConnect(true); }, state: ODEX, setProject: odexSetProject,
+      projects: odexProjectGroups, restore: odexRestoreSaved, saved: odexListSaved };
+  }
+  /* /mbon-ode-api-v1 */
+
   // ---------------------------------------------------------------- wiring
   // The Filters drawer floats over the right edge; give every tab (except
   // the map, which handles its own controls) room so nothing hides under it.
@@ -13712,6 +15331,7 @@
     populateRunSelect();
     applyActiveRunToMap();
     wire();
+    try { mbonOdeInit(); } catch (e) { console.error("ODE import init:", e); }   // mbon-ode-api-v1
     mbonRenderUploadStatus();
     if (typeof mbonInitMap === "function") { try { mbonInitMap(); } catch (e) { console.error(e); } }
     // Cross-Sample is the primary tab and loads first.

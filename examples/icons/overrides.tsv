@@ -1,0 +1,19 @@
+# Manual icon choices. One per line: <organism or genus name> <TAB> <PhyloPic image uuid | none>
+# Use "group:<Group name>" to change a whole group's stand-in. Find uuids at https://www.phylopic.org
+# (the image page URL ends in the uuid). After editing, re-run:  python3 phylopic_icons.py fetch --report <report.html> --inject
+#
+# Examples:
+# Megaptera novaeangliae	<uuid of a humpback whale silhouette>
+# Bovine orthopneumovirus	none
+# group:Crustaceans	<uuid of a generic crustacean>
+
+# 2026-10-21: better matches for the example organisms (also used by the MBON report)
+Megaptera novaeangliae	fd8d3e5e-24a0-4aa2-9211-987ff86007dd
+Menidia	34e8731d-da6b-4d9c-a61a-3d2a806a2321
+Penilia avirostris	d90c3957-0838-4bbb-b17e-9d8115960ca8
+Skeletonema	ebff2e9f-3091-4ad6-a7b2-f39a77d3a960
+group:Mediophyceae	ebff2e9f-3091-4ad6-a7b2-f39a77d3a960
+group:Hexanauplia	34354e80-d132-41a1-961c-1cc229bd4440
+group:Branchiopoda	d90c3957-0838-4bbb-b17e-9d8115960ca8
+group:Tentaculata	4a519268-72ce-4421-ab9e-4804fff8df74
+group:Scyphozoa	f0494167-77f6-46eb-841d-c4cefb683bbd

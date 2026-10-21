@@ -1,0 +1,21 @@
+# requirement_level_code	M	O	O	O	O	M	M	O	M	O	O	O	O	O	O
+# section	Sample collection	Sample collection	Sample collection	Sample collection	Sample collection	Sample collection	Sample collection	Sample collection	Sample collection	Sample collection	Sample collection	Sample collection	Sample collection	Sample collection	Sample collection
+samp_name	samp_category	neg_cont_type	expedition_id	station_id	ctd_bottle_number	decimalLatitude	decimalLongitude	geo_loc_name	eventDate	minimumDepthInMeters	maximumDepthInMeters	depth_category	tot_depth_water_col	temp	salinity
+DEMO231019-CTD01-50	sample	not applicable	DEMO23-01	CTD01	CTD01	29.45	-87.0847	Synthetic Sea	10/19/23	50	50	Surface	90	21.0	35.42
+DEMO231001-CTD02-120	sample	not applicable	DEMO23-01	CTD02	CTD02	27.0453	-86.1155	Synthetic Sea	10/1/23	120	120	Surface	160	20.81	34.73
+DEMO231003-CTD03-50	sample	not applicable	DEMO23-01	CTD03	CTD03	27.7703	-85.532	Synthetic Sea	10/3/23	50	50	Bottom	90	23.16	34.77
+DEMO230721-CTD04-50	sample	not applicable	DEMO23-01	CTD04	CTD04	27.2857	-88.3247	Synthetic Sea	7/21/23	50	50	Bottom	90	14.38	35.92
+DEMO230728-CTD05-190	sample	not applicable	DEMO23-01	CTD05	CTD05	27.6993	-88.1294	Synthetic Sea	7/28/23	190	190	Mid	230	16.24	35.38
+DEMO230719-CTD06-120	sample	not applicable	DEMO23-01	CTD06	CTD06	28.4193	-86.2568	Synthetic Sea	7/19/23	120	120	Bottom	160	17.93	34.89
+DEMO230706-CTD07-190	sample	not applicable	DEMO23-01	CTD07	CTD07	28.3918	-86.1096	Synthetic Sea	7/6/23	190	190	Surface	230	22.2	35.67
+DEMO230726-CTD08-50	sample	not applicable	DEMO23-01	CTD08	CTD08	28.7543	-86.6552	Synthetic Sea	7/26/23	50	50	Surface	90	20.67	36.3
+DEMO230923-CTD09-120	sample	not applicable	DEMO23-01	CTD09	CTD09	27.1165	-87.5522	Synthetic Sea	9/23/23	120	120	Bottom	160	13.19	35.21
+DEMO230720-CTD10-120	sample	not applicable	DEMO23-01	CTD10	CTD10	27.7031	-87.6981	Synthetic Sea	7/20/23	120	120	Mid	160	23.39	34.51
+DEMO231007-CTD11-120	sample	not applicable	DEMO23-01	CTD11	CTD11	27.3767	-85.9728	Synthetic Sea	10/7/23	120	120	Bottom	160	19.12	34.83
+DEMO230927-CTD12-260	sample	not applicable	DEMO23-01	CTD12	CTD12	29.1747	-87.7204	Synthetic Sea	9/27/23	260	260	Surface	300	19.13	36.3
+DEMO231002-CTD13-120	sample	not applicable	DEMO23-01	CTD13	CTD13	27.9744	-85.8147	Synthetic Sea	10/2/23	120	120	Bottom	160	14.12	35.35
+DEMO230709-CTD14-260	sample	not applicable	DEMO23-01	CTD14	CTD14	29.1943	-87.3526	Synthetic Sea	7/9/23	260	260	Surface	300	15.13	34.59
+Control1_2023	negative control	field negative	DEMO23-01	not applicable	not applicable	not applicable	not applicable	not applicable	8/22/23	not applicable	not applicable	not applicable	not applicable	not applicable	not applicable
+Control2_2023	negative control	field negative	DEMO23-01	not applicable	not applicable	not applicable	not applicable	not applicable	9/21/23	not applicable	not applicable	not applicable	not applicable	not applicable	not applicable
+Control3_2023	negative control	extraction negative	DEMO23-01	not applicable	not applicable	not applicable	not applicable	not applicable	8/17/23	not applicable	not applicable	not applicable	not applicable	not applicable	not applicable
+Control4_2023	negative control	PCR negative	DEMO23-01	not applicable	not applicable	not applicable	not applicable	not applicable	7/26/23	not applicable	not applicable	not applicable	not applicable	not applicable	not applicable

@@ -1,0 +1,19 @@
+# requirement_level_code	M	O	O	O	O	O	M	M	O	M	O	O
+# section	Sample collection	Sample collection	Sample collection	Sample collection	Sample collection	Sample collection	Sample collection	Sample collection	Sample collection	Sample collection	Sample collection	Sample collection
+samp_name	samp_category	neg_cont_type	materialSampleID	cruise_id	station_id	replicate_number	decimalLongitude	decimalLatitude	geo_loc_name	eventDate	tot_depth_water_col	temp
+DEMO_01A_Lagoon_SiteA-1_2025-05-20	sample	not applicable	SiteA-1_1A	DEMO_REEF1	Lagoon_SiteA-1	A	-80.719197	25.308761	Lagoon	2025-05-20T12:40:00Z	8	27.41
+DEMO_01B_Lagoon_SiteA-1_2025-05-20	sample	not applicable	SiteA-1_1B	DEMO_REEF1	Lagoon_SiteA-1	B	-80.719197	25.308761	Lagoon	2025-05-20T17:00:00Z	11	28.92
+DEMO_02A_Lagoon_SiteA-2_2025-05-21	sample	not applicable	SiteA-2_2A	DEMO_REEF1	Lagoon_SiteA-2	A	-80.5755	25.433346	Lagoon	2025-05-21T15:15:00Z	5	29.6
+DEMO_02B_Lagoon_SiteA-2_2025-05-21	sample	not applicable	SiteA-2_2B	DEMO_REEF1	Lagoon_SiteA-2	B	-80.5755	25.433346	Lagoon	2025-05-21T17:00:00Z	16	27.59
+DEMO_03A_Lagoon_SiteB-1_2025-05-22	sample	not applicable	SiteB-1_3A	DEMO_REEF1	Lagoon_SiteB-1	A	-80.89594	25.436222	Lagoon	2025-05-22T16:40:00Z	15	29.59
+DEMO_03B_Lagoon_SiteB-1_2025-05-22	sample	not applicable	SiteB-1_3B	DEMO_REEF1	Lagoon_SiteB-1	B	-80.89594	25.436222	Lagoon	2025-05-22T16:40:00Z	13	26.2
+DEMO_04A_Crest_SiteC-1_2025-05-23	sample	not applicable	SiteC-1_4A	DEMO_REEF1	Crest_SiteC-1	A	-80.919661	24.698541	Crest	2025-05-23T14:40:00Z	5	30.91
+DEMO_04B_Crest_SiteC-1_2025-05-23	sample	not applicable	SiteC-1_4B	DEMO_REEF1	Crest_SiteC-1	B	-80.919661	24.698541	Crest	2025-05-23T14:40:00Z	12	27.23
+DEMO_05A_Crest_SiteC-2_2025-05-24	sample	not applicable	SiteC-2_5A	DEMO_REEF1	Crest_SiteC-2	A	-80.171405	25.306793	Crest	2025-05-24T14:40:00Z	15	28.43
+DEMO_05B_Crest_SiteC-2_2025-05-24	sample	not applicable	SiteC-2_5B	DEMO_REEF1	Crest_SiteC-2	B	-80.171405	25.306793	Crest	2025-05-24T14:40:00Z	9	29.8
+DEMO_06A_Crest_SiteD-1_2025-05-25	sample	not applicable	SiteD-1_6A	DEMO_REEF1	Crest_SiteD-1	A	-80.110075	25.495595	Crest	2025-05-25T13:00:00Z	15	28.93
+DEMO_06B_Crest_SiteD-1_2025-05-25	sample	not applicable	SiteD-1_6B	DEMO_REEF1	Crest_SiteD-1	B	-80.110075	25.495595	Crest	2025-05-25T15:00:00Z	18	28.17
+DEMO_07A_Slope_SiteE-1_2025-05-26	sample	not applicable	SiteE-1_7A	DEMO_REEF1	Slope_SiteE-1	A	-80.178516	25.129802	Slope	2025-05-26T16:40:00Z	8	30.24
+DEMO_07B_Slope_SiteE-1_2025-05-26	sample	not applicable	SiteE-1_7B	DEMO_REEF1	Slope_SiteE-1	B	-80.178516	25.129802	Slope	2025-05-26T17:15:00Z	14	27.28
+DEMO_08A_Slope_SiteE-2_2025-05-27	sample	not applicable	SiteE-2_8A	DEMO_REEF1	Slope_SiteE-2	A	-80.387801	24.931881	Slope	2025-05-27T16:40:00Z	9	29.95
+DEMO_08B_Slope_SiteE-2_2025-05-27	sample	not applicable	SiteE-2_8B	DEMO_REEF1	Slope_SiteE-2	B	-80.387801	24.931881	Slope	2025-05-27T12:40:00Z	19	27.1

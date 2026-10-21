@@ -7,6 +7,7 @@ Observation Network (MBON).
 | Component | What it does |
 |---|---|
 | [`build_mbon_html.py`](build_mbon_html.py) | Reads Wilderlab ASV workbooks, Kraken2 reports, Ocean DNA Explorer (Tourmaline) feature tables and FAIRe station metadata (`.xlsx` / `.csv` / `.tsv` / `.json`) and writes a single self-contained HTML report: station map, cross-sample analysis, explorer, data table, metadata. |
+| [`ode_client.py`](ode_client.py) | Pulls projects (or sets of samples) from the [Ocean DNA Explorer](https://www.oceandnaexplorer.org): CLI, Python API, and a local bridge (`serve`) that the report's **Import from Ocean DNA Explorer** dialog uses for live search and import jobs with status. See [docs/ODE_IMPORT.md](docs/ODE_IMPORT.md). |
 | [`ingest.py`](ingest.py) | Loads the same inputs into the MBON Postgres schema ([`sql/create_tables.sql`](sql/create_tables.sql)) and writes report↔sample concordance files. |
 | [`api/`](api) + [`frontend/`](frontend) | Flask API + static dashboard (Vue/D3/Leaflet) for browsing the database, spreadsheets or Google Sheets. |
 | [`make_example_data.py`](make_example_data.py) | Regenerates the bundled **synthetic** example dataset in [`data/example/`](data/example). |
@@ -182,6 +183,26 @@ workbook or Kraken2 report their reads; an Ocean DNA Explorer `table_*.tsv` +
 **Reset to original** drops every upload and manual edit.
 More files can be dropped into the report's **Data Sources** panel in the browser.
 
+### Ocean DNA Explorer projects — live import and project switching
+
+*🌊 Import from Ocean DNA Explorer* (📁 project menu in the header, Filters → *Add data*,
+or the Data panel) finds any ODE project by name, id, sample name or pasted link,
+previews its samples on a map (filter / pick samples, pick analyses), then imports with
+per-file status, success and failure states, retry and a background status pill. Each
+analysis becomes an Ocean DNA Explorer layer; imports are kept in this browser and reopen
+with the report. The 📁 menu (and Filters → *Project*) switches every tab and the map
+between the projects in the report, with ‹ › to step through them.
+
+```bash
+python3 ode_client.py serve       # optional local bridge: live search, sample search, caching
+python3 ode_client.py catalog     # refresh data/ode_catalog.json (embedded in built reports)
+python3 ode_client.py pull noaa-aoml-mire --analysis MiFish --manifest --build
+```
+
+Without the bridge the dialog uses the catalog embedded at build time and downloads the
+files directly (the ODE API can't be called from a report file; its file store can).
+Details, the HTTP routes and job JSON: [docs/ODE_IMPORT.md](docs/ODE_IMPORT.md).
+
 ## Loading the database — `ingest.py`
 
 ```bash
@@ -253,3 +274,11 @@ Everything in `data/example/` is **synthetic**: stations, coordinates, sample ID
 counts and sequences are generated from a fixed seed by `make_example_data.py`.
 Species names are real Atlantic coastal taxa, but the detections are invented and
 TaxIDs are illustrative only. It contains no personal information.
+
+Organism silhouettes for the example come from `examples/icons/`, a small committed
+subset of the PhyloPic icons folder (`../icons`) so that CI and GitHub Pages builds
+show them too; `--example` uses it automatically. After changing the example
+organisms or `../icons/overrides.tsv`, refresh it with
+`python examples/make_example_icons.py` (it checks the subset gives the same icons
+as the full folder). Image credits and licences are in the report under
+**Filters → Organism icons → credits**.

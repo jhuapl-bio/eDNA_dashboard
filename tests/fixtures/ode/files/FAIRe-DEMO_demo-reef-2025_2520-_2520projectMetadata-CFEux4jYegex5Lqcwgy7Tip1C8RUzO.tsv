@@ -1,0 +1,7 @@
+requirement_level_code	section	term_name	project_level	Fish-12S-MiFish-Demo-Reef	Vertebrates-12S-MarVer1-Demo
+M	Project	project_id	demo-reef-2025		
+M	Project	project_name	Synthetic reef eDNA 2025 (demo data)		
+R	Project	institution	Example Marine Lab (synthetic)		
+M	Project	project_contact	demo@example.org		
+R	Project	license	CC0 (synthetic test data)		
+M	PCR	target_gene		12S rRNA	12S rRNA

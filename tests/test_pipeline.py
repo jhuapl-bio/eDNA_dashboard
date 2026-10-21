@@ -188,12 +188,12 @@ def _write_ode_project(projects):
     (proj / "faire" / "FAIRe_ode-demo - experimentRunMetadata-ZyXwVuTsRqPoNmLk (2).tsv").write_text(
         "# requirement_level_code\tM\tM\tM\n# section\tPCR\tPCR\tLib\n"
         "samp_name\tassay_name\tlib_id\tseq_run_id\n"
-        "S1-CTD1-100\tFish-12S-MiFish-Miya-Stoeckle\tS1-CTD1-100_MiFish_S1\trun_mifish\n"
-        "S2-CTD2-50\tFish-12S-MiFish-Miya-Stoeckle\tS2-CTD2-50_MiFish_S2\trun_mifish\n"
-        "S3-CTD2-120\tFish-12S-MiFish-Miya-Stoeckle\tS3-CTD2-120_MiFish_S3\trun_mifish\n"
-        "ExtNeg_1\tFish-12S-MiFish-Miya-Stoeckle\tExtNeg_1_MiFish_S4\trun_mifish\n")
+        "S1-CTD1-100\tFish-12S-MiFish-U-Demo\tS1-CTD1-100_MiFish_S1\trun_mifish\n"
+        "S2-CTD2-50\tFish-12S-MiFish-U-Demo\tS2-CTD2-50_MiFish_S2\trun_mifish\n"
+        "S3-CTD2-120\tFish-12S-MiFish-U-Demo\tS3-CTD2-120_MiFish_S3\trun_mifish\n"
+        "ExtNeg_1\tFish-12S-MiFish-U-Demo\tExtNeg_1_MiFish_S4\trun_mifish\n")
     (proj / "faire" / "FAIRe_ode-demo - projectMetadata-QqWwEeRrTtYyUuIi.tsv").write_text(
-        "requirement_level_code\tsection\tterm_name\tproject_level\tFish-12S-MiFish-Miya-Stoeckle\n"
+        "requirement_level_code\tsection\tterm_name\tproject_level\tFish-12S-MiFish-U-Demo\n"
         "R\tProject\tproject_name\tDemo cruise\t\n"
         "HR\tPCR\ttarget_gene\t\t12S rRNA\n")
     (proj / "tourmaline" / "table_demo_mifish_v1-T9UVz1iHJ3CWCBbyKyVL.tsv").write_text(
@@ -260,9 +260,9 @@ def test_ode_tourmaline_run(example, tmp_path):
 
 
 def test_ode_pairing_and_lib_suffixes(tmp_path):
-    assert B._ode_pair_key("table_gu1901_mifish_v2024.10_241001-T9UVz1iHJ3CWCBbyKyVLMa4ridCZai.tsv") == \
-        B._ode_pair_key("asvTaxaFeatures_gu1901_mifish_v2024.10_241001-gSmSC3yZ1DGFSoejVuxAAKKFDtDGui.tsv")
-    smap = {"GU190706-CTD11-220": {}}
+    assert B._ode_pair_key("table_demo23_mifish_v1_260101-Ab12Cd34Ef56Gh78Ij90Kl12Mn34Op.tsv") == \
+        B._ode_pair_key("asvTaxaFeatures_demo23_mifish_v1_260101-Zy98Xw76Vu54Ts32Rq10Po98Nm76Lk.tsv")
+    smap = {"DEMO230706-CTD11-220": {}}
     res = lambda q: q if q in smap else None
-    assert B.ode_lib_to_sample("GU190706-CTD11-220_MiFish_S30", {}, res)[0] == "GU190706-CTD11-220"
-    assert B._ode_short_assay("Fish-12S-MiFish-Miya-Stoeckle") == "MiFish"
+    assert B.ode_lib_to_sample("DEMO230706-CTD11-220_MiFish_S30", {}, res)[0] == "DEMO230706-CTD11-220"
+    assert B._ode_short_assay("Fish-12S-MiFish-U-Demo") == "MiFish"

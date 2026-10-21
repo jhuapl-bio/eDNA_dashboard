@@ -1,0 +1,35 @@
+# requirement_level_code	M	M	M	M
+# section	PCR	PCR	PCR	PCR
+samp_name	assay_name	pcr_plate_id	lib_id	seq_run_id
+DEMO_01A_Lagoon_SiteA-1_2025-05-20	Fish-12S-MiFish-Demo-Reef	na	DEMO1_12S_MF_01A	run1
+DEMO_01A_Lagoon_SiteA-1_2025-05-20	Vertebrates-12S-MarVer1-Demo	na	DEMO1_12S_MV_01A	run1
+DEMO_01B_Lagoon_SiteA-1_2025-05-20	Fish-12S-MiFish-Demo-Reef	na	DEMO1_12S_MF_01B	run1
+DEMO_01B_Lagoon_SiteA-1_2025-05-20	Vertebrates-12S-MarVer1-Demo	na	DEMO1_12S_MV_01B	run1
+DEMO_02A_Lagoon_SiteA-2_2025-05-21	Fish-12S-MiFish-Demo-Reef	na	DEMO1_12S_MF_02A	run1
+DEMO_02A_Lagoon_SiteA-2_2025-05-21	Vertebrates-12S-MarVer1-Demo	na	DEMO1_12S_MV_02A	run1
+DEMO_02B_Lagoon_SiteA-2_2025-05-21	Fish-12S-MiFish-Demo-Reef	na	DEMO1_12S_MF_02B	run1
+DEMO_02B_Lagoon_SiteA-2_2025-05-21	Vertebrates-12S-MarVer1-Demo	na	DEMO1_12S_MV_02B	run1
+DEMO_03A_Lagoon_SiteB-1_2025-05-22	Fish-12S-MiFish-Demo-Reef	na	DEMO1_12S_MF_03A	run1
+DEMO_03A_Lagoon_SiteB-1_2025-05-22	Vertebrates-12S-MarVer1-Demo	na	DEMO1_12S_MV_03A	run1
+DEMO_03B_Lagoon_SiteB-1_2025-05-22	Fish-12S-MiFish-Demo-Reef	na	DEMO1_12S_MF_03B	run1
+DEMO_03B_Lagoon_SiteB-1_2025-05-22	Vertebrates-12S-MarVer1-Demo	na	DEMO1_12S_MV_03B	run1
+DEMO_04A_Crest_SiteC-1_2025-05-23	Fish-12S-MiFish-Demo-Reef	na	DEMO1_12S_MF_04A	run1
+DEMO_04A_Crest_SiteC-1_2025-05-23	Vertebrates-12S-MarVer1-Demo	na	DEMO1_12S_MV_04A	run1
+DEMO_04B_Crest_SiteC-1_2025-05-23	Fish-12S-MiFish-Demo-Reef	na	DEMO1_12S_MF_04B	run1
+DEMO_04B_Crest_SiteC-1_2025-05-23	Vertebrates-12S-MarVer1-Demo	na	DEMO1_12S_MV_04B	run1
+DEMO_05A_Crest_SiteC-2_2025-05-24	Fish-12S-MiFish-Demo-Reef	na	DEMO1_12S_MF_05A	run1
+DEMO_05A_Crest_SiteC-2_2025-05-24	Vertebrates-12S-MarVer1-Demo	na	DEMO1_12S_MV_05A	run1
+DEMO_05B_Crest_SiteC-2_2025-05-24	Fish-12S-MiFish-Demo-Reef	na	DEMO1_12S_MF_05B	run1
+DEMO_05B_Crest_SiteC-2_2025-05-24	Vertebrates-12S-MarVer1-Demo	na	DEMO1_12S_MV_05B	run1
+DEMO_06A_Crest_SiteD-1_2025-05-25	Fish-12S-MiFish-Demo-Reef	na	DEMO1_12S_MF_06A	run1
+DEMO_06A_Crest_SiteD-1_2025-05-25	Vertebrates-12S-MarVer1-Demo	na	DEMO1_12S_MV_06A	run1
+DEMO_06B_Crest_SiteD-1_2025-05-25	Fish-12S-MiFish-Demo-Reef	na	DEMO1_12S_MF_06B	run1
+DEMO_06B_Crest_SiteD-1_2025-05-25	Vertebrates-12S-MarVer1-Demo	na	DEMO1_12S_MV_06B	run1
+DEMO_07A_Slope_SiteE-1_2025-05-26	Fish-12S-MiFish-Demo-Reef	na	DEMO1_12S_MF_07A	run1
+DEMO_07A_Slope_SiteE-1_2025-05-26	Vertebrates-12S-MarVer1-Demo	na	DEMO1_12S_MV_07A	run1
+DEMO_07B_Slope_SiteE-1_2025-05-26	Fish-12S-MiFish-Demo-Reef	na	DEMO1_12S_MF_07B	run1
+DEMO_07B_Slope_SiteE-1_2025-05-26	Vertebrates-12S-MarVer1-Demo	na	DEMO1_12S_MV_07B	run1
+DEMO_08A_Slope_SiteE-2_2025-05-27	Fish-12S-MiFish-Demo-Reef	na	DEMO1_12S_MF_08A	run1
+DEMO_08A_Slope_SiteE-2_2025-05-27	Vertebrates-12S-MarVer1-Demo	na	DEMO1_12S_MV_08A	run1
+DEMO_08B_Slope_SiteE-2_2025-05-27	Fish-12S-MiFish-Demo-Reef	na	DEMO1_12S_MF_08B	run1
+DEMO_08B_Slope_SiteE-2_2025-05-27	Vertebrates-12S-MarVer1-Demo	na	DEMO1_12S_MV_08B	run1

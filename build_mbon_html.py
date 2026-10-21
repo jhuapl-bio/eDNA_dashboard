@@ -1142,7 +1142,8 @@ def ode_file_role(path):
     if not path.is_file() or path.suffix.lower() not in TEXT_TABLE_EXT or ec.is_temp_file(path):
         return None
     h = _ode_header(path)
-    if h and h[0] in ('featureid', 'featureid1', 'otuid', 'asvid'):
+    if h and (h[0] in ('featureid', 'featureid1', 'otuid', 'asvid')
+              or (h[0] == '' and len(h) > 2 and _ODE_TABLE_RE.search(re.sub(r'^.*?asv[-_ ]', '', path.name, flags=re.I)))):
         if 'taxonomy' in h or 'species' in h or 'dnasequence' in h:
             return 'taxa'
         return 'table'
@@ -1216,6 +1217,7 @@ def ode_taxon(rec):
         parts = [x.strip() for x in str(rec.get('taxonomy') or '').split(';')
                  if x.strip() and not re.match(r'^[a-z]__$', x.strip())]
         parts = [re.sub(r'^[a-z]__', '', x) for x in parts]
+        parts = [x for x in parts if x.lower() not in ('unassigned', 'unclassified')]
         for k, v in zip(_ODE_RANKS, parts):
             vals[k] = v
     finest = next((k for k in reversed(_ODE_RANKS) if vals[k]), None)
@@ -1257,6 +1259,11 @@ def read_ode_taxonomy(path):
             continue
         rec = {(_ODE_RANKS[_ODE_RANKS.index(_norm_colname(k))]
                 if _norm_colname(k) in _ODE_RANKS else k): v for k, v in rec.items()}
+        if _faire_blank(rec.get('kingdom')):      # some analyses name the top rank 'domain'
+            for alt in ('domain', 'superkingdom', 'Domain', 'Superkingdom'):
+                if not _faire_blank(rec.get(alt)):
+                    rec['kingdom'] = rec[alt]
+                    break
         t = ode_taxon(rec)
         if seq_c:
             t['sequence'] = _clean(rec.get(seq_c))
@@ -1266,8 +1273,17 @@ def read_ode_taxonomy(path):
 
 def read_ode_table(path):
     """Feature table -> DataFrame (index featureid, one numeric column per library)."""
-    df = read_text_table(path)
-    if df.empty or len(df.columns) < 2:
+    raw = read_text_table(path, header=None)
+    if raw.empty or len(raw.columns) < 2:
+        raise InputError(f"{Path(path).name}: feature table has no library columns")
+    # Ocean DNA Explorer tables from some pipelines (phyloseq exports) leave the
+    # first header cell blank; it is still the feature id column.
+    hdr = ['' if h is None else str(h).strip() for h in raw.iloc[0].tolist()]
+    hdr[0] = hdr[0] or 'featureid'
+    df = raw.iloc[1:].copy()
+    df.columns = hdr
+    df = df.loc[:, [c for c in df.columns if c]]
+    if len(df.columns) < 2:
         raise InputError(f"{Path(path).name}: feature table has no library columns")
     fid = df.columns[0]
     df[fid] = df[fid].map(_clean)
@@ -3431,10 +3447,17 @@ def _sanitize(obj):
 ICONS_DIR = None            # set in main(); None = icons off
 
 
-def _default_icons_dir():
+# The example report uses the slim, committed examples/icons/ (so CI and GitHub
+# Pages builds get the same silhouettes); refresh it with examples/make_example_icons.py.
+EXAMPLE_ICONS_DIR = ec.REPO_ROOT / 'examples' / 'icons'
+
+
+def _default_icons_dir(example=False):
     env = os.getenv('EDNA_ICONS_DIR')
     if env:
         return ec.resolve_path(env)
+    if example and (EXAMPLE_ICONS_DIR / 'phylopic_icons.py').exists():
+        return EXAMPLE_ICONS_DIR
     cand = ec.REPO_ROOT.parent / 'icons'
     return cand if (cand / 'phylopic_icons.py').exists() else None
 
@@ -3459,12 +3482,40 @@ def _attach_icons(payload):
     return payload
 
 
+# Ocean DNA Explorer catalog snapshot (ode_client.py catalog -> data/ode_catalog.json).
+# Embedded as payload['odeCatalog'] so the report's "Import from Ocean DNA
+# Explorer" dialog can list projects and download their files without a local
+# bridge (the ODE API itself sends no CORS headers; its file store does).
+ODE_CATALOG = ec.DATA_DIR / 'ode_catalog.json'   # set in main(); None = don't embed
+
+
+def _attach_ode_catalog(payload):
+    """Add payload['odeCatalog'] from ODE_CATALOG when that file exists (best effort)."""
+    if not ODE_CATALOG or 'odeCatalog' in payload:
+        return payload
+    path = Path(ODE_CATALOG)
+    if not path.is_file():
+        return payload
+    try:
+        cat = json.loads(path.read_text(encoding='utf-8'))
+        if not isinstance(cat, dict) or not isinstance(cat.get('projects'), list):
+            raise ValueError('not an ode_client.py catalog (needs a projects list)')
+        payload = dict(payload)
+        payload['odeCatalog'] = cat
+        log.info("ODE catalog  : %s (%d projects, %s)", ec.rel(path), len(cat['projects']),
+                 cat.get('generatedAt', '?'))
+    except Exception as e:
+        log.warning("ODE catalog: %s skipped (%s)", path, e)
+    return payload
+
+
 def _render(payload, template_path, output_path):
     """Inject the payload into the template's data slot and write the HTML to
     output_path atomically (a failed build never leaves a half-written report)."""
     template_path = ec.require_file(template_path, 'HTML template', ('.html', '.htm'))
     tpl = Path(template_path).read_text(encoding='utf-8')
     payload = _attach_icons(payload)
+    payload = _attach_ode_catalog(payload)
     data_js = payload_to_js(_sanitize(payload))
     if _SLOT_RE.search(tpl):
         repl = "/*@@MBON_DATA_START@@*/" + data_js + "/*@@MBON_DATA_END@@*/"
@@ -3802,8 +3853,14 @@ def build_parser():
                    help="load Wilder Samples+Taxa CSV-only folders during auto-discovery")
     p.add_argument('--icons-dir', default=None,
                    help="PhyloPic icons folder with phylopic_icons.py + svg/ (default: $EDNA_ICONS_DIR, "
-                        "else ../icons next to this repo when present)")
+                        "else examples/icons for --example, else ../icons next to this repo when present)")
     p.add_argument('--no-icons', action='store_true', help='build without organism silhouettes')
+    p.add_argument('--ode-catalog', default=None,
+                   help="Ocean DNA Explorer catalog JSON to embed for the report's import dialog "
+                        "(default: data/ode_catalog.json when present; write it with "
+                        "`python ode_client.py catalog`)")
+    p.add_argument('--no-ode-catalog', action='store_true',
+                   help="don't embed the Ocean DNA Explorer catalog")
     p.add_argument('--version', action='version', version=f'%(prog)s {__version__}')
     ec.add_logging_args(p)
     return p
@@ -3837,7 +3894,7 @@ def _resolve_projects_root(path, given):
 def main(argv=None):
     global DATA_DIR, DATA_PROJECTS, MANIFEST, MANIFEST_EXCLUSIVE, ONLY_PROJECTS, ONLY_RUNS
     global SKIP_MANIFEST_RUNS, SKIP_FOLDERS, SKIP_WILDER02_ONLY
-    global STATION_METADATA_FILE, STATION_METADATA_GLOBS, ICONS_DIR
+    global STATION_METADATA_FILE, STATION_METADATA_GLOBS, ICONS_DIR, ODE_CATALOG
     args = build_parser().parse_args(argv)
     ec.setup_logging("build_mbon_html", args.log_level, args.log_file, args.quiet)
     ec.load_dotenv_if_present()
@@ -3875,9 +3932,11 @@ def main(argv=None):
         SKIP_WILDER02_ONLY = not args.include_wilder02
         MANIFEST_EXCLUSIVE = not args.include_unmanifested
         ICONS_DIR = (None if args.no_icons else
-                     ec.resolve_path(args.icons_dir) if args.icons_dir else _default_icons_dir())
+                     ec.resolve_path(args.icons_dir) if args.icons_dir else _default_icons_dir(args.example))
         if ICONS_DIR:
             log.info("icons        : %s", ICONS_DIR)
+        ODE_CATALOG = (None if args.no_ode_catalog else
+                       ec.resolve_path(args.ode_catalog) if args.ode_catalog else ec.DATA_DIR / 'ode_catalog.json')
         STATION_METADATA_FILE = None
         if args.station_metadata:
             STATION_METADATA_FILE = ec.require_file(ec.resolve_path(args.station_metadata),

@@ -1,0 +1,830 @@
+{
+"_metadata": {
+"api_base": "https://api.phylopic.org",
+"build": 541,
+"completed_page_count": 261,
+"completed_pages": [
+0,
+1,
+2,
+3,
+4,
+5,
+6,
+7,
+8,
+9,
+10,
+11,
+12,
+13,
+14,
+15,
+16,
+17,
+18,
+19,
+20,
+21,
+22,
+23,
+24,
+25,
+26,
+27,
+28,
+29,
+30,
+31,
+32,
+33,
+34,
+35,
+36,
+37,
+38,
+39,
+40,
+41,
+42,
+43,
+44,
+45,
+46,
+47,
+48,
+49,
+50,
+51,
+52,
+53,
+54,
+55,
+56,
+57,
+58,
+59,
+60,
+61,
+62,
+63,
+64,
+65,
+66,
+67,
+68,
+69,
+70,
+71,
+72,
+73,
+74,
+75,
+76,
+77,
+78,
+79,
+80,
+81,
+82,
+83,
+84,
+85,
+86,
+87,
+88,
+89,
+90,
+91,
+92,
+93,
+94,
+95,
+96,
+97,
+98,
+99,
+100,
+101,
+102,
+103,
+104,
+105,
+106,
+107,
+108,
+109,
+110,
+111,
+112,
+113,
+114,
+115,
+116,
+117,
+118,
+119,
+120,
+121,
+122,
+123,
+124,
+125,
+126,
+127,
+128,
+129,
+130,
+131,
+132,
+133,
+134,
+135,
+136,
+137,
+138,
+139,
+140,
+141,
+142,
+143,
+144,
+145,
+146,
+147,
+148,
+149,
+150,
+151,
+152,
+153,
+154,
+155,
+156,
+157,
+158,
+159,
+160,
+161,
+162,
+163,
+164,
+165,
+166,
+167,
+168,
+169,
+170,
+171,
+172,
+173,
+174,
+175,
+176,
+177,
+178,
+179,
+180,
+181,
+182,
+183,
+184,
+185,
+186,
+187,
+188,
+189,
+190,
+191,
+192,
+193,
+194,
+195,
+196,
+197,
+198,
+199,
+200,
+201,
+202,
+203,
+204,
+205,
+206,
+207,
+208,
+209,
+210,
+211,
+212,
+213,
+214,
+215,
+216,
+217,
+218,
+219,
+220,
+221,
+222,
+223,
+224,
+225,
+226,
+227,
+228,
+229,
+230,
+231,
+232,
+233,
+234,
+235,
+236,
+237,
+238,
+239,
+240,
+241,
+242,
+243,
+244,
+245,
+246,
+247,
+248,
+249,
+250,
+251,
+252,
+253,
+254,
+255,
+256,
+257,
+258,
+259,
+260
+],
+"last_completed_page": 260,
+"last_updated": "2026-06-25T21:36:25Z",
+"note": "subset for the example report; regenerate with examples/make_example_icons.py",
+"organism_key_count": 9457,
+"total_items": 12483,
+"total_pages": 261
+},
+"organisms": {
+"Acartia tonsa": [
+{
+"UUID": "34354e80-d132-41a1-961c-1cc229bd4440",
+"attribution": "Alexandra Hahn",
+"build": 541,
+"created": "2024-07-12T13:40:05.360Z",
+"generalNode": {
+"href": "https://api.phylopic.org/nodes/43f6380b-355f-460f-89d4-2b7d8471c83e?build=541",
+"title": "Acartia"
+},
+"image_api": "https://api.phylopic.org/images/34354e80-d132-41a1-961c-1cc229bd4440?build=541",
+"modified": "2025-12-26T04:56:33.154Z",
+"sourceFile": "https://images.phylopic.org/images/34354e80-d132-41a1-961c-1cc229bd4440/source.svg",
+"specificNode": {
+"href": "https://api.phylopic.org/nodes/9118ce64-6626-441c-9516-5bc16a2adbf7?build=541",
+"title": "Acartia tonsa"
+},
+"svg": "https://images.phylopic.org/images/34354e80-d132-41a1-961c-1cc229bd4440/vector.svg"
+}
+],
+"Acrolepis": {
+"UUID": "b93fddc6-9d06-45cd-b4ad-7f9a1a28deed",
+"attribution": "Tree of Life App",
+"build": 541,
+"created": "2023-12-01T04:24:37.189Z",
+"generalNode": {
+"href": "https://api.phylopic.org/nodes/41ffb672-c346-45a9-befd-453ead39440b?build=541",
+"title": "Actinopteri"
+},
+"image_api": "https://api.phylopic.org/images/b93fddc6-9d06-45cd-b4ad-7f9a1a28deed?build=541",
+"modified": "2023-12-01T04:25:25.226Z",
+"sourceFile": "https://images.phylopic.org/images/b93fddc6-9d06-45cd-b4ad-7f9a1a28deed/source.svg",
+"specificNode": {
+"href": "https://api.phylopic.org/nodes/dde4a408-634b-42b2-9ec9-e873701c860c?build=541",
+"title": "Acrolepis"
+},
+"svg": "https://images.phylopic.org/images/b93fddc6-9d06-45cd-b4ad-7f9a1a28deed/vector.svg"
+},
+"Anchoa panamensis": {
+"UUID": "6bd3702d-3ef1-44d0-83bf-93377875017c",
+"attribution": "M Kolmann",
+"build": 541,
+"created": "2019-01-11T04:03:43.726Z",
+"generalNode": {
+"href": "https://api.phylopic.org/nodes/7c6902ee-f198-4dbc-a67e-dda8efd8c7d1?build=541",
+"title": "Clupeoidei"
+},
+"image_api": "https://api.phylopic.org/images/6bd3702d-3ef1-44d0-83bf-93377875017c?build=541",
+"modified": "2026-05-21T04:55:05.781Z",
+"sourceFile": "https://images.phylopic.org/images/6bd3702d-3ef1-44d0-83bf-93377875017c/source.png",
+"specificNode": {
+"href": "https://api.phylopic.org/nodes/fa27518a-d08c-4fd8-b83b-32def135a53d?build=541",
+"title": "Anchoa panamensis"
+},
+"svg": "https://images.phylopic.org/images/6bd3702d-3ef1-44d0-83bf-93377875017c/vector.svg"
+},
+"Atherina presbyter": {
+"UUID": "34e8731d-da6b-4d9c-a61a-3d2a806a2321",
+"attribution": "Fidji Berio",
+"build": 541,
+"created": "2024-07-24T08:24:11.349Z",
+"generalNode": {
+"href": "https://api.phylopic.org/nodes/453b6cf8-6eab-4ebf-a673-e36017235c0c?build=541",
+"title": "Atherinomorphae"
+},
+"image_api": "https://api.phylopic.org/images/34e8731d-da6b-4d9c-a61a-3d2a806a2321?build=541",
+"modified": "2024-07-24T08:24:34.101Z",
+"sourceFile": "https://images.phylopic.org/images/34e8731d-da6b-4d9c-a61a-3d2a806a2321/source.svg",
+"specificNode": {
+"href": "https://api.phylopic.org/nodes/d32001df-8b7e-42a1-be15-7f1e49edb795?build=541",
+"title": "Atherina presbyter"
+},
+"svg": "https://images.phylopic.org/images/34e8731d-da6b-4d9c-a61a-3d2a806a2321/vector.svg"
+},
+"Aurelia aurita": {
+"UUID": "f0494167-77f6-46eb-841d-c4cefb683bbd",
+"build": 541,
+"created": "2026-03-22T02:23:08.712Z",
+"image_api": "https://api.phylopic.org/images/f0494167-77f6-46eb-841d-c4cefb683bbd?build=541",
+"modified": "2026-03-22T02:23:08.712Z",
+"sourceFile": "https://images.phylopic.org/images/f0494167-77f6-46eb-841d-c4cefb683bbd/source.svg",
+"specificNode": {
+"href": "https://api.phylopic.org/nodes/60880298-3002-46d9-909b-b7d56eaabb4e?build=541",
+"title": "Aurelia aurita"
+},
+"svg": "https://images.phylopic.org/images/f0494167-77f6-46eb-841d-c4cefb683bbd/vector.svg"
+},
+"Balaenoptera novaeangliae": [
+{
+"UUID": "fd8d3e5e-24a0-4aa2-9211-987ff86007dd",
+"build": 541,
+"created": "2026-05-01T22:00:40.685Z",
+"image_api": "https://api.phylopic.org/images/fd8d3e5e-24a0-4aa2-9211-987ff86007dd?build=541",
+"modified": "2026-05-01T22:00:53.547Z",
+"sourceFile": "https://images.phylopic.org/images/fd8d3e5e-24a0-4aa2-9211-987ff86007dd/source.svg",
+"specificNode": {
+"href": "https://api.phylopic.org/nodes/07dc7cf4-9c52-4a1d-9ccc-9db356958351?build=541",
+"title": "Balaenoptera novaeangliae"
+},
+"svg": "https://images.phylopic.org/images/fd8d3e5e-24a0-4aa2-9211-987ff86007dd/vector.svg"
+}
+],
+"Bathycoccus prasinos": [
+{
+"UUID": "de6f99e9-5e7d-475f-970a-761761dc15cd",
+"attribution": "Arcadia Science",
+"build": 541,
+"created": "2025-09-30T06:05:47.907Z",
+"generalNode": {
+"href": "https://api.phylopic.org/nodes/bb57c632-2733-45d1-b3cb-bfa2fabef960?build=541",
+"title": "Bathycoccaceae"
+},
+"image_api": "https://api.phylopic.org/images/de6f99e9-5e7d-475f-970a-761761dc15cd?build=541",
+"modified": "2025-10-01T00:35:59.706Z",
+"sourceFile": "https://images.phylopic.org/images/de6f99e9-5e7d-475f-970a-761761dc15cd/source.svg",
+"specificNode": {
+"href": "https://api.phylopic.org/nodes/9182b30d-693e-4b23-a8ad-5d9bc6f98c37?build=541",
+"title": "Bathycoccus prasinos"
+},
+"svg": "https://images.phylopic.org/images/de6f99e9-5e7d-475f-970a-761761dc15cd/vector.svg"
+}
+],
+"Brevoortia tyrannus": {
+"UUID": "7acccca8-8f9e-4bc2-b979-f08bd5228b89",
+"attribution": "Arthur S. Brum",
+"build": 541,
+"created": "2026-03-07T00:36:34.291Z",
+"generalNode": {
+"href": "https://api.phylopic.org/nodes/e92ab9bc-d4f3-4179-86e7-05d181805f9b?build=541",
+"title": "Dorosomatoidea"
+},
+"image_api": "https://api.phylopic.org/images/7acccca8-8f9e-4bc2-b979-f08bd5228b89?build=541",
+"modified": "2026-05-21T04:56:22.706Z",
+"sourceFile": "https://images.phylopic.org/images/7acccca8-8f9e-4bc2-b979-f08bd5228b89/source.svg",
+"specificNode": {
+"href": "https://api.phylopic.org/nodes/54080d7e-c2c4-42ed-bf34-87e4d624e71e?build=541",
+"title": "Brevoortia tyrannus"
+},
+"svg": "https://images.phylopic.org/images/7acccca8-8f9e-4bc2-b979-f08bd5228b89/vector.svg"
+},
+"Callinectes sapidus": {
+"UUID": "7197c71a-0653-4e82-bcbb-b156c150826a",
+"build": 541,
+"created": "2023-06-10T15:19:53.222Z",
+"generalNode": {
+"href": "https://api.phylopic.org/nodes/206e39c5-ae0c-4e01-8b87-f4ff3ff706e1?build=541",
+"title": "Portunidae"
+},
+"image_api": "https://api.phylopic.org/images/7197c71a-0653-4e82-bcbb-b156c150826a?build=541",
+"modified": "2023-06-10T15:29:19.886Z",
+"sourceFile": "https://images.phylopic.org/images/7197c71a-0653-4e82-bcbb-b156c150826a/source.svg",
+"specificNode": {
+"href": "https://api.phylopic.org/nodes/7412ab2e-17c5-40ce-993c-e755027532f5?build=541",
+"title": "Callinectes sapidus"
+},
+"svg": "https://images.phylopic.org/images/7197c71a-0653-4e82-bcbb-b156c150826a/vector.svg"
+},
+"Centropages typicus": {
+"UUID": "5cb87b0e-afe4-44af-8ac9-73bd73196af5",
+"attribution": "Niall McGinty",
+"build": 541,
+"created": "2024-01-04T05:38:31.259Z",
+"generalNode": {
+"href": "https://api.phylopic.org/nodes/4e8b97be-5597-42ca-870e-36ba2a9a6136?build=541",
+"title": "Neocopepoda"
+},
+"image_api": "https://api.phylopic.org/images/5cb87b0e-afe4-44af-8ac9-73bd73196af5?build=541",
+"modified": "2025-12-26T04:56:52.346Z",
+"sourceFile": "https://images.phylopic.org/images/5cb87b0e-afe4-44af-8ac9-73bd73196af5/source.svg",
+"specificNode": {
+"href": "https://api.phylopic.org/nodes/d74233ea-70fa-4413-93c6-fba7732dd5af?build=541",
+"title": "Centropages typicus"
+},
+"svg": "https://images.phylopic.org/images/5cb87b0e-afe4-44af-8ac9-73bd73196af5/vector.svg"
+},
+"Crassostrea": {
+"UUID": "a43f58eb-36c8-4c31-8e85-57f7a97d043a",
+"attribution": "Taro Maeda (Illustrated from David.Monniaux)",
+"build": 541,
+"created": "2018-07-10T12:21:47.558Z",
+"image_api": "https://api.phylopic.org/images/a43f58eb-36c8-4c31-8e85-57f7a97d043a?build=541",
+"modified": "2018-07-10T12:21:47.558Z",
+"sourceFile": "https://images.phylopic.org/images/a43f58eb-36c8-4c31-8e85-57f7a97d043a/source.png",
+"specificNode": {
+"href": "https://api.phylopic.org/nodes/0b0dddbc-708b-4cb6-89a6-9cbdda5babb7?build=541",
+"title": "Crassostrea"
+},
+"svg": "https://images.phylopic.org/images/a43f58eb-36c8-4c31-8e85-57f7a97d043a/vector.svg"
+},
+"Crassostrea virginica": {
+"UUID": "6d387b2b-9017-4f15-b65d-0fd626f1b220",
+"attribution": "Ian Boys",
+"build": 541,
+"created": "2023-08-28T09:10:24.272Z",
+"generalNode": {
+"href": "https://api.phylopic.org/nodes/0aaa9ce7-4591-48d8-94ac-98dcd56a23c2?build=541",
+"title": "Ostreidae"
+},
+"image_api": "https://api.phylopic.org/images/6d387b2b-9017-4f15-b65d-0fd626f1b220?build=541",
+"modified": "2025-07-30T10:34:22.715Z",
+"sourceFile": "https://images.phylopic.org/images/6d387b2b-9017-4f15-b65d-0fd626f1b220/source.svg",
+"specificNode": {
+"href": "https://api.phylopic.org/nodes/243c7752-21e7-40a1-89ed-0fd284c10a03?build=541",
+"title": "Crassostrea virginica"
+},
+"svg": "https://images.phylopic.org/images/6d387b2b-9017-4f15-b65d-0fd626f1b220/vector.svg"
+},
+"Evadne nordmanni": {
+"UUID": "d90c3957-0838-4bbb-b17e-9d8115960ca8",
+"build": 541,
+"created": "2026-03-22T02:28:37.744Z",
+"generalNode": {
+"href": "https://api.phylopic.org/nodes/36428246-2d8c-4922-b0f6-bb41abc9356e?build=541",
+"title": "Onychopoda"
+},
+"image_api": "https://api.phylopic.org/images/d90c3957-0838-4bbb-b17e-9d8115960ca8?build=541",
+"modified": "2026-03-22T02:29:38.392Z",
+"sourceFile": "https://images.phylopic.org/images/d90c3957-0838-4bbb-b17e-9d8115960ca8/source.svg",
+"specificNode": {
+"href": "https://api.phylopic.org/nodes/ee15eef2-7c4c-46a5-98ba-055b0e05928d?build=541",
+"title": "Evadne nordmanni"
+},
+"svg": "https://images.phylopic.org/images/d90c3957-0838-4bbb-b17e-9d8115960ca8/vector.svg"
+},
+"Mammalia": {
+"UUID": "f4b6df56-f216-4a4c-9940-4105da8b462e",
+"attribution": "T. Michael Keesey",
+"build": 541,
+"created": "2011-02-02T17:23:29.333Z",
+"generalNode": {
+"href": "https://api.phylopic.org/nodes/d21685a7-c536-49ea-ab7d-a2bc25fff4d5?build=541",
+"title": "Holotheria"
+},
+"image_api": "https://api.phylopic.org/images/f4b6df56-f216-4a4c-9940-4105da8b462e?build=541",
+"modified": "2024-04-04T02:50:06.896Z",
+"sourceFile": "https://images.phylopic.org/images/f4b6df56-f216-4a4c-9940-4105da8b462e/source.png",
+"specificNode": {
+"href": "https://api.phylopic.org/nodes/1fccccf8-fbee-416c-9cd9-eb9c9cc88ae8?build=541",
+"title": "Mammalia"
+},
+"svg": "https://images.phylopic.org/images/f4b6df56-f216-4a4c-9940-4105da8b462e/vector.svg"
+},
+"Micromonas commoda": {
+"UUID": "dc7c4b9d-ced5-46b2-9ee7-507f150dd357",
+"attribution": "Arcadia Science",
+"build": 541,
+"created": "2025-09-30T08:28:25.549Z",
+"generalNode": {
+"href": "https://api.phylopic.org/nodes/88caa28c-a40b-4beb-ad20-29000ffacf0b?build=541",
+"title": "Mamiellophyceae"
+},
+"image_api": "https://api.phylopic.org/images/dc7c4b9d-ced5-46b2-9ee7-507f150dd357?build=541",
+"modified": "2025-09-30T08:30:54.330Z",
+"sourceFile": "https://images.phylopic.org/images/dc7c4b9d-ced5-46b2-9ee7-507f150dd357/source.svg",
+"specificNode": {
+"href": "https://api.phylopic.org/nodes/06c6bf1c-734d-4b7e-8906-695e1105690c?build=541",
+"title": "Micromonas commoda"
+},
+"svg": "https://images.phylopic.org/images/dc7c4b9d-ced5-46b2-9ee7-507f150dd357/vector.svg"
+},
+"Micropogonias undulatus": {
+"UUID": "c9887901-8a2d-4ffe-86a5-4993cd4c4404",
+"attribution": "Nathan Hermann",
+"build": 541,
+"created": "2023-02-14T12:34:56.954Z",
+"generalNode": {
+"href": "https://api.phylopic.org/nodes/e73282f4-a23a-4762-b5d3-0a5d14d4440b?build=541",
+"title": "Sciaenidae"
+},
+"image_api": "https://api.phylopic.org/images/c9887901-8a2d-4ffe-86a5-4993cd4c4404?build=541",
+"modified": "2023-02-14T12:36:04.807Z",
+"sourceFile": "https://images.phylopic.org/images/c9887901-8a2d-4ffe-86a5-4993cd4c4404/source.svg",
+"specificNode": {
+"href": "https://api.phylopic.org/nodes/65983520-4256-453e-8de3-355b0615482b?build=541",
+"title": "Micropogonias undulatus"
+},
+"svg": "https://images.phylopic.org/images/c9887901-8a2d-4ffe-86a5-4993cd4c4404/vector.svg"
+},
+"Mnemiopsis leidyi": [
+{
+"UUID": "4a519268-72ce-4421-ab9e-4804fff8df74",
+"attribution": "Arcadia Science",
+"build": 541,
+"created": "2025-09-30T06:12:04.094Z",
+"generalNode": {
+"href": "https://api.phylopic.org/nodes/1d064232-f368-4519-a055-17f76427e868?build=541",
+"title": "Lobata"
+},
+"image_api": "https://api.phylopic.org/images/4a519268-72ce-4421-ab9e-4804fff8df74?build=541",
+"modified": "2025-09-30T06:13:41.200Z",
+"sourceFile": "https://images.phylopic.org/images/4a519268-72ce-4421-ab9e-4804fff8df74/source.svg",
+"specificNode": {
+"href": "https://api.phylopic.org/nodes/f1c32fe6-cbb5-47c3-b7d3-1bb100838426?build=541",
+"title": "Mnemiopsis leidyi"
+},
+"svg": "https://images.phylopic.org/images/4a519268-72ce-4421-ab9e-4804fff8df74/vector.svg"
+}
+],
+"Morone chrysops": {
+"UUID": "bae30310-1dbd-4057-b673-abc8ebd9f7a9",
+"build": 541,
+"created": "2023-11-03T10:15:32.779Z",
+"generalNode": {
+"href": "https://api.phylopic.org/nodes/f47e6580-7f4e-4a86-80e2-98ebc0992892?build=541",
+"title": "Morone"
+},
+"image_api": "https://api.phylopic.org/images/bae30310-1dbd-4057-b673-abc8ebd9f7a9?build=541",
+"modified": "2025-04-20T00:06:01.545Z",
+"sourceFile": "https://images.phylopic.org/images/bae30310-1dbd-4057-b673-abc8ebd9f7a9/source.svg",
+"specificNode": {
+"href": "https://api.phylopic.org/nodes/4dc8d722-17c8-4444-b93e-1ac1be3879e0?build=541",
+"title": "Morone chrysops"
+},
+"svg": "https://images.phylopic.org/images/bae30310-1dbd-4057-b673-abc8ebd9f7a9/vector.svg"
+},
+"Mytilus": {
+"UUID": "837c4173-e322-4d37-af25-3b8c8ee4f15e",
+"attribution": "Filippo Nicolini",
+"build": 541,
+"created": "2025-07-30T10:31:57.398Z",
+"generalNode": {
+"href": "https://api.phylopic.org/nodes/35541f8f-28e7-4723-b715-23144fc0faa1?build=541",
+"title": "Mytilidae"
+},
+"image_api": "https://api.phylopic.org/images/837c4173-e322-4d37-af25-3b8c8ee4f15e?build=541",
+"modified": "2025-11-08T11:19:23.229Z",
+"sourceFile": "https://images.phylopic.org/images/837c4173-e322-4d37-af25-3b8c8ee4f15e/source.svg",
+"specificNode": {
+"href": "https://api.phylopic.org/nodes/d8e6d724-7d2b-4846-a691-4fcd3c7fc5cc?build=541",
+"title": "Mytilus"
+},
+"svg": "https://images.phylopic.org/images/837c4173-e322-4d37-af25-3b8c8ee4f15e/vector.svg"
+},
+"Mytilus edulis": [
+{
+"UUID": "87ac7931-d814-433f-81d6-e2e44dd72f5d",
+"build": 541,
+"created": "2023-06-21T09:17:07.656Z",
+"generalNode": {
+"href": "https://api.phylopic.org/nodes/35541f8f-28e7-4723-b715-23144fc0faa1?build=541",
+"title": "Mytilidae"
+},
+"image_api": "https://api.phylopic.org/images/87ac7931-d814-433f-81d6-e2e44dd72f5d?build=541",
+"modified": "2023-06-21T09:17:32.262Z",
+"sourceFile": "https://images.phylopic.org/images/87ac7931-d814-433f-81d6-e2e44dd72f5d/source.svg",
+"specificNode": {
+"href": "https://api.phylopic.org/nodes/84e46057-7601-4590-b41b-e0a14c75786d?build=541",
+"title": "Mytilus edulis"
+},
+"svg": "https://images.phylopic.org/images/87ac7931-d814-433f-81d6-e2e44dd72f5d/vector.svg"
+}
+],
+"Paralichthys adspersus": {
+"UUID": "f3b501e2-2eca-4357-8732-e56b5f62ebfb",
+"attribution": "Daniel Ore Villalba (original photograph)",
+"build": 541,
+"created": "2026-03-22T02:30:18.375Z",
+"generalNode": {
+"href": "https://api.phylopic.org/nodes/e04cc43a-57a0-45fa-b519-955a7f0783e9?build=541",
+"title": "Pleuronectoidea"
+},
+"image_api": "https://api.phylopic.org/images/f3b501e2-2eca-4357-8732-e56b5f62ebfb?build=541",
+"modified": "2026-03-22T02:30:51.228Z",
+"sourceFile": "https://images.phylopic.org/images/f3b501e2-2eca-4357-8732-e56b5f62ebfb/source.svg",
+"specificNode": {
+"href": "https://api.phylopic.org/nodes/5d82eaf4-7145-48b8-bca1-0a634444f16c?build=541",
+"title": "Paralichthys adspersus"
+},
+"svg": "https://images.phylopic.org/images/f3b501e2-2eca-4357-8732-e56b5f62ebfb/vector.svg"
+},
+"Paralichthys dentatus": {
+"UUID": "017fbcd1-34bb-42b6-80e2-75adab53987d",
+"attribution": "Nathan Hermann",
+"build": 541,
+"created": "2023-02-23T23:17:02.823Z",
+"generalNode": {
+"href": "https://api.phylopic.org/nodes/e04cc43a-57a0-45fa-b519-955a7f0783e9?build=541",
+"title": "Pleuronectoidea"
+},
+"image_api": "https://api.phylopic.org/images/017fbcd1-34bb-42b6-80e2-75adab53987d?build=541",
+"modified": "2024-07-12T14:05:10.281Z",
+"sourceFile": "https://images.phylopic.org/images/017fbcd1-34bb-42b6-80e2-75adab53987d/source.svg",
+"specificNode": {
+"href": "https://api.phylopic.org/nodes/1d7adbfa-7238-4f04-96ba-317345079d24?build=541",
+"title": "Paralichthys dentatus"
+},
+"svg": "https://images.phylopic.org/images/017fbcd1-34bb-42b6-80e2-75adab53987d/vector.svg"
+},
+"Penaeus monodon": [
+{
+"UUID": "4538167f-531f-4687-8316-beb95b9f848c",
+"attribution": "Polina Drozdova",
+"build": 541,
+"created": "2024-01-04T05:49:46.974Z",
+"generalNode": {
+"href": "https://api.phylopic.org/nodes/25d85cd5-0e66-4660-b17c-11f63b3f5443?build=541",
+"title": "Decapoda"
+},
+"image_api": "https://api.phylopic.org/images/4538167f-531f-4687-8316-beb95b9f848c?build=541",
+"modified": "2024-01-04T05:50:11.300Z",
+"sourceFile": "https://images.phylopic.org/images/4538167f-531f-4687-8316-beb95b9f848c/source.svg",
+"specificNode": {
+"href": "https://api.phylopic.org/nodes/05c07996-9ae8-4ed3-9444-71cb9af09d61?build=541",
+"title": "Penaeus monodon"
+},
+"svg": "https://images.phylopic.org/images/4538167f-531f-4687-8316-beb95b9f848c/vector.svg"
+}
+],
+"Phocoena phocoena": [
+{
+"UUID": "7b6a2a22-303f-4536-b5b8-52389232969a",
+"attribution": "Matthew Schmitz",
+"build": 541,
+"created": "2025-10-07T12:47:14.830Z",
+"generalNode": {
+"href": "https://api.phylopic.org/nodes/58d66a51-c78d-4dcc-8dce-91837e5594a8?build=541",
+"title": "Monodontoidae"
+},
+"image_api": "https://api.phylopic.org/images/7b6a2a22-303f-4536-b5b8-52389232969a?build=541",
+"modified": "2025-10-07T21:40:30.273Z",
+"sourceFile": "https://images.phylopic.org/images/7b6a2a22-303f-4536-b5b8-52389232969a/source.svg",
+"specificNode": {
+"href": "https://api.phylopic.org/nodes/27d13a8f-a536-4dae-8162-b9e8709a5b35?build=541",
+"title": "Phocoena phocoena"
+},
+"svg": "https://images.phylopic.org/images/7b6a2a22-303f-4536-b5b8-52389232969a/vector.svg"
+}
+],
+"Pomatomus saltatrix": {
+"UUID": "287624dd-5b4f-4fa6-aeef-f4d54e33ae61",
+"attribution": "Nathan Hermann",
+"build": 541,
+"created": "2023-02-16T00:29:51.958Z",
+"generalNode": {
+"href": "https://api.phylopic.org/nodes/63833cae-a869-4052-9e1f-875da5940dc1?build=541",
+"title": "Scombrimorpharia"
+},
+"image_api": "https://api.phylopic.org/images/287624dd-5b4f-4fa6-aeef-f4d54e33ae61?build=541",
+"modified": "2025-05-11T12:34:37.464Z",
+"sourceFile": "https://images.phylopic.org/images/287624dd-5b4f-4fa6-aeef-f4d54e33ae61/source.svg",
+"specificNode": {
+"href": "https://api.phylopic.org/nodes/6ebec682-3e59-40ba-b385-6a8e361606f7?build=541",
+"title": "Pomatomus saltatrix"
+},
+"svg": "https://images.phylopic.org/images/287624dd-5b4f-4fa6-aeef-f4d54e33ae61/vector.svg"
+},
+"Pseudomonas aeruginosa": [
+{
+"UUID": "1e7bca3b-85f3-45de-a43c-f56c5a84f61b",
+"attribution": "Matt Crook",
+"build": 541,
+"created": "2015-11-17T01:58:00.383Z",
+"generalNode": {
+"href": "https://api.phylopic.org/nodes/a4aac9c5-c784-4517-9770-2d891d995228?build=541",
+"title": "Gammaproteobacteria"
+},
+"image_api": "https://api.phylopic.org/images/1e7bca3b-85f3-45de-a43c-f56c5a84f61b?build=541",
+"modified": "2015-11-17T01:58:00.383Z",
+"sourceFile": "https://images.phylopic.org/images/1e7bca3b-85f3-45de-a43c-f56c5a84f61b/source.svg",
+"specificNode": {
+"href": "https://api.phylopic.org/nodes/023ca6e0-f13d-4933-8435-58aebe9efe99?build=541",
+"title": "Pseudomonas aeruginosa"
+},
+"svg": "https://images.phylopic.org/images/1e7bca3b-85f3-45de-a43c-f56c5a84f61b/vector.svg"
+}
+],
+"Thalassiosira pseudonana": {
+"UUID": "ebff2e9f-3091-4ad6-a7b2-f39a77d3a960",
+"attribution": "Sarah Frail",
+"build": 541,
+"created": "2023-09-28T06:30:07.717Z",
+"generalNode": {
+"href": "https://api.phylopic.org/nodes/35b62a88-87b9-422b-b3bb-7adda412f0a6?build=541",
+"title": "Thalassiosirales"
+},
+"image_api": "https://api.phylopic.org/images/ebff2e9f-3091-4ad6-a7b2-f39a77d3a960?build=541",
+"modified": "2023-09-28T06:30:42.147Z",
+"sourceFile": "https://images.phylopic.org/images/ebff2e9f-3091-4ad6-a7b2-f39a77d3a960/source.svg",
+"specificNode": {
+"href": "https://api.phylopic.org/nodes/95e247e5-19e6-4fa5-aafe-296fcd2e0868?build=541",
+"title": "Thalassiosira pseudonana"
+},
+"svg": "https://images.phylopic.org/images/ebff2e9f-3091-4ad6-a7b2-f39a77d3a960/vector.svg"
+},
+"Tursiops truncatus": [
+{
+"UUID": "ddaedcc2-7fb3-4b1e-a8e9-e3074b2e58a7",
+"build": 541,
+"created": "2025-01-20T15:41:22.200Z",
+"image_api": "https://api.phylopic.org/images/ddaedcc2-7fb3-4b1e-a8e9-e3074b2e58a7?build=541",
+"modified": "2025-01-20T15:41:22.200Z",
+"sourceFile": "https://images.phylopic.org/images/ddaedcc2-7fb3-4b1e-a8e9-e3074b2e58a7/source.svg",
+"specificNode": {
+"href": "https://api.phylopic.org/nodes/d16616ef-3427-4464-ad66-fc16c8c87ef4?build=541",
+"title": "Tursiops truncatus"
+},
+"svg": "https://images.phylopic.org/images/ddaedcc2-7fb3-4b1e-a8e9-e3074b2e58a7/vector.svg"
+},
+{
+"UUID": "10af79a9-36b4-4be3-8a5d-dadea9cea810",
+"build": 541,
+"created": "2023-06-14T10:17:32.376Z",
+"generalNode": {
+"href": "https://api.phylopic.org/nodes/ebefa1b2-7f25-43a5-9bb4-74554e5540eb?build=541",
+"title": "Tursiops"
+},
+"image_api": "https://api.phylopic.org/images/10af79a9-36b4-4be3-8a5d-dadea9cea810?build=541",
+"modified": "2023-06-14T10:19:17.191Z",
+"sourceFile": "https://images.phylopic.org/images/10af79a9-36b4-4be3-8a5d-dadea9cea810/source.svg",
+"specificNode": {
+"href": "https://api.phylopic.org/nodes/d16616ef-3427-4464-ad66-fc16c8c87ef4?build=541",
+"title": "Tursiops truncatus"
+},
+"svg": "https://images.phylopic.org/images/10af79a9-36b4-4be3-8a5d-dadea9cea810/vector.svg"
+}
+],
+"Unio pictorum": {
+"UUID": "d70a2a8d-f553-4d1e-b178-d4d5b140b352",
+"attribution": "H. Zell",
+"build": 541,
+"created": "2025-12-15T08:16:51.049Z",
+"generalNode": {
+"href": "https://api.phylopic.org/nodes/7c63c35a-bcdc-4b96-8cf2-c1fc694344c4?build=541",
+"title": "Bivalvia"
+},
+"image_api": "https://api.phylopic.org/images/d70a2a8d-f553-4d1e-b178-d4d5b140b352?build=541",
+"modified": "2025-12-15T08:17:18.271Z",
+"sourceFile": "https://images.phylopic.org/images/d70a2a8d-f553-4d1e-b178-d4d5b140b352/source.svg",
+"specificNode": {
+"href": "https://api.phylopic.org/nodes/aeaa8ef2-ac46-4dcc-954d-b172d4a9e890?build=541",
+"title": "Unio pictorum"
+},
+"svg": "https://images.phylopic.org/images/d70a2a8d-f553-4d1e-b178-d4d5b140b352/vector.svg"
+},
+"Vibrio cholerae": {
+"UUID": "5b498137-53c4-4229-9772-6fd10025fbb6",
+"attribution": "Matt Crook",
+"build": 541,
+"created": "2015-11-17T01:15:48.002Z",
+"generalNode": {
+"href": "https://api.phylopic.org/nodes/3746d37a-2cd1-46ff-a08e-67e94e19957f?build=541",
+"title": "Vibrionales"
+},
+"image_api": "https://api.phylopic.org/images/5b498137-53c4-4229-9772-6fd10025fbb6?build=541",
+"modified": "2015-11-17T01:15:48.002Z",
+"sourceFile": "https://images.phylopic.org/images/5b498137-53c4-4229-9772-6fd10025fbb6/source.svg",
+"specificNode": {
+"href": "https://api.phylopic.org/nodes/5f0ec951-1c65-42b7-89c4-3ac9039763a9?build=541",
+"title": "Vibrio cholerae"
+},
+"svg": "https://images.phylopic.org/images/5b498137-53c4-4229-9772-6fd10025fbb6/vector.svg"
+}
+}
+}

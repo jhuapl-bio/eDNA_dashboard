@@ -111,6 +111,18 @@ different assays are never pooled.
 The same files can also be dropped onto an open report (*Add data*): drop the FAIRe
 `.tsv` sheets together with the two Tourmaline files.
 
+Rather than downloading by hand, `python3 ode_client.py pull <project_id>` fetches a
+project (or some of its samples / analyses) into this layout and can add the manifest
+rows; the report's *Import from Ocean DNA Explorer* dialog imports into an open report.
+Some analyses name the files differently (`ps_<marker>_ASV_table-….tsv` /
+`ps_<marker>_taxonomy-….tsv`), leave the feature table's first header cell blank, and call
+the top rank `domain` with a lower-case `confidence` column — all are accepted (`pull`
+renames such files to the `table_` / `asvTaxaFeatures_` pattern). See
+[ODE_IMPORT.md](ODE_IMPORT.md).
+
+`data/ode_catalog.json` (written by `ode_client.py catalog`) is embedded in built reports
+as `payload.odeCatalog` so the import dialog can list projects without the bridge.
+
 ## Kraken2 reports (`kraken2/…`)
 
 Standard Kraken2 `--report` output, one file per sample, tab-separated:

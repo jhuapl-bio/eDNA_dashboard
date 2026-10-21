@@ -1,0 +1,8 @@
+requirement_level_code	section	term_name	project_level	Fish-12S-MiFish-U-Demo	Fish-12S-Riaz-Demo
+M	Project	project_id	demo-shelf-2023		
+M	Project	project_name	Synthetic shelf survey 2023 (demo data)		
+R	Project	institution	Example Marine Lab (synthetic)		
+M	Project	project_contact	demo@example.org		
+R	Project	license	CC0 (synthetic test data)		
+M	Project	expedition_id	DEMO23-01		
+M	PCR	target_gene		12S rRNA	12S rRNA
